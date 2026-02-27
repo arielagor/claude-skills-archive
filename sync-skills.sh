@@ -95,4 +95,5 @@ if ! git diff --cached --quiet; then
 
 $(echo "$changed_files" | head -20)
 $([ "$(echo "$changed_files" | wc -l)" -gt 20 ] && echo "... and more")"
+  git push origin master 2>/dev/null || true
 fi
