@@ -21,23 +21,44 @@ if [ -d "$GLOBAL_SRC" ]; then
 fi
 
 # --- Sync project-level skills ---
+# Only sync from real project directories (skip C-- encoded config mirrors).
+# Look for skills at .claude/<name>/SKILL.md and .claude/skills/<name>/SKILL.md
+# but NOT deeper (avoids recursive nesting artifacts).
 PROJECTS_SRC="$CLAUDE_DIR/projects"
 PROJECTS_DST="$REPO_DIR/projects"
 
 if [ -d "$PROJECTS_SRC" ]; then
-  # Find all SKILL.md files inside project .claude directories (skills or commands)
-  find "$PROJECTS_SRC" -maxdepth 6 -path "*/.claude/*/SKILL.md" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/claude-skills-archive/*" -print 2>/dev/null | while read -r skill_file; do
-    # Extract: projects/<project>/.claude/<path>/SKILL.md
-    rel="${skill_file#$PROJECTS_SRC/}"
-    project_name="${rel%%/*}"
-    # Get the skill path after .claude/
-    after_claude="${rel#*/.claude/}"
-    # Could be skills/<name>/SKILL.md or <name>/SKILL.md
-    skill_rel_dir="$(dirname "$after_claude")"
+  for proj_dir in "$PROJECTS_SRC"/*/; do
+    proj_name="$(basename "$proj_dir")"
 
-    dest_dir="$PROJECTS_DST/$project_name/$skill_rel_dir"
-    mkdir -p "$dest_dir"
-    cp "$skill_file" "$dest_dir/SKILL.md"
+    # Skip encoded config mirrors and this archive repo
+    [[ "$proj_name" == C--* ]] && continue
+    [[ "$proj_name" == "claude-skills-archive" ]] && continue
+
+    claude_dir="$proj_dir/.claude"
+    [ -d "$claude_dir" ] || continue
+
+    # Pattern 1: .claude/<skill-name>/SKILL.md (direct skills)
+    for skill_file in "$claude_dir"/*/SKILL.md; do
+      [ -f "$skill_file" ] || continue
+      skill_name="$(basename "$(dirname "$skill_file")")"
+      # Skip if this "skill" dir itself contains another SKILL.md (it's a wrapper, not a real skill)
+      # Just take the top-level one
+      dest_dir="$PROJECTS_DST/$proj_name/$skill_name"
+      mkdir -p "$dest_dir"
+      cp "$skill_file" "$dest_dir/SKILL.md"
+    done
+
+    # Pattern 2: .claude/skills/<skill-name>/SKILL.md
+    if [ -d "$claude_dir/skills" ]; then
+      for skill_file in "$claude_dir"/skills/*/SKILL.md; do
+        [ -f "$skill_file" ] || continue
+        skill_name="$(basename "$(dirname "$skill_file")")"
+        dest_dir="$PROJECTS_DST/$proj_name/skills/$skill_name"
+        mkdir -p "$dest_dir"
+        cp "$skill_file" "$dest_dir/SKILL.md"
+      done
+    fi
   done
 fi
 
@@ -53,14 +74,24 @@ if [ -d "$GLOBAL_DST" ]; then
   done
 fi
 
+# Project - remove stale project dirs
+if [ -d "$PROJECTS_DST" ]; then
+  for repo_proj in "$PROJECTS_DST"/*/; do
+    [ -d "$repo_proj" ] || continue
+    proj_name="$(basename "$repo_proj")"
+    if [ ! -d "$PROJECTS_SRC/$proj_name/.claude" ]; then
+      rm -rf "$repo_proj"
+    fi
+  done
+fi
+
 # --- Auto-commit if there are changes ---
 cd "$REPO_DIR"
 git add -A
 if ! git diff --cached --quiet; then
-  # Build a commit message listing what changed
   changed_files="$(git diff --cached --name-only)"
-  added="$(echo "$changed_files" | grep -c '^' || true)"
-  git commit -m "Sync $added skill file(s)
+  count="$(echo "$changed_files" | grep -c '^' || true)"
+  git commit -m "Sync $count skill file(s)
 
 $(echo "$changed_files" | head -20)
 $([ "$(echo "$changed_files" | wc -l)" -gt 20 ] && echo "... and more")"
