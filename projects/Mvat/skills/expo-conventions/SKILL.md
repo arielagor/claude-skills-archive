@@ -114,3 +114,19 @@ Use `StyleSheet.create()` for performance. Keep styles co-located with component
 
 ### Error boundaries
 Wrap screen-level components in error boundaries. Log errors to crash reporting.
+
+## AC Reference Annotations (MANDATORY)
+
+All implementation code MUST include Acceptance Criteria reference annotations. This is a requirement discovered from R1 pipeline run 1 — the architect's annotations made traceability verification dramatically easier for the pipeline-judge.
+
+Format: `// AC-{story}.{criterion}: {description}`
+
+Examples:
+- `// AC-1.5: Keep screen awake while timer is running`
+- `// AC-3.3: Reset does NOT count as completed session`
+- `// AC-4.5: Long break after every 4 completed focus sessions`
+
+Every line of code that directly implements an acceptance criterion MUST have this annotation. This enables:
+1. pipeline-judge to trace implementation to requirements
+2. quality-sentinel to verify coverage of all ACs
+3. Automated tracking of which ACs are implemented vs pending
