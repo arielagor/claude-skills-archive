@@ -79,6 +79,40 @@ Artifacts with status `approved` that remain unconsumed for >7 days are eligible
 - Archived artifacts remain in place for audit purposes
 - Archival is logged in the audit trail
 
+## Asset Dependency Tracking
+
+When an artifact references non-code assets (images, sounds, fonts, videos):
+
+1. Add an `asset_dependencies` array to the artifact header:
+
+```json
+{
+  "asset_dependencies": [
+    {
+      "type": "audio",
+      "path": "app/assets/sounds/session-complete.mp3",
+      "status": "placeholder",
+      "required_for": ["US-R2-2"]
+    },
+    {
+      "type": "image",
+      "path": "app/assets/screenshots/dark-mode-timer.png",
+      "status": "bundled",
+      "required_for": ["ASO screenshot set"]
+    }
+  ]
+}
+```
+
+2. Status values: `placeholder` (referenced but not yet bundled), `bundled` (exists in repo), `remote` (hosted externally)
+
+3. **pipeline-judge** validates at Marketing stage: if any referenced assets have status `placeholder`,
+   flag as WARNING in verdict and note in launch plan
+
+4. **launch-coordinator** MUST NOT mark launch plan as "ready" if any critical assets have status `placeholder`
+
+5. **code-reviewer** flags code that imports or references asset paths where the file does not exist
+
 ## Success Criteria Best Practices
 
 Each criterion must be:
