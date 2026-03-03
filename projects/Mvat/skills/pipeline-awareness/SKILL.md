@@ -1,6 +1,17 @@
+---
+name: pipeline-awareness
+mode: autonomous
+escalation_on_ambiguity: governance/escalations/
+description: How the Mvat pipeline works and how to check pipeline state.
+---
+
 # Pipeline Awareness
 
 How the Mvat pipeline works and how to check pipeline state.
+
+> **Skill Mode: autonomous** — This skill never requires human input.
+> When ambiguity arises, write an escalation to `governance/escalations/` and
+> continue with the conservative default. Do NOT prompt for user input.
 
 ## 10-Stage Pipeline
 

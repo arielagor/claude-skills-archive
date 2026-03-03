@@ -1,6 +1,17 @@
+---
+name: expo-conventions
+mode: autonomous
+escalation_on_ambiguity: governance/escalations/
+description: Expo/React Native patterns and conventions for the Mvat platform.
+---
+
 # Expo Conventions
 
 Expo/React Native patterns and conventions for the Mvat platform.
+
+> **Skill Mode: autonomous** — This skill never requires human input.
+> When ambiguity arises, write an escalation to `governance/escalations/` and
+> continue with the conservative default. Do NOT prompt for user input.
 
 ## Stack
 

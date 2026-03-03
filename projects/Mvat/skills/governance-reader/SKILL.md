@@ -1,6 +1,17 @@
+---
+name: governance-reader
+mode: autonomous
+escalation_on_ambiguity: governance/escalations/
+description: How to read and interpret Mvat governance files. Every agent must check these during initialization.
+---
+
 # Governance Reader
 
 How to read and interpret Mvat governance files. Every agent must check these during initialization.
+
+> **Skill Mode: autonomous** — This skill never requires human input.
+> When ambiguity arises, write an escalation to `governance/escalations/` and
+> continue with the conservative default. Do NOT prompt for user input.
 
 ## Kill Switch — `governance/kill-switch.json`
 
