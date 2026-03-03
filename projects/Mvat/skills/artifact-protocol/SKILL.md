@@ -1,6 +1,17 @@
+---
+name: artifact-protocol
+mode: autonomous
+escalation_on_ambiguity: governance/escalations/
+description: How to create, validate, and manage artifacts in the Mvat system.
+---
+
 # Artifact Protocol
 
 How to create, validate, and manage artifacts in the Mvat system.
+
+> **Skill Mode: autonomous** — This skill never requires human input.
+> When ambiguity arises, write an escalation to `governance/escalations/` and
+> continue with the conservative default. Do NOT prompt for user input.
 
 ## Artifact Header Format
 
