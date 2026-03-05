@@ -3,7 +3,7 @@
 # Receives tool input as JSON on stdin.
 
 INPUT="$(cat)"
-FILE_PATH="$(node -e "try{console.log(JSON.parse(process.argv[1]).tool_input.file_path||'')}catch(e){console.log('')}" "$INPUT")"
+FILE_PATH="$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)" || FILE_PATH=""
 
 # Only act on SKILL.md files inside ~/.claude/
 if [[ "$FILE_PATH" == *"SKILL.md"* ]] && [[ "$FILE_PATH" == *".claude"* ]]; then
