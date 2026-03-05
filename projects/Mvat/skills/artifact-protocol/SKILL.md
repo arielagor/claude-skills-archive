@@ -37,6 +37,43 @@ Every artifact file starts with a JSON header block. Required fields:
 }
 ```
 
+## Provenance Tracking
+
+Every artifact SHOULD include a `provenance` field in its header to enable full traceability
+from implementation back through ADR, PRD, strategy doc, and market research:
+
+```json
+{
+  "provenance": {
+    "upstream_artifacts": ["strategy-20260302-mvat-focus", "prd-20260302-mvat-focus-mvp"],
+    "decision_chain": ["strategy.success_criteria[2]", "prd.US-MVP-3"],
+    "modifications": [
+      {
+        "timestamp": "2026-03-03T10:00:00Z",
+        "modifier": "architect",
+        "change": "Added error boundary wrapper per ADR recommendation",
+        "artifact_id": "adr-20260302-mvat-focus-mvp-architecture"
+      }
+    ]
+  }
+}
+```
+
+### Provenance Rules
+
+1. `upstream_artifacts` lists ALL artifact IDs that informed this artifact (not just the immediate parent)
+2. `decision_chain` traces specific requirements: which success criterion or user story drove this work
+3. `modifications` is append-only — every post-creation edit adds an entry with who, what, when, and why
+4. pipeline-judge traces claims through provenance chains during factual consistency checks
+5. When consuming an upstream artifact, copy its `provenance.upstream_artifacts` and append the upstream artifact's own ID
+
+### Provenance Validation
+
+pipeline-judge validates provenance at stage transitions:
+- Every claim in a downstream artifact must trace to an upstream source via `decision_chain`
+- Modifications must reference the artifact that prompted the change
+- Orphaned artifacts (no upstream and not a Stage 1 root artifact) are flagged as WARNING
+
 ## Status Lifecycle
 
 ```
