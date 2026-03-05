@@ -75,6 +75,29 @@ Confidence thresholds: `.confidence_thresholds`
 - `flag_for_review`: 0.65 - 0.84
 - `escalate`: < 0.65
 
+## Assumption Registry — `governance/assumption-registry.json`
+
+Each assumption has a `history` array tracking confidence trajectory over time:
+
+```json
+"history": [
+  {"timestamp": "...", "status": "active", "confidence": 0.70, "event": "created"},
+  {"timestamp": "...", "status": "weakened", "confidence": 0.40, "event": "weakened", "evidence_id": "jv-..."}
+]
+```
+
+### Reading Trajectories
+
+- **Stable**: history length == 1 or last entry matches first status
+- **Declining**: last entry confidence < previous entry confidence
+- **Recovering**: status moved from weakened back to active with higher confidence
+
+When reading assumptions relevant to your work:
+1. Check `status` field for current state
+2. Check `history` array for trajectory direction
+3. If confidence is declining (2+ drops), treat the assumption as high-risk even if still `active`
+4. If an assumption your work depends on has `status: weakened`, note this in your artifact header
+
 ## Correction Log — `governance/corrections.jsonl`
 
 Append-only log of founder corrections. Each line is a JSON object:
