@@ -13,28 +13,6 @@ How the Mvat pipeline works and how to check pipeline state.
 > When ambiguity arises, write an escalation to `governance/escalations/` and
 > continue with the conservative default. Do NOT prompt for user input.
 
-## Product Directory Resolution
-
-Agent specs reference `$PRODUCT_DIR/` instead of hardcoded paths. To resolve:
-
-1. Read `products/active-product.json` for the current product configuration
-2. `repo_path` gives the relative path to the product repo (e.g., `../mvat-focus`)
-3. `app_dir` gives the app directory name within the product repo (e.g., `app`)
-4. Resolve `$PRODUCT_DIR/` to `{repo_path}/{app_dir}/` (e.g., `../mvat-focus/app/`)
-
-If `products/active-product.json` doesn't exist, fall back to `app/` in the current repo (monorepo mode).
-
-## Complexity Profiles
-
-Agents should self-regulate compute based on task complexity. Read `governance/complexity-profiles.json` for guidance:
-
-- **routine** (20 turns): Standard analysis, reporting, no novel decisions
-- **standard** (50 turns): Normal pipeline work with some judgment calls
-- **complex** (80 turns): First run in new phase, recovery from failures, cross-department synthesis
-- **critical** (100 turns): Invalidated assumptions, pending escalations, Authority Boundary changes
-
-Complexity bumps up when: first run in new phase, previous failures on same task, invalidated assumptions affect your work, pending escalations in your department.
-
 ## 10-Stage Pipeline
 
 | Stage | Name | Department | Quality Gate |
