@@ -115,7 +115,7 @@ Slot 18: "Active: Content creation around Cognexus/OpOntology — positioning as
 Slot 19: "Active: Job search/interviewing — parallel to consulting practice build. Tension between employment security and entrepreneurial identity."
 Slot 20: "Active: Identity Memory framework (this project) — meta-level work on how AI should remember. Bridges philosophy, psychology, and engineering."
 Slot 21: "Recurring: Market analysis interests — S&P 500, corporate buybacks, economic indicators. Analytical hobby that connects to finance background."
-Slot 22: "Recurring: Therapeutic work with Dr. Singh — emotional regulation, assertiveness, behavioral patterns. Active self-development, not crisis management."
+Slot 22: "Recurring: Personal development practices — emotional regulation, assertiveness, behavioral patterns. Active self-development, not crisis management."
 ```
 
 **Update trigger:** When projects start, complete, stall, or shift priority. Review every ~5 conversations for staleness.
