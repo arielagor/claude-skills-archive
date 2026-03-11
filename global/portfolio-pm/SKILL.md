@@ -14,165 +14,195 @@ Parse the first argument to determine mode:
 
 | Command | Mode | What it does |
 |---------|------|-------------|
-| `/pm` | Dashboard | Full scan of all 6 projects |
-| `/pm sprint` | Sprint | Generate or review weekly sprint plan |
+| `/pm` | Dashboard | Full scan of all 6 projects (6 parallel agents) |
+| `/pm sprint` | Sprint | Generate or review weekly sprint plan (10 items) |
 | `/pm <project>` | Deep-dive | Focus on one project (e.g., `/pm modelstack`) |
 | `/pm market <project>` | Marketing | Execute marketing actions for one project |
 | `/pm blockers` | Blockers | Cross-project blocker report |
 | `/pm revenue` | Revenue | Revenue analysis with action items |
 | `/pm sync` | Synergies | Cross-project synergy opportunities |
 
+Project name aliases: `modelstack` = modelstack.digital, `aphor` = aphor.me, `focus` = mvat-focus, `agor` = agor.me, `mirror` = mvat-mirror, `mvat` = mvat.ai
+
 ## Project Registry (Quick Reference)
 
-| # | Project | Path | Deploy | Revenue Model |
-|---|---------|------|--------|---------------|
-| 1 | modelstack.digital | `C:\Users\ariel\.claude\projects\modelstack.digital` | Netlify `fd2416ab` | Stripe Payment Links, 36 products |
-| 2 | aphor.me | `C:\Users\ariel\.claude\projects\aphor.me\subconscious-studio` | Netlify `endearing-clafoutis-f18631` | Stripe Checkout, sessions $9.99-$29.99 |
-| 3 | mvat-focus | `C:\Users\ariel\.claude\projects\mvat-focus` | EAS Build (App Store + Google Play) | IAP $0.99 lifetime |
-| 4 | agor.me | `C:\Users\ariel\.claude\projects\C--Users-ariel--claude-projects-agor.me` | Netlify `c589be58` | Consulting bookings |
-| 5 | mvat-mirror | `C:\Users\ariel\.claude\projects\mvat-mirror` | EAS Build | IAP $9.99/mo, $49.99 lifetime |
-| 6 | mvat.ai | `C:\Users\ariel\.claude\projects\Mvat` | Netlify (site/) | Brand support |
+| # | Project | Path | Deploy | Revenue Model | Content |
+|---|---------|------|--------|---------------|---------|
+| 1 | modelstack.digital | `projects/modelstack.digital` | Netlify `fd2416ab` | Stripe Payment Links, 35 products | 19 blog posts |
+| 2 | aphor.me | `projects/aphor.me/subconscious-studio` | Netlify (subdomain) | Stripe Checkout $9.99-$29.99 | 22 sessions, 12 blog posts |
+| 3 | mvat-focus | `projects/mvat-focus` | EAS Build | IAP $4.99/mo or $39.99/yr | Pomodoro timer app |
+| 4 | agor.me | `projects/C--Users-ariel--claude-projects-agor.me` | Netlify `c589be58` | Consulting bookings | 42 blog posts, 6 podcasts |
+| 5 | mvat-mirror | `projects/mvat-mirror` | EAS Build | IAP $9.99/mo or $49.99 lifetime | 7 personality frameworks |
+| 6 | mvat.ai | `projects/Mvat` | Netlify (site/) | Brand support | 39-agent framework |
+
+All paths relative to `C:\Users\ariel\.claude\`. For full details, read `REFERENCE-projects.md`.
 
 ## Mode: Dashboard (`/pm`)
 
-Spawn **6 parallel sub-agents** (one per project). Each agent runs in the project directory and reports:
-
-### Per-project scan checklist
-1. Read `HANDOFF.md` in project root (if exists)
-2. Run `git status --short` (never `-uall`)
-3. Run `git log --oneline -5`
-4. Read project `CLAUDE.md` for current status
-5. Count content: blog posts, products, sessions (project-specific)
-6. Check deploy: Netlify status or EAS build status
-7. Identify top blocker
+Spawn **6 parallel sub-agents** (subagent_type: "Explore") to scan projects simultaneously. Each runs in the project directory.
 
 ### Sub-agent prompt template
 ```
 Scan project: {name}
-Directory: {path}
+Directory: {full_path}
+Report these items concisely:
 
-1. Read HANDOFF.md if it exists
-2. Run: git status --short
-3. Run: git log --oneline -5
-4. Read CLAUDE.md (first 100 lines)
-5. Count content items:
-   - modelstack: count files in products/ and blog/posts/
-   - aphor.me: count sessions in src/lib/sessions.ts
-   - agor.me: count .mdx files in src/app/blog/posts/
-   - mvat-focus/mirror: check app.json version, read recent build status
-   - mvat.ai: check governance/kill-switch.json
-6. Report: last_commit_date, uncommitted_count, content_counts, top_blocker, deploy_status
+1. Read HANDOFF.md if it exists (full content)
+2. Run: git status --short (count modified/untracked files)
+3. Run: git log --oneline -5 (last 5 commits with dates)
+4. Read CLAUDE.md (first 80 lines for current status)
+5. Count content:
+   {content_check_command}
+6. Check deploy status:
+   {deploy_check_command}
+7. Identify the single biggest blocker preventing revenue
+
+Return a structured summary:
+- last_commit: date + message
+- uncommitted_files: count
+- content_count: {type}: {count}
+- deploy_status: live|building|failed|unknown
+- top_blocker: one sentence
+- handoff_summary: key points or "none"
 ```
 
-### After collecting results
+**Content check commands per project:**
+- modelstack: `ls products/ | wc -l` and `ls blog/posts/ | wc -l`
+- aphor.me: grep "id:" in `src/lib/sessions.ts` and `ls src/app/blog/`
+- mvat-focus: read `app/app.json` for version
+- agor.me: `ls src/app/blog/posts/*.mdx | wc -l`
+- mvat-mirror: read `app.json` for version
+- mvat.ai: read `products/active-product.json`
 
-1. Build dashboard table:
+**Deploy check commands:**
+- Netlify projects: `netlify status` or check last deploy via `netlify api listSiteDeploys --data '{"site_id":"{id}"}'`
+- EAS projects: `eas build:list --limit 1 --non-interactive`
+
+### After collecting all 6 results
+
+1. Build unified dashboard table:
 ```
-| Project | Last Commit | Uncommitted | Content | Deploy | Top Blocker |
+| # | Project | Last Commit | Uncommitted | Content | Deploy | Top Blocker |
+|---|---------|-------------|-------------|---------|--------|-------------|
 ```
 
 2. Calculate revenue priority score per project:
-   - product_readiness (0-1) × 0.4
-   - payment_integration (0-1) × 0.3
-   - marketing_maturity (0-1) × 0.2
-   - content_volume (0-1) × 0.1
+   - product_readiness (0-1) x 0.4 — is the product usable and purchasable?
+   - payment_integration (0-1) x 0.3 — is Stripe/IAP live and tested?
+   - marketing_maturity (0-1) x 0.2 — social, SEO, email active?
+   - content_volume (0-1) x 0.1 — enough content to attract traffic?
 
-3. Generate **Top 5 Actions** ranked by revenue impact, each linking to specific project + files to modify.
+3. Generate **Top 5 Actions** ranked by revenue impact. Each action must specify: project, what to do, which files to modify, expected outcome.
 
-4. Save results to `C:\Users\ariel\.claude\agent-memory\portfolio-pm\portfolio-state.json` (overwrite).
+4. Update agent memory: `C:\Users\ariel\.claude\agent-memory\portfolio-pm\MEMORY.md`
 
 ## Mode: Sprint (`/pm sprint`)
 
 1. Read `C:\Users\ariel\.claude\agent-memory\portfolio-pm\sprint-log.json`
-2. If previous sprint exists, score completion (done / total)
-3. Run dashboard scan if state is stale (>24h or missing)
-4. Generate exactly **10 sprint items**:
+2. If active sprint exists, show progress: `done/total` with per-item status
+3. If no active sprint or sprint is >7 days old, generate new sprint:
 
-**Allocation by revenue rank:**
-- 4 items → highest revenue-priority project
-- 3 items → #2 project
-- 2 items → #3 project
-- 1 item → spread across remaining
+**Generate exactly 10 sprint items, allocated by revenue rank:**
+- 4 items for highest revenue-priority project
+- 3 items for #2 project
+- 2 items for #3 project
+- 1 item spread across remaining
 
-**Each item:**
+**Each sprint item format:**
 ```json
 {
   "id": 1,
   "project": "modelstack.digital",
   "action": "Fix social posting to hit Facebook/Instagram/LinkedIn",
-  "revenue_impact": "high|medium|low",
-  "effort": "1h|2h|4h|8h",
-  "status": "pending|in_progress|done|blocked",
+  "revenue_impact": "high",
+  "effort": "2h",
+  "status": "pending",
   "files": ["scripts/post-to-social.mjs"],
   "depends_on": []
 }
 ```
 
-5. Save to `sprint-log.json` with `week_of` timestamp.
-6. Present as a numbered checklist to the user.
+4. Pull specific actions from `REFERENCE-playbooks.md` — don't invent actions
+5. Save sprint to `sprint-log.json` with `week_of` ISO date
+6. Present as numbered checklist with effort estimates
+
+**To update sprint item status:** edit sprint-log.json directly when items are completed during a session.
 
 ## Mode: Marketing (`/pm market <project>`)
 
-1. Read `REFERENCE-playbooks.md` for the target project's playbook.
-2. For each action in the playbook, assess current state (read relevant files).
-3. Present actions as a ranked checklist with current status (done / not done / partially done).
-4. Ask user which actions to execute now.
-5. For executable actions, spawn sub-agents to do the work:
-   - SEO audit → read HTML files, check for meta tags, structured data, sitemap
-   - Social expansion → check social posting scripts and manifests
-   - Email setup → check email infrastructure code
-   - Content → check blog post counts and cadence
+1. Read `REFERENCE-playbooks.md` for the target project's playbook
+2. Run project scan (single sub-agent) to get current state
+3. For each playbook action, assess: done / partially done / not started
+4. Present ranked checklist with current status
+5. Ask user which actions to execute now
+6. For executable actions, spawn sub-agents (max 3 parallel):
+   - SEO audit: read HTML, check meta tags, structured data, sitemap
+   - Social check: verify posting scripts, credentials, platform coverage
+   - Content audit: count posts, check publication cadence, find gaps
+   - Email check: verify Nodemailer config, nurture sequences
 
 ## Mode: Deep-dive (`/pm <project>`)
 
-1. Run the single-project scan from the dashboard protocol
-2. Read the project's CLAUDE.md fully
+1. Run single-project scan (sub-agent in project directory)
+2. Read the project's full CLAUDE.md
 3. Read HANDOFF.md if exists
-4. Read the playbook for this project from REFERENCE-playbooks.md
-5. Present: current state, blockers, marketing status, and recommended next actions
+4. Read the project's playbook from REFERENCE-playbooks.md
+5. Read cross-promo entries for this project from REFERENCE-cross-promo.md
+6. Present: current state, all blockers, marketing status, and top 5 recommended actions
 
 ## Mode: Blockers (`/pm blockers`)
 
-Scan all 6 projects (parallel) and for each, identify:
+Scan all 6 projects (parallel sub-agents) and for each identify:
 - Uncommitted changes blocking deploys
 - Failed builds or store rejections
 - Missing infrastructure (domain, webhook, credentials)
 - Stale content pipelines (blog not posting on schedule)
+- Dependency issues (crashes, version conflicts)
 
-Present as a priority-sorted blocker list with resolution steps.
+Present as priority-sorted blocker list:
+```
+| Priority | Project | Blocker | Resolution | Effort |
+```
 
 ## Mode: Revenue (`/pm revenue`)
 
 1. Read `C:\Users\ariel\.claude\agent-memory\portfolio-pm\revenue-tracker.json`
 2. For each project, assess:
-   - Is payment infrastructure live and tested?
-   - Is there traffic (blog posts, social, email)?
-   - What's the conversion path (visitor → customer)?
-   - What's blocking first revenue?
-3. Present revenue readiness scorecard and top 3 actions to unlock revenue.
+   - Is payment infrastructure live and tested end-to-end?
+   - Is there traffic (blog posts, social reach, email list)?
+   - What's the conversion path (visitor -> customer)?
+   - What's the single thing blocking first revenue?
+3. Present revenue readiness scorecard:
+```
+| Project | Payment | Traffic | Conversion Path | Blocking First $1 |
+```
+4. Top 3 actions to unlock revenue, with specific steps
 
 ## Mode: Synergies (`/pm sync`)
 
-Read `REFERENCE-cross-promo.md` and for each high-value synergy:
-1. Check if it's already implemented (grep for cross-links in code)
-2. If not, propose specific implementation
-3. Prioritize by: effort (low first) × audience overlap (high first)
+1. Read `REFERENCE-cross-promo.md`
+2. For each HIGH-value synergy, spawn a sub-agent to check implementation:
+   - Grep for cross-links, UTM parameters, "More from" sections
+   - Report: implemented / partially / not started
+3. Present synergy status matrix
+4. Recommend top 3 synergies to implement now (effort x impact)
 
 ## State Management
 
-All state lives in `C:\Users\ariel\.claude\agent-memory\portfolio-pm\`:
+All persistent state in `C:\Users\ariel\.claude\agent-memory\portfolio-pm\`:
 
-- `MEMORY.md` — Agent memory, updated after each significant interaction
-- `sprint-log.json` — Sprint history and current sprint
-- `revenue-tracker.json` — Revenue milestones and projections
-- `portfolio-state.json` — Last dashboard scan results (generated on scan)
+| File | Purpose | Updated when |
+|------|---------|-------------|
+| `MEMORY.md` | Portfolio snapshot, decisions, blockers | After each dashboard scan |
+| `sprint-log.json` | Sprint history + active sprint | Sprint create/update |
+| `revenue-tracker.json` | Revenue milestones per project | Revenue mode or milestone reached |
 
 ## Constraints
 
 - Never force-push or commit `.env` files
 - Never deploy without user confirmation
-- Marketing actions that involve creating social media posts should be previewed before posting
-- Sprint items should be actionable within a single Claude Code session
-- Maximum 6 parallel sub-agents (one per project) during dashboard scan
-- Maximum 3 parallel sub-agents during marketing execution
+- Marketing actions that create social media posts: preview before posting
+- Sprint items must be actionable within a single Claude Code session
+- Maximum 6 parallel sub-agents (dashboard scan), 3 for other operations
 - Always read REFERENCE files for project-specific details — don't rely on cached knowledge
+- When updating sprint status, preserve existing sprint history
