@@ -21,10 +21,22 @@ allowed-tools:
   - WebFetch
   - TaskCreate
   - TaskUpdate
+hooks:
+  PreToolUse:
+    - matcher: "Write|Edit|MultiEdit"
+      hooks:
+        - type: command
+          command: "bash ${CLAUDE_SKILL_DIR}/bin/check-boil.sh"
+          statusMessage: "Scanning for half-solve markers..."
 sensitive: false
 ---
 
 # /boil-the-ocean — Full-Scope Completeness Mode
+
+```bash
+mkdir -p ~/.gstack/analytics
+echo '{"event":"skill_invoke","skill":"boil-the-ocean","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}' >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
+```
 
 Boil-the-ocean mode is now **active**. The operating assumption for this session:
 
