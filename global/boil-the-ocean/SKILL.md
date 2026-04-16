@@ -96,6 +96,24 @@ For a deploy:
 - TestFlight / production / live URL polled until the build is reachable
 - Rollback path known
 
+## Self-Audit Before Committing
+
+Before any commit in boil-the-ocean mode, run the diff auditor:
+
+```bash
+bash ${CLAUDE_SKILL_DIR}/bin/audit-diff.sh            # working tree vs HEAD
+bash ${CLAUDE_SKILL_DIR}/bin/audit-diff.sh --staged   # staged only
+bash ${CLAUDE_SKILL_DIR}/bin/audit-diff.sh --path src/ # scan a subtree
+```
+
+Exit 0 = clean. Exit 1 = half-solves found; resolve before committing. The auditor looks for the same markers the PreToolUse hook flags: TODO/FIXME/XXX/HACK, not-implemented throws, `.skip`/`.only` tests, `@ts-ignore`, temp/workaround comments, empty catch blocks, and stray `console.log` calls.
+
+## How the Hook Works
+
+While boil-the-ocean is active, every `Write`, `Edit`, or `MultiEdit` call is scanned by `bin/check-boil.sh`. If it detects half-solve markers in the content being written, it returns `permissionDecision: "ask"` with the list of flags, giving you a chance to upgrade the half-solve to a real solve before it lands. Markdown, docs, and the skill's own files are skipped so meta-references don't false-fire.
+
+Analytics fire to `~/.gstack/analytics/skill-usage.jsonl` on skill invoke and on each hook fire (flag names only, never file content).
+
 ## When to Break Glass
 
 Boil-the-ocean is not license to rewrite the world. If the complete solve genuinely requires:
