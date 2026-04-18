@@ -46,7 +46,26 @@ For each learning identified:
 - **Infrastructure built** → GBrain project page + memory file + MEMORY.md entry + CLAUDE.md if cross-session
 - **Codebase knowledge** → appropriate CLAUDE.md or memory file
 
-### Step 4: Update MEMORY.md index
+### Step 4: Cross-check gstack learnings
+
+Check gstack's project-scoped learnings for anything that should also exist as a memory file (for non-gstack sessions) or vice versa:
+
+```bash
+eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)" 2>/dev/null || true
+~/.claude/skills/gstack/bin/gstack-learnings-search --limit 50 2>/dev/null || echo "No gstack learnings."
+```
+
+For each gstack learning:
+- If it's a reusable cross-session insight, ensure a corresponding feedback memory file exists
+- If a memory file exists for a pattern not in gstack learnings, consider logging it there too via `gstack-learnings-log`
+
+For each new memory file created during the session:
+- If it describes an operational pitfall or pattern that gstack skills would benefit from, log it:
+```bash
+~/.claude/skills/gstack/bin/gstack-learnings-log '{"skill":"session-retro","type":"TYPE","key":"SHORT_KEY","insight":"DESCRIPTION","confidence":N,"source":"observed"}'
+```
+
+### Step 5: Update MEMORY.md index
 
 Add entries for any new memory files created.
 
@@ -76,3 +95,15 @@ This skill is the human-invocable counterpart to three automated mechanisms:
 - CLAUDE.md behavioral rule requiring infrastructure filing
 
 Together they form the **learning loop**: hooks catch signals in real-time, the retro synthesizes them into durable knowledge, and the memories inform future sessions.
+
+## Three Learning Stores
+
+The system bridges three parallel stores:
+
+| Store | Scope | Written By | Read By |
+|-------|-------|-----------|---------|
+| **Claude memory** (`~/.claude/projects/.../memory/`) | Global, cross-project | Claude sessions | Every Claude session |
+| **GBrain** (`projects/` pages) | Global, durable knowledge | Claude sessions, collectors | Claude sessions via MCP |
+| **gstack learnings** (`~/.gstack/projects/<slug>/learnings.jsonl`) | Per-project | gstack skills | gstack skills |
+
+The session retro bridges them: insights that matter across projects go to memory + GBrain. Insights specific to one project's build/deploy/test quirks go to gstack learnings. Operational pitfalls go to both.
