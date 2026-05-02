@@ -116,14 +116,13 @@ Reset an agent's circuit breaker and rate limits.
 
 | Tier | Model | Use Case | Agents |
 |------|-------|----------|--------|
-| Opus | `claude-opus-4-6` | Production code, critical gates | architect, frontend-engineer, backend-engineer, code-reviewer, quality-sentinel, pipeline-judge, spec-evolver |
-| Sonnet | `claude-sonnet-4-6` | Content writing, substantive analysis | product-strategist, spec-writer, ui-designer, test-strategist, + 15 more |
-| Haiku | `claude-haiku-4-5` | Read-only analysis, reporting | market-researcher, anomaly-detector, budget-manager, + 10 more |
+| Opus | `claude-opus-4-7` | Default for any agent that produces output (code, content, analysis, gating) | architect, frontend-engineer, backend-engineer, code-reviewer, quality-sentinel, pipeline-judge, spec-evolver, product-strategist, spec-writer, ui-designer, test-strategist, content-writer, + all other producing agents |
+| Haiku | `claude-haiku-4-5-20251001` | Read-only analysis, reporting | market-researcher, anomaly-detector, budget-manager, + 10 more |
 
 **Rules:**
+- Sonnet is BANNED in this stack. Any agent specifying Sonnet must be re-tiered to Opus.
 - Haiku agents MUST NOT write user-facing content, code, or make gating decisions
-- Any agent that writes content MUST be Sonnet or higher
-- Any agent that writes production code MUST be Opus
+- Any agent that produces ANY output (content, code, analysis, decisions) MUST be Opus
 
 ## Department Roster
 
