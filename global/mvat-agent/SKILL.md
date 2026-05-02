@@ -48,8 +48,8 @@ List all agents with their status.
 MVAT Agents — Phase R1
 ━━━━━━━━━━━━━━━━━━━━━━
 Department: Product
-  ✓ product-strategist  Sonnet  — enabled
-  ○ spec-writer         Sonnet  — R2 (inactive)
+  ✓ product-strategist  Opus    — enabled
+  ○ spec-writer         Opus    — R2 (inactive)
   ○ market-researcher   Haiku   — R2 (inactive)
 
 Department: Engineering
