@@ -1,30 +1,27 @@
 ---
-name: pair-agent
+name: landing-report
 version: 0.1.0
 description: |
-  Pair a remote AI agent with your browser. One command generates a setup key and
-  prints instructions the other agent can follow to connect. Works with OpenClaw,
-  Hermes, Codex, Cursor, or any agent that can make HTTP requests. The remote agent
-  gets its own tab with scoped access (read+write by default, admin on request).
-  Use when asked to "pair agent", "connect agent", "share browser", "remote browser",
-  "let another agent use my browser", or "give browser access". (gstack)
-voice-triggers:
-  - "pair agent"
-  - "connect agent"
-  - "share my browser"
-  - "remote browser access"
+  Read-only queue dashboard for workspace-aware ship. Shows which VERSION slots
+  are currently claimed by open PRs, which sibling Conductor workspaces have
+  WIP work likely to ship soon, and what slot /ship would pick next. No
+  mutations — just a snapshot. Use when asked to "landing report", "what's in
+  the queue", "show me open PRs", or "which version do I claim next". (gstack)
 triggers:
-  - pair with agent
-  - connect remote agent
-  - share my browser
+  - landing report
+  - version queue
+  - ship queue
+  - what version comes next
+  - show open PR versions
 allowed-tools:
   - Bash
   - Read
-  - AskUserQuestion
-
+sensitive: false
 ---
 <!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly -->
 <!-- Regenerate: bun run gen:skill-docs -->
+
+# /landing-report — Version Queue Dashboard
 
 ## Preamble (run first)
 
@@ -61,7 +58,7 @@ _QUESTION_TUNING=$(~/.claude/skills/gstack/bin/gstack-config get question_tuning
 echo "QUESTION_TUNING: $_QUESTION_TUNING"
 mkdir -p ~/.gstack/analytics
 if [ "$_TEL" != "off" ]; then
-echo '{"skill":"pair-agent","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
+echo '{"skill":"landing-report","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
 fi
 for _PF in $(find ~/.gstack/analytics -maxdepth 1 -name '.pending-*' 2>/dev/null); do
   if [ -f "$_PF" ]; then
@@ -83,7 +80,7 @@ if [ -f "$_LEARN_FILE" ]; then
 else
   echo "LEARNINGS: 0"
 fi
-~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"pair-agent","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
+~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"landing-report","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
 _HAS_ROUTING="no"
 if [ -f CLAUDE.md ] && grep -q "## Skill routing" CLAUDE.md 2>/dev/null; then
   _HAS_ROUTING="yes"
@@ -596,7 +593,7 @@ Before each AskUserQuestion, choose `question_id` from `scripts/question-registr
 
 After answer, log best-effort:
 ```bash
-~/.claude/skills/gstack/bin/gstack-question-log '{"skill":"pair-agent","question_id":"<id>","question_summary":"<short>","category":"<approval|clarification|routing|cherry-pick|feedback-loop>","door_type":"<one-way|two-way>","options_count":N,"user_choice":"<key>","recommended":"<key>","session_id":"'"$_SESSION_ID"'"}' 2>/dev/null || true
+~/.claude/skills/gstack/bin/gstack-question-log '{"skill":"landing-report","question_id":"<id>","question_summary":"<short>","category":"<approval|clarification|routing|cherry-pick|feedback-loop>","door_type":"<one-way|two-way>","options_count":N,"user_choice":"<key>","recommended":"<key>","session_id":"'"$_SESSION_ID"'"}' 2>/dev/null || true
 ```
 
 For two-way questions, offer: "Tune this question? Reply `tune: never-ask`, `tune: always-ask`, or free-form."
@@ -683,276 +680,141 @@ In plan mode before ExitPlanMode: if the plan file lacks `## GSTACK REVIEW REPOR
 
 PLAN MODE EXCEPTION — always allowed (it's the plan file).
 
-# /pair-agent — Share Your Browser With Another AI Agent
+---
 
-You're sitting in Claude Code with a browser running. You also have another AI agent
-open (OpenClaw, Hermes, Codex, Cursor, whatever). You want that other agent to be
-able to browse the web using YOUR browser. This skill makes that happen.
+## Why this skill exists
 
-## How it works
+When you're running 5-10 parallel Conductor workspaces, it helps to see — at a
+glance — which version numbers are claimed, by whom, and what slot your next
+`/ship` would land in. This skill is a read-only call into the same
+`bin/gstack-next-version` utility `/ship` uses, but with nothing mutating.
+Think of it as `gh pr list` for VERSION numbers.
 
-Your gstack browser runs a local HTTP server. This skill creates a one-time setup key,
-prints a block of instructions, and you paste those instructions into the other agent.
-The other agent exchanges the key for a session token, creates its own tab, and starts
-browsing. Each agent gets its own tab. They can't mess with each other's tabs.
+---
 
-The setup key expires in 5 minutes and can only be used once. If it leaks, it's dead
-before anyone can abuse it. The session token lasts 24 hours.
+## Step 1: Detect platform and base branch
 
-**Same machine:** If the other agent is on the same machine (like OpenClaw running
-locally), you can skip the copy-paste ceremony and write the credentials directly to
-the agent's config directory.
-
-**Remote:** If the other agent is on a different machine, you need an ngrok tunnel.
-The skill will tell you if one is needed and how to set it up.
-
-## SETUP (run this check BEFORE any browse command)
+Same detection as other gstack skills.
 
 ```bash
-_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-B=""
-[ -n "$_ROOT" ] && [ -x "$_ROOT/.claude/skills/gstack/browse/dist/browse" ] && B="$_ROOT/.claude/skills/gstack/browse/dist/browse"
-[ -z "$B" ] && B="$HOME/.claude/skills/gstack/browse/dist/browse"
-if [ -x "$B" ]; then
-  echo "READY: $B"
-else
-  echo "NEEDS_SETUP"
-fi
+BASE_BRANCH=$(gh pr view --json baseRefName -q .baseRefName 2>/dev/null || \
+              gh repo view --json defaultBranchRef -q .defaultBranchRef.name 2>/dev/null || \
+              echo main)
+echo "Base branch: $BASE_BRANCH"
 ```
 
-If `NEEDS_SETUP`:
-1. Tell the user: "gstack browse needs a one-time build (~10 seconds). OK to proceed?" Then STOP and wait.
-2. Run: `cd <SKILL_DIR> && ./setup`
-3. If `bun` is not installed:
-   ```bash
-   if ! command -v bun >/dev/null 2>&1; then
-     BUN_VERSION="1.3.10"
-     BUN_INSTALL_SHA="bab8acfb046aac8c72407bdcce903957665d655d7acaa3e11c7c4616beae68dd"
-     tmpfile=$(mktemp)
-     curl -fsSL "https://bun.sh/install" -o "$tmpfile"
-     actual_sha=$(shasum -a 256 "$tmpfile" | awk '{print $1}')
-     if [ "$actual_sha" != "$BUN_INSTALL_SHA" ]; then
-       echo "ERROR: bun install script checksum mismatch" >&2
-       echo "  expected: $BUN_INSTALL_SHA" >&2
-       echo "  got:      $actual_sha" >&2
-       rm "$tmpfile"; exit 1
-     fi
-     BUN_VERSION="$BUN_VERSION" bash "$tmpfile"
-     rm "$tmpfile"
-   fi
-   ```
+---
 
-## Step 1: Check prerequisites
+## Step 2: Read current state
 
 ```bash
-$B status 2>/dev/null
+CURRENT_VERSION=$(cat VERSION 2>/dev/null | tr -d '[:space:]' || echo "0.0.0.0")
+git fetch origin "$BASE_BRANCH" --quiet 2>/dev/null || true
+BASE_VERSION=$(git show "origin/$BASE_BRANCH:VERSION" 2>/dev/null | tr -d '[:space:]' || echo "$CURRENT_VERSION")
+echo "origin/$BASE_BRANCH VERSION: $BASE_VERSION"
+echo "branch HEAD VERSION: $CURRENT_VERSION"
 ```
 
-If the browse server is not running, start it:
+---
+
+## Step 3: Query the queue
+
+Call the util three times — once for each bump level — so the user sees what
+they'd claim for micro/patch/minor/major. Cheap (same gh call cached by bun).
 
 ```bash
-$B goto about:blank
+for LEVEL in micro patch minor major; do
+  bun run bin/gstack-next-version \
+    --base "$BASE_BRANCH" \
+    --bump "$LEVEL" \
+    --current-version "$BASE_VERSION" \
+    > "/tmp/landing-$LEVEL.json" 2>/dev/null || echo '{"offline":true}' > "/tmp/landing-$LEVEL.json"
+done
 ```
 
-This ensures the server is up and healthy before pairing.
+---
 
-## Step 2: Ask what they want
+## Step 4: Render the dashboard
 
-Use AskUserQuestion:
+Build a single table output. Use the `patch`-level JSON as canonical for
+queue + siblings (they're identical across bump levels; only `.version`
+differs).
 
-> Which agent do you want to pair with your browser? This determines the
-> instructions format and where credentials get written.
+Use `jq` to extract:
+- `.host` — github | gitlab | unknown
+- `.offline` — did the query fail?
+- `.claimed` — array of {pr, branch, version, url}
+- `.siblings` — all sibling worktrees found
+- `.active_siblings` — subset that's likely about to ship
 
-Options:
-- A) OpenClaw (local or remote)
-- B) Codex / OpenAI Agents (local)
-- C) Cursor (local)
-- D) Another Claude Code session (local or remote)
-- E) Something else (generic HTTP instructions — use this for Hermes)
+Render in this exact format:
 
-Based on the answer, set `TARGET_HOST`:
-- A → `openclaw`
-- B → `codex`
-- C → `cursor`
-- D → `claude`
-- E → generic (no host-specific config)
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                     GSTACK LANDING REPORT                        ║
+╠══════════════════════════════════════════════════════════════════╣
+║ Repo:    <owner/repo>                                            ║
+║ Base:    <base> @ v<base-version>                                ║
+║ Host:    <github|gitlab|unknown>                                 ║
+║ Status:  <ONLINE|OFFLINE: queue-awareness unavailable>           ║
+╚══════════════════════════════════════════════════════════════════╝
 
-## Step 3: Local or remote?
+Open PRs claiming versions on <base>:
+  #1152  alpha-branch         → v1.7.0.0
+  #1153  beta-branch          → v1.7.0.0  ⚠ collision with #1152
+  #1151  gamma-branch         → v1.6.5.0
 
-Use AskUserQuestion:
+Sibling Conductor worktrees (<workspace_root>):
+  path                        branch                 VERSION      last commit   PR
+  ──────────────────────────────────────────────────────────────────────────────────
+  ../tokyo-v2                 feat/dashboard         v1.7.1.0    3h ago         none  ★ active
+  ../melbourne                feat/review            v1.6.0.0    12d ago        none
+  ../osaka                    feat/payments          v1.8.0.0    5h ago         #1155
 
-> Is the other agent running on this same machine, or on a different machine/server?
->
-> **Same machine** skips the copy-paste ceremony. Credentials are written directly to
-> the agent's config directory. No tunnel needed.
->
-> **Different machine** generates a setup key and instruction block. If ngrok is
-> installed, the tunnel starts automatically. If not, I'll walk you through setup.
->
-> RECOMMENDATION: Choose A if the agent is local. It's instant, no copy-paste needed.
+★ active = has VERSION ahead of base AND last commit < 24h AND no open PR.
+  These are the ones likely to ship soon.
 
-Options:
-- A) Same machine (write credentials directly)
-- B) Different machine (generate instruction block for copy-paste)
-
-## Step 4: Execute pairing
-
-### If same machine (option A):
-
-Run pair-agent with --local flag:
-
-```bash
-$B pair-agent --local TARGET_HOST
+If you ran /ship right now, you'd claim:
+  micro bump:  v1.6.3.1   (queue-advance: none)
+  patch bump:  v1.7.1.0   (bumped past claimed 1.7.0.0)
+  minor bump:  v1.8.0.0   (bumped past claimed 1.7.0.0)
+  major bump:  v2.0.0.0   (no major collisions)
 ```
 
-Replace `TARGET_HOST` with the value from Step 2 (openclaw, codex, cursor, etc.).
+For offline / unknown-host output, print a shorter block:
 
-If it succeeds, tell the user:
-"Done. TARGET_HOST can now use your browser. It will read credentials from the
-config file that was written. Try asking it to navigate to a URL."
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                     GSTACK LANDING REPORT                        ║
+╠══════════════════════════════════════════════════════════════════╣
+║ Status:  OFFLINE — queue-awareness unavailable                   ║
+║ Reason:  <offline reason from warnings>                          ║
+╚══════════════════════════════════════════════════════════════════╝
 
-If it fails (host not found, write permission error), show the error and suggest
-using the generic remote flow instead.
-
-### If different machine (option B):
-
-First, detect ngrok status:
-
-```bash
-which ngrok 2>/dev/null && echo "NGROK_INSTALLED" || echo "NGROK_NOT_INSTALLED"
-ngrok config check 2>/dev/null && echo "NGROK_AUTHED" || echo "NGROK_NOT_AUTHED"
+Fallback: local VERSION bumps still work, but collisions cannot be detected.
 ```
 
-**If ngrok is installed and authed:** Just run the command. The CLI will auto-detect
-ngrok, start the tunnel, and print the instruction block with the tunnel URL:
+---
 
-```bash
-$B pair-agent --client TARGET_HOST
-```
+## Step 5: Suggest next action
 
-If the user also needs admin access (JS execution, cookies, storage):
+After rendering the table, suggest ONE of:
 
-```bash
-$B pair-agent --admin --client TARGET_HOST
-```
+1. **If there are collisions in the queue** (two open PRs claim the same version):
+   "⚠ Two open PRs collide on v<X>. Whoever merges second will either overwrite
+   the first's CHANGELOG entry or land a duplicate. Consider asking one author
+   to rerun /ship to pick up the next free slot."
 
-**CRITICAL: You MUST output the full instruction block to the user.** The command
-prints everything between ═══ lines. Copy the ENTIRE block verbatim into your
-response so the user can copy-paste it into their other agent. Do NOT summarize it,
-do NOT skip it, do NOT just say "here's the output." The user needs to SEE the block
-to copy it. Output it inside a markdown code block so it's easy to select and copy.
+2. **If an active sibling outranks the user's branch version:**
+   "Sibling worktree <path> has v<X> committed <N>h ago and hasn't PR'd yet.
+   If that work ships first, your branch will need to rebump at land time."
 
-Then tell the user:
-"Copy the block above and paste it into your other agent's chat. The setup key
-expires in 5 minutes."
+3. **If everything looks clean:**
+   "Queue is clean. Next /ship will claim a slot without conflict."
 
-**If ngrok is installed but NOT authed:** Walk the user through authentication:
+---
 
-Tell the user:
-"ngrok is installed but not logged in. Let's fix that:
+## Plan Mode
 
-1. Go to https://dashboard.ngrok.com/get-started/your-authtoken
-2. Copy your auth token
-3. Come back here and I'll run the auth command for you."
-
-STOP here and wait for the user to provide their auth token.
-
-When they provide it, run:
-```bash
-ngrok config add-authtoken THEIR_TOKEN
-```
-
-Then retry `$B pair-agent --client TARGET_HOST`.
-
-**If ngrok is NOT installed:** Walk the user through installation:
-
-Tell the user:
-"To connect a remote agent, we need ngrok (a tunnel that exposes your local
-browser to the internet securely).
-
-1. Go to https://ngrok.com and sign up (free tier works)
-2. Install ngrok:
-   - macOS: `brew install ngrok`
-   - Linux: `snap install ngrok` or download from ngrok.com/download
-3. Auth it: `ngrok config add-authtoken YOUR_TOKEN`
-   (get your token from https://dashboard.ngrok.com/get-started/your-authtoken)
-4. Come back here and run `/pair-agent` again."
-
-STOP here. Wait for the user to install ngrok and re-invoke.
-
-## Step 5: Verify connection
-
-After the user pastes the instructions into the other agent, wait a moment then check:
-
-```bash
-$B status
-```
-
-Look for the connected agent in the status output. If it appears, tell the user:
-"The remote agent is connected and has its own tab. You'll see its activity in the
-side panel if you have GStack Browser open."
-
-## What the remote agent can do
-
-With default (read+write) access:
-- Navigate to URLs, click elements, fill forms, take screenshots
-- Read page content (text, HTML, snapshot)
-- Create new tabs (each agent gets its own)
-- Cannot execute arbitrary JavaScript, read cookies, or access storage
-
-With admin access (--admin flag):
-- Everything above, plus JS execution, cookie access, storage access
-- Use sparingly. Only for agents you fully trust.
-
-## Troubleshooting
-
-**"Tab not owned by your agent"** — The remote agent tried to interact with a tab
-it didn't create. Tell it to run `newtab` first to get its own tab.
-
-**"Domain not allowed"** — The token has domain restrictions. Re-pair with broader
-domain access or no domain restrictions.
-
-**"Rate limit exceeded"** — The agent is sending > 10 requests/second. It should
-wait for the Retry-After header and slow down.
-
-**"Token expired"** — The 24-hour session expired. Run `/pair-agent` again to
-generate a new setup key.
-
-**Agent can't reach the server** — If remote, check the ngrok tunnel is running
-(`$B status`). If local, check the browse server is running.
-
-## Platform-specific notes
-
-### OpenClaw / AlphaClaw
-
-OpenClaw agents use the `exec` tool instead of `Bash`. The instruction block uses
-`exec curl` syntax which OpenClaw understands natively. When using `--local openclaw`,
-credentials are written to `~/.openclaw/skills/gstack/browse-remote.json`.
-
-
-### Codex
-
-Codex agents can execute shell commands via `codex exec`. The instruction block's
-curl commands work directly. When using `--local codex`, credentials are written
-to `~/.codex/skills/gstack/browse-remote.json`.
-
-### Cursor
-
-Cursor's AI can run terminal commands. The instruction block works as-is.
-When using `--local cursor`, credentials are written to
-`~/.cursor/skills/gstack/browse-remote.json`.
-
-## Revoking access
-
-To disconnect a specific agent:
-
-```bash
-$B tunnel revoke AGENT_NAME
-```
-
-To disconnect all agents and rotate the root token:
-
-```bash
-# This invalidates ALL scoped tokens immediately
-$B tunnel rotate
-```
+PLAN MODE EXCEPTION — ALWAYS RUN. This skill is entirely read-only: no file
+writes, no git mutations, no network state changes. Safe to run in plan mode.

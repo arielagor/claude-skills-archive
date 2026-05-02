@@ -1,27 +1,27 @@
 ---
-name: pair-agent
-version: 0.1.0
+name: context-restore
+preamble-tier: 2
+version: 1.0.0
 description: |
-  Pair a remote AI agent with your browser. One command generates a setup key and
-  prints instructions the other agent can follow to connect. Works with OpenClaw,
-  Hermes, Codex, Cursor, or any agent that can make HTTP requests. The remote agent
-  gets its own tab with scoped access (read+write by default, admin on request).
-  Use when asked to "pair agent", "connect agent", "share browser", "remote browser",
-  "let another agent use my browser", or "give browser access". (gstack)
-voice-triggers:
-  - "pair agent"
-  - "connect agent"
-  - "share my browser"
-  - "remote browser access"
-triggers:
-  - pair with agent
-  - connect remote agent
-  - share my browser
+  Restore working context saved earlier by /context-save. Loads the most recent
+  saved state (across all branches by default) so you can pick up where you
+  left off — even across Conductor workspace handoffs.
+  Use when asked to "resume", "restore context", "where was I", or
+  "pick up where I left off". Pair with /context-save.
+  Formerly /checkpoint resume — renamed because Claude Code treats /checkpoint
+  as a native rewind alias in current environments. (gstack)
 allowed-tools:
   - Bash
   - Read
+  - Glob
+  - Grep
   - AskUserQuestion
-
+triggers:
+  - resume where i left off
+  - restore context
+  - where was i
+  - pick up where i left off
+  - context restore
 ---
 <!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly -->
 <!-- Regenerate: bun run gen:skill-docs -->
@@ -61,7 +61,7 @@ _QUESTION_TUNING=$(~/.claude/skills/gstack/bin/gstack-config get question_tuning
 echo "QUESTION_TUNING: $_QUESTION_TUNING"
 mkdir -p ~/.gstack/analytics
 if [ "$_TEL" != "off" ]; then
-echo '{"skill":"pair-agent","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
+echo '{"skill":"context-restore","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
 fi
 for _PF in $(find ~/.gstack/analytics -maxdepth 1 -name '.pending-*' 2>/dev/null); do
   if [ -f "$_PF" ]; then
@@ -83,7 +83,7 @@ if [ -f "$_LEARN_FILE" ]; then
 else
   echo "LEARNINGS: 0"
 fi
-~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"pair-agent","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
+~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"context-restore","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
 _HAS_ROUTING="no"
 if [ -f CLAUDE.md ] && grep -q "## Skill routing" CLAUDE.md 2>/dev/null; then
   _HAS_ROUTING="yes"
@@ -596,7 +596,7 @@ Before each AskUserQuestion, choose `question_id` from `scripts/question-registr
 
 After answer, log best-effort:
 ```bash
-~/.claude/skills/gstack/bin/gstack-question-log '{"skill":"pair-agent","question_id":"<id>","question_summary":"<short>","category":"<approval|clarification|routing|cherry-pick|feedback-loop>","door_type":"<one-way|two-way>","options_count":N,"user_choice":"<key>","recommended":"<key>","session_id":"'"$_SESSION_ID"'"}' 2>/dev/null || true
+~/.claude/skills/gstack/bin/gstack-question-log '{"skill":"context-restore","question_id":"<id>","question_summary":"<short>","category":"<approval|clarification|routing|cherry-pick|feedback-loop>","door_type":"<one-way|two-way>","options_count":N,"user_choice":"<key>","recommended":"<key>","session_id":"'"$_SESSION_ID"'"}' 2>/dev/null || true
 ```
 
 For two-way questions, offer: "Tune this question? Reply `tune: never-ask`, `tune: always-ask`, or free-form."
@@ -609,24 +609,6 @@ Write (only after confirmation for free-form):
 ```
 
 Exit code 2 = rejected as not user-originated; do not retry. On success: "Set `<id>` → `<preference>`. Active immediately."
-
-## Repo Ownership — See Something, Say Something
-
-`REPO_MODE` controls how to handle issues outside your branch:
-- **`solo`** — You own everything. Investigate and offer to fix proactively.
-- **`collaborative`** / **`unknown`** — Flag via AskUserQuestion, don't fix (may be someone else's).
-
-Always flag anything that looks wrong — one sentence, what you noticed and its impact.
-
-## Search Before Building
-
-Before building anything unfamiliar, **search first.** See `~/.claude/skills/gstack/ETHOS.md`.
-- **Layer 1** (tried and true) — don't reinvent. **Layer 2** (new and popular) — scrutinize. **Layer 3** (first principles) — prize above all.
-
-**Eureka:** When first-principles reasoning contradicts conventional wisdom, name it and log:
-```bash
-jq -n --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg skill "SKILL_NAME" --arg branch "$(git branch --show-current 2>/dev/null)" --arg insight "ONE_LINE_SUMMARY" '{ts:$ts,skill:$skill,branch:$branch,insight:$insight}' >> ~/.gstack/analytics/eureka.jsonl 2>/dev/null || true
-```
 
 ## Completion Status Protocol
 
@@ -683,276 +665,128 @@ In plan mode before ExitPlanMode: if the plan file lacks `## GSTACK REVIEW REPOR
 
 PLAN MODE EXCEPTION — always allowed (it's the plan file).
 
-# /pair-agent — Share Your Browser With Another AI Agent
+# /context-restore — Restore Saved Working Context
 
-You're sitting in Claude Code with a browser running. You also have another AI agent
-open (OpenClaw, Hermes, Codex, Cursor, whatever). You want that other agent to be
-able to browse the web using YOUR browser. This skill makes that happen.
+You are a **Staff Engineer reading a colleague's meticulous session notes** to
+pick up exactly where they left off. Your job is to load the most recent saved
+context and present it clearly so the user can resume work without losing a beat.
 
-## How it works
+**HARD GATE:** Do NOT implement code changes. This skill only reads saved
+context files and presents the summary.
 
-Your gstack browser runs a local HTTP server. This skill creates a one-time setup key,
-prints a block of instructions, and you paste those instructions into the other agent.
-The other agent exchanges the key for a session token, creates its own tab, and starts
-browsing. Each agent gets its own tab. They can't mess with each other's tabs.
+**Default: load the most recent saved context across ALL branches.** This is
+intentionally different from `/context-save list`, which defaults to the current
+branch. `/context-restore` is for Conductor workspace handoff — a context saved
+on one branch can be resumed from another.
 
-The setup key expires in 5 minutes and can only be used once. If it leaks, it's dead
-before anyone can abuse it. The session token lasts 24 hours.
+**Do NOT filter the candidate set by current branch.** The `list` flow does
+that; `/context-restore` does not.
 
-**Same machine:** If the other agent is on the same machine (like OpenClaw running
-locally), you can skip the copy-paste ceremony and write the credentials directly to
-the agent's config directory.
+---
 
-**Remote:** If the other agent is on a different machine, you need an ngrok tunnel.
-The skill will tell you if one is needed and how to set it up.
+## Detect command
 
-## SETUP (run this check BEFORE any browse command)
+Parse the user's input:
+
+- `/context-restore` → load the most recent saved context (any branch)
+- `/context-restore <title-fragment-or-number>` → load a specific saved context
+- `/context-restore list` → tell the user "Use `/context-save list` — listing
+  lives on the save side" and exit. No mode detection here.
+
+---
+
+## Restore flow
+
+### Step 1: Find saved contexts
 
 ```bash
-_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-B=""
-[ -n "$_ROOT" ] && [ -x "$_ROOT/.claude/skills/gstack/browse/dist/browse" ] && B="$_ROOT/.claude/skills/gstack/browse/dist/browse"
-[ -z "$B" ] && B="$HOME/.claude/skills/gstack/browse/dist/browse"
-if [ -x "$B" ]; then
-  echo "READY: $B"
+eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)" && mkdir -p ~/.gstack/projects/$SLUG
+CHECKPOINT_DIR="${GSTACK_HOME:-$HOME/.gstack}/projects/$SLUG/checkpoints"
+if [ ! -d "$CHECKPOINT_DIR" ]; then
+  echo "NO_CHECKPOINTS"
 else
-  echo "NEEDS_SETUP"
+  # Use find + sort instead of ls -1t. Two reasons:
+  # 1. Canonical order is the filename YYYYMMDD-HHMMSS prefix (stable across
+  #    copies/rsync). Filesystem mtime drifts and is not authoritative.
+  # 2. On macOS, `find ... | xargs ls -1t` with zero results falls back to
+  #    listing cwd. `sort -r` on empty input cleanly returns nothing.
+  # Cap at 20 most recent: a user with 10k saved files shouldn't blow the
+  # context window just listing them. /context-save list handles pagination.
+  FILES=$(find "$CHECKPOINT_DIR" -maxdepth 1 -name "*.md" -type f 2>/dev/null | sort -r | head -20)
+  if [ -z "$FILES" ]; then
+    echo "NO_CHECKPOINTS"
+  else
+    echo "$FILES"
+  fi
 fi
 ```
 
-If `NEEDS_SETUP`:
-1. Tell the user: "gstack browse needs a one-time build (~10 seconds). OK to proceed?" Then STOP and wait.
-2. Run: `cd <SKILL_DIR> && ./setup`
-3. If `bun` is not installed:
-   ```bash
-   if ! command -v bun >/dev/null 2>&1; then
-     BUN_VERSION="1.3.10"
-     BUN_INSTALL_SHA="bab8acfb046aac8c72407bdcce903957665d655d7acaa3e11c7c4616beae68dd"
-     tmpfile=$(mktemp)
-     curl -fsSL "https://bun.sh/install" -o "$tmpfile"
-     actual_sha=$(shasum -a 256 "$tmpfile" | awk '{print $1}')
-     if [ "$actual_sha" != "$BUN_INSTALL_SHA" ]; then
-       echo "ERROR: bun install script checksum mismatch" >&2
-       echo "  expected: $BUN_INSTALL_SHA" >&2
-       echo "  got:      $actual_sha" >&2
-       rm "$tmpfile"; exit 1
-     fi
-     BUN_VERSION="$BUN_VERSION" bash "$tmpfile"
-     rm "$tmpfile"
-   fi
-   ```
+**Candidates include every `.md` file in the directory, regardless of branch**
+(the branch is recorded in frontmatter, not used for filtering here). This
+enables Conductor workspace handoff.
 
-## Step 1: Check prerequisites
+### Step 2: Load the right file
 
-```bash
-$B status 2>/dev/null
+- If the user specified a title fragment or number: find the matching file among
+  the candidates.
+- Otherwise: load the **first file returned by the `sort -r` above** — that is
+  the newest `YYYYMMDD-HHMMSS` prefix, which is the canonical "most recent."
+
+Read the chosen file and present a summary:
+
+```
+RESUMING CONTEXT
+════════════════════════════════════════
+Title:       {title}
+Branch:      {branch from frontmatter}
+Saved:       {timestamp, human-readable}
+Duration:    Last session was {formatted duration} (if available)
+Status:      {status}
+════════════════════════════════════════
+
+### Summary
+{summary from saved file}
+
+### Remaining Work
+{remaining work items}
+
+### Notes
+{notes}
 ```
 
-If the browse server is not running, start it:
+If the current branch differs from the saved context's branch, note this:
+"This context was saved on branch `{branch}`. You are currently on
+`{current branch}`. You may want to switch branches before continuing."
 
-```bash
-$B goto about:blank
-```
+### Step 3: Offer next steps
 
-This ensures the server is up and healthy before pairing.
+After presenting, ask via AskUserQuestion:
 
-## Step 2: Ask what they want
+- A) Continue working on the remaining items
+- B) Show the full saved file
+- C) Just needed the context, thanks
 
-Use AskUserQuestion:
+If A, summarize the first remaining work item and suggest starting there.
 
-> Which agent do you want to pair with your browser? This determines the
-> instructions format and where credentials get written.
+---
 
-Options:
-- A) OpenClaw (local or remote)
-- B) Codex / OpenAI Agents (local)
-- C) Cursor (local)
-- D) Another Claude Code session (local or remote)
-- E) Something else (generic HTTP instructions — use this for Hermes)
+## If no saved contexts exist
 
-Based on the answer, set `TARGET_HOST`:
-- A → `openclaw`
-- B → `codex`
-- C → `cursor`
-- D → `claude`
-- E → generic (no host-specific config)
+If Step 1 printed `NO_CHECKPOINTS`, tell the user:
 
-## Step 3: Local or remote?
+"No saved contexts yet. Run `/context-save` first to save your current working
+state, then `/context-restore` will find it."
 
-Use AskUserQuestion:
+---
 
-> Is the other agent running on this same machine, or on a different machine/server?
->
-> **Same machine** skips the copy-paste ceremony. Credentials are written directly to
-> the agent's config directory. No tunnel needed.
->
-> **Different machine** generates a setup key and instruction block. If ngrok is
-> installed, the tunnel starts automatically. If not, I'll walk you through setup.
->
-> RECOMMENDATION: Choose A if the agent is local. It's instant, no copy-paste needed.
+## Important Rules
 
-Options:
-- A) Same machine (write credentials directly)
-- B) Different machine (generate instruction block for copy-paste)
-
-## Step 4: Execute pairing
-
-### If same machine (option A):
-
-Run pair-agent with --local flag:
-
-```bash
-$B pair-agent --local TARGET_HOST
-```
-
-Replace `TARGET_HOST` with the value from Step 2 (openclaw, codex, cursor, etc.).
-
-If it succeeds, tell the user:
-"Done. TARGET_HOST can now use your browser. It will read credentials from the
-config file that was written. Try asking it to navigate to a URL."
-
-If it fails (host not found, write permission error), show the error and suggest
-using the generic remote flow instead.
-
-### If different machine (option B):
-
-First, detect ngrok status:
-
-```bash
-which ngrok 2>/dev/null && echo "NGROK_INSTALLED" || echo "NGROK_NOT_INSTALLED"
-ngrok config check 2>/dev/null && echo "NGROK_AUTHED" || echo "NGROK_NOT_AUTHED"
-```
-
-**If ngrok is installed and authed:** Just run the command. The CLI will auto-detect
-ngrok, start the tunnel, and print the instruction block with the tunnel URL:
-
-```bash
-$B pair-agent --client TARGET_HOST
-```
-
-If the user also needs admin access (JS execution, cookies, storage):
-
-```bash
-$B pair-agent --admin --client TARGET_HOST
-```
-
-**CRITICAL: You MUST output the full instruction block to the user.** The command
-prints everything between ═══ lines. Copy the ENTIRE block verbatim into your
-response so the user can copy-paste it into their other agent. Do NOT summarize it,
-do NOT skip it, do NOT just say "here's the output." The user needs to SEE the block
-to copy it. Output it inside a markdown code block so it's easy to select and copy.
-
-Then tell the user:
-"Copy the block above and paste it into your other agent's chat. The setup key
-expires in 5 minutes."
-
-**If ngrok is installed but NOT authed:** Walk the user through authentication:
-
-Tell the user:
-"ngrok is installed but not logged in. Let's fix that:
-
-1. Go to https://dashboard.ngrok.com/get-started/your-authtoken
-2. Copy your auth token
-3. Come back here and I'll run the auth command for you."
-
-STOP here and wait for the user to provide their auth token.
-
-When they provide it, run:
-```bash
-ngrok config add-authtoken THEIR_TOKEN
-```
-
-Then retry `$B pair-agent --client TARGET_HOST`.
-
-**If ngrok is NOT installed:** Walk the user through installation:
-
-Tell the user:
-"To connect a remote agent, we need ngrok (a tunnel that exposes your local
-browser to the internet securely).
-
-1. Go to https://ngrok.com and sign up (free tier works)
-2. Install ngrok:
-   - macOS: `brew install ngrok`
-   - Linux: `snap install ngrok` or download from ngrok.com/download
-3. Auth it: `ngrok config add-authtoken YOUR_TOKEN`
-   (get your token from https://dashboard.ngrok.com/get-started/your-authtoken)
-4. Come back here and run `/pair-agent` again."
-
-STOP here. Wait for the user to install ngrok and re-invoke.
-
-## Step 5: Verify connection
-
-After the user pastes the instructions into the other agent, wait a moment then check:
-
-```bash
-$B status
-```
-
-Look for the connected agent in the status output. If it appears, tell the user:
-"The remote agent is connected and has its own tab. You'll see its activity in the
-side panel if you have GStack Browser open."
-
-## What the remote agent can do
-
-With default (read+write) access:
-- Navigate to URLs, click elements, fill forms, take screenshots
-- Read page content (text, HTML, snapshot)
-- Create new tabs (each agent gets its own)
-- Cannot execute arbitrary JavaScript, read cookies, or access storage
-
-With admin access (--admin flag):
-- Everything above, plus JS execution, cookie access, storage access
-- Use sparingly. Only for agents you fully trust.
-
-## Troubleshooting
-
-**"Tab not owned by your agent"** — The remote agent tried to interact with a tab
-it didn't create. Tell it to run `newtab` first to get its own tab.
-
-**"Domain not allowed"** — The token has domain restrictions. Re-pair with broader
-domain access or no domain restrictions.
-
-**"Rate limit exceeded"** — The agent is sending > 10 requests/second. It should
-wait for the Retry-After header and slow down.
-
-**"Token expired"** — The 24-hour session expired. Run `/pair-agent` again to
-generate a new setup key.
-
-**Agent can't reach the server** — If remote, check the ngrok tunnel is running
-(`$B status`). If local, check the browse server is running.
-
-## Platform-specific notes
-
-### OpenClaw / AlphaClaw
-
-OpenClaw agents use the `exec` tool instead of `Bash`. The instruction block uses
-`exec curl` syntax which OpenClaw understands natively. When using `--local openclaw`,
-credentials are written to `~/.openclaw/skills/gstack/browse-remote.json`.
-
-
-### Codex
-
-Codex agents can execute shell commands via `codex exec`. The instruction block's
-curl commands work directly. When using `--local codex`, credentials are written
-to `~/.codex/skills/gstack/browse-remote.json`.
-
-### Cursor
-
-Cursor's AI can run terminal commands. The instruction block works as-is.
-When using `--local cursor`, credentials are written to
-`~/.cursor/skills/gstack/browse-remote.json`.
-
-## Revoking access
-
-To disconnect a specific agent:
-
-```bash
-$B tunnel revoke AGENT_NAME
-```
-
-To disconnect all agents and rotate the root token:
-
-```bash
-# This invalidates ALL scoped tokens immediately
-$B tunnel rotate
-```
+- **Never modify code.** This skill only reads saved files and presents them.
+- **Always search across all branches by default.** Cross-branch resume is the
+  whole point. Only filter by branch if the user explicitly asks via a
+  title-fragment match that happens to be branch-specific.
+- **"Most recent" means the filename `YYYYMMDD-HHMMSS` prefix**, not
+  `ls -1t` (filesystem mtime). Filenames are stable across file-system
+  operations; mtime is not.
+- **This is a gstack skill, not a Claude Code built-in.** When the user types
+  `/context-restore`, invoke this skill via the Skill tool.

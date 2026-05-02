@@ -1,25 +1,30 @@
 ---
-name: benchmark
+name: make-pdf
 preamble-tier: 1
 version: 1.0.0
 description: |
-  Performance regression detection using the browse daemon. Establishes
-  baselines for page load times, Core Web Vitals, and resource sizes.
-  Compares before/after on every PR. Tracks performance trends over time.
-  Use when: "performance", "benchmark", "page speed", "lighthouse", "web vitals",
-  "bundle size", "load time". (gstack)
+  Turn any markdown file into a publication-quality PDF. Proper 1in margins,
+  intelligent page breaks, page numbers, cover pages, running headers, curly
+  quotes and em dashes, clickable TOC, diagonal DRAFT watermark. Not a draft
+  artifact — a finished artifact. Use when asked to "make a PDF", "export to
+  PDF", "turn this markdown into a PDF", or "generate a document". (gstack)
 voice-triggers:
-  - "speed test"
-  - "check performance"
+  - "make this a pdf"
+  - "make it a pdf"
+  - "export to pdf"
+  - "turn this into a pdf"
+  - "turn this markdown into a pdf"
+  - "generate a pdf"
+  - "make a pdf from"
+  - "pdf this markdown"
 triggers:
-  - performance benchmark
-  - check page speed
-  - detect performance regression
+  - markdown to pdf
+  - generate pdf
+  - make pdf
+  - export pdf
 allowed-tools:
   - Bash
   - Read
-  - Write
-  - Glob
   - AskUserQuestion
 ---
 <!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly -->
@@ -60,7 +65,7 @@ _QUESTION_TUNING=$(~/.claude/skills/gstack/bin/gstack-config get question_tuning
 echo "QUESTION_TUNING: $_QUESTION_TUNING"
 mkdir -p ~/.gstack/analytics
 if [ "$_TEL" != "off" ]; then
-echo '{"skill":"benchmark","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
+echo '{"skill":"make-pdf","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
 fi
 for _PF in $(find ~/.gstack/analytics -maxdepth 1 -name '.pending-*' 2>/dev/null); do
   if [ -f "$_PF" ]; then
@@ -82,7 +87,7 @@ if [ -f "$_LEARN_FILE" ]; then
 else
   echo "LEARNINGS: 0"
 fi
-~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"benchmark","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
+~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"make-pdf","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
 _HAS_ROUTING="no"
 if [ -f CLAUDE.md ] && grep -q "## Skill routing" CLAUDE.md 2>/dev/null; then
   _HAS_ROUTING="yes"
@@ -429,251 +434,168 @@ In plan mode before ExitPlanMode: if the plan file lacks `## GSTACK REVIEW REPOR
 
 PLAN MODE EXCEPTION — always allowed (it's the plan file).
 
-## SETUP (run this check BEFORE any browse command)
+# make-pdf: publication-quality PDFs from markdown
+
+Turn `.md` files into PDFs that look like Faber & Faber essays: 1in margins,
+left-aligned body, Helvetica throughout, curly quotes and em dashes, optional
+cover page and clickable TOC, diagonal DRAFT watermark when you need it.
+Copy-paste from the PDF produces clean words, never "S a i l i n g".
+
+On Linux, install `fonts-liberation` for correct rendering — Helvetica and Arial
+aren't present by default, and Liberation Sans is the standard metric-compatible
+fallback. CI and Docker builds install it automatically via Dockerfile.ci.
+
+## MAKE-PDF SETUP (run this check BEFORE any make-pdf command)
 
 ```bash
 _ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-B=""
-[ -n "$_ROOT" ] && [ -x "$_ROOT/.claude/skills/gstack/browse/dist/browse" ] && B="$_ROOT/.claude/skills/gstack/browse/dist/browse"
-[ -z "$B" ] && B="$HOME/.claude/skills/gstack/browse/dist/browse"
-if [ -x "$B" ]; then
-  echo "READY: $B"
+P=""
+[ -n "$MAKE_PDF_BIN" ] && [ -x "$MAKE_PDF_BIN" ] && P="$MAKE_PDF_BIN"
+[ -z "$P" ] && [ -n "$_ROOT" ] && [ -x "$_ROOT/.claude/skills/gstack/make-pdf/dist/pdf" ] && P="$_ROOT/.claude/skills/gstack/make-pdf/dist/pdf"
+[ -z "$P" ] && P="$HOME/.claude/skills/gstack/make-pdf/dist/pdf"
+if [ -x "$P" ]; then
+  echo "MAKE_PDF_READY: $P"
+  alias _p_="$P"   # shellcheck alias helper (not exported)
+  export P   # available as $P in subsequent blocks within the same skill invocation
 else
-  echo "NEEDS_SETUP"
+  echo "MAKE_PDF_NOT_AVAILABLE (run './setup' in the gstack repo to build it)"
 fi
 ```
 
-If `NEEDS_SETUP`:
-1. Tell the user: "gstack browse needs a one-time build (~10 seconds). OK to proceed?" Then STOP and wait.
-2. Run: `cd <SKILL_DIR> && ./setup`
-3. If `bun` is not installed:
-   ```bash
-   if ! command -v bun >/dev/null 2>&1; then
-     BUN_VERSION="1.3.10"
-     BUN_INSTALL_SHA="bab8acfb046aac8c72407bdcce903957665d655d7acaa3e11c7c4616beae68dd"
-     tmpfile=$(mktemp)
-     curl -fsSL "https://bun.sh/install" -o "$tmpfile"
-     actual_sha=$(shasum -a 256 "$tmpfile" | awk '{print $1}')
-     if [ "$actual_sha" != "$BUN_INSTALL_SHA" ]; then
-       echo "ERROR: bun install script checksum mismatch" >&2
-       echo "  expected: $BUN_INSTALL_SHA" >&2
-       echo "  got:      $actual_sha" >&2
-       rm "$tmpfile"; exit 1
-     fi
-     BUN_VERSION="$BUN_VERSION" bash "$tmpfile"
-     rm "$tmpfile"
-   fi
-   ```
+If `MAKE_PDF_NOT_AVAILABLE` is printed: tell the user the binary is not
+built. Have them run `./setup` from the gstack repo, then retry.
 
-# /benchmark — Performance Regression Detection
+If `MAKE_PDF_READY` is printed: `$P` is the binary path for the rest of
+the skill. Use `$P` (not an explicit path) so the skill body stays portable.
 
-You are a **Performance Engineer** who has optimized apps serving millions of requests. You know that performance doesn't degrade in one big regression — it dies by a thousand paper cuts. Each PR adds 50ms here, 20KB there, and one day the app takes 8 seconds to load and nobody knows when it got slow.
+Core commands:
+- `$P generate <input.md> [output.pdf]` — render markdown to PDF (80% use case)
+- `$P generate --cover --toc essay.md out.pdf` — full publication layout
+- `$P generate --watermark DRAFT memo.md draft.pdf` — diagonal DRAFT watermark
+- `$P preview <input.md>` — render HTML and open in browser (fast iteration)
+- `$P setup` — verify browse + Chromium + pdftotext and run a smoke test
+- `$P --help` — full flag reference
 
-Your job is to measure, baseline, compare, and alert. You use the browse daemon's `perf` command and JavaScript evaluation to gather real performance data from running pages.
+Output contract:
+- `stdout`: ONLY the output path on success. One line.
+- `stderr`: progress (`Rendering HTML... Generating PDF...`) unless `--quiet`.
+- Exit 0 success / 1 bad args / 2 render error / 3 Paged.js timeout / 4 browse unavailable.
 
-## User-invocable
-When the user types `/benchmark`, run this skill.
+## Core patterns
 
-## Arguments
-- `/benchmark <url>` — full performance audit with baseline comparison
-- `/benchmark <url> --baseline` — capture baseline (run before making changes)
-- `/benchmark <url> --quick` — single-pass timing check (no baseline needed)
-- `/benchmark <url> --pages /,/dashboard,/api/health` — specify pages
-- `/benchmark --diff` — benchmark only pages affected by current branch
-- `/benchmark --trend` — show performance trends from historical data
+### 80% case — memo/letter
 
-## Instructions
-
-### Phase 1: Setup
+One command, no flags. Gets a clean PDF with running header + page numbers
++ CONFIDENTIAL footer by default.
 
 ```bash
-eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null || echo "SLUG=unknown")"
-mkdir -p .gstack/benchmark-reports
-mkdir -p .gstack/benchmark-reports/baselines
+$P generate letter.md                 # writes /tmp/letter.pdf
+$P generate letter.md letter.pdf      # explicit output path
 ```
 
-### Phase 2: Page Discovery
-
-Same as /canary — auto-discover from navigation or use `--pages`.
-
-If `--diff` mode:
-```bash
-git diff $(gh pr view --json baseRefName -q .baseRefName 2>/dev/null || gh repo view --json defaultBranchRef -q .defaultBranchRef.name 2>/dev/null || echo main)...HEAD --name-only
-```
-
-### Phase 3: Performance Data Collection
-
-For each page, collect comprehensive performance metrics:
+### Publication mode — cover + TOC + chapter breaks
 
 ```bash
-$B goto <page-url>
-$B perf
+$P generate --cover --toc --author "Garry Tan" --title "On Horizons" \
+  essay.md essay.pdf
 ```
 
-Then gather detailed metrics via JavaScript:
+Each top-level H1 in the markdown starts a new page. Disable with
+`--no-chapter-breaks` for memos that happen to have multiple H1s.
+
+### Draft-stage watermark
 
 ```bash
-$B eval "JSON.stringify(performance.getEntriesByType('navigation')[0])"
+$P generate --watermark DRAFT memo.md draft.pdf
 ```
 
-Extract key metrics:
-- **TTFB** (Time to First Byte): `responseStart - requestStart`
-- **FCP** (First Contentful Paint): from PerformanceObserver or `paint` entries
-- **LCP** (Largest Contentful Paint): from PerformanceObserver
-- **DOM Interactive**: `domInteractive - navigationStart`
-- **DOM Complete**: `domComplete - navigationStart`
-- **Full Load**: `loadEventEnd - navigationStart`
+Diagonal 10% opacity DRAFT across every page. When the draft is final, drop
+the flag and regenerate.
 
-Resource analysis:
+### Fast iteration via preview
+
 ```bash
-$B eval "JSON.stringify(performance.getEntriesByType('resource').map(r => ({name: r.name.split('/').pop().split('?')[0], type: r.initiatorType, size: r.transferSize, duration: Math.round(r.duration)})).sort((a,b) => b.duration - a.duration).slice(0,15))"
+$P preview essay.md
 ```
 
-Bundle size check:
+Renders HTML with the same print CSS and opens it in your browser. Refresh
+as you edit the markdown. Skip the PDF round trip until you're ready.
+
+### Brand-free (no CONFIDENTIAL footer)
+
 ```bash
-$B eval "JSON.stringify(performance.getEntriesByType('resource').filter(r => r.initiatorType === 'script').map(r => ({name: r.name.split('/').pop().split('?')[0], size: r.transferSize})))"
-$B eval "JSON.stringify(performance.getEntriesByType('resource').filter(r => r.initiatorType === 'css').map(r => ({name: r.name.split('/').pop().split('?')[0], size: r.transferSize})))"
+$P generate --no-confidential memo.md memo.pdf
 ```
 
-Network summary:
-```bash
-$B eval "(() => { const r = performance.getEntriesByType('resource'); return JSON.stringify({total_requests: r.length, total_transfer: r.reduce((s,e) => s + (e.transferSize||0), 0), by_type: Object.entries(r.reduce((a,e) => { a[e.initiatorType] = (a[e.initiatorType]||0) + 1; return a; }, {})).sort((a,b) => b[1]-a[1])})})()"
-```
-
-### Phase 4: Baseline Capture (--baseline mode)
-
-Save metrics to baseline file:
-
-```json
-{
-  "url": "<url>",
-  "timestamp": "<ISO>",
-  "branch": "<branch>",
-  "pages": {
-    "/": {
-      "ttfb_ms": 120,
-      "fcp_ms": 450,
-      "lcp_ms": 800,
-      "dom_interactive_ms": 600,
-      "dom_complete_ms": 1200,
-      "full_load_ms": 1400,
-      "total_requests": 42,
-      "total_transfer_bytes": 1250000,
-      "js_bundle_bytes": 450000,
-      "css_bundle_bytes": 85000,
-      "largest_resources": [
-        {"name": "main.js", "size": 320000, "duration": 180},
-        {"name": "vendor.js", "size": 130000, "duration": 90}
-      ]
-    }
-  }
-}
-```
-
-Write to `.gstack/benchmark-reports/baselines/baseline.json`.
-
-### Phase 5: Comparison
-
-If baseline exists, compare current metrics against it:
+## Common flags
 
 ```
-PERFORMANCE REPORT — [url]
-══════════════════════════
-Branch: [current-branch] vs baseline ([baseline-branch])
+Page layout:
+  --margins <dim>            1in (default) | 72pt | 2.54cm | 25mm
+  --page-size letter|a4|legal
 
-Page: /
-─────────────────────────────────────────────────────
-Metric              Baseline    Current     Delta    Status
-────────            ────────    ───────     ─────    ──────
-TTFB                120ms       135ms       +15ms    OK
-FCP                 450ms       480ms       +30ms    OK
-LCP                 800ms       1600ms      +800ms   REGRESSION
-DOM Interactive     600ms       650ms       +50ms    OK
-DOM Complete        1200ms      1350ms      +150ms   WARNING
-Full Load           1400ms      2100ms      +700ms   REGRESSION
-Total Requests      42          58          +16      WARNING
-Transfer Size       1.2MB       1.8MB       +0.6MB   REGRESSION
-JS Bundle           450KB       720KB       +270KB   REGRESSION
-CSS Bundle          85KB        88KB        +3KB     OK
+Structure:
+  --cover                    Cover page (title, author, date, hairline rule)
+  --toc                      Clickable TOC with page numbers
+  --no-chapter-breaks        Don't start a new page at every H1
 
-REGRESSIONS DETECTED: 3
-  [1] LCP doubled (800ms → 1600ms) — likely a large new image or blocking resource
-  [2] Total transfer +50% (1.2MB → 1.8MB) — check new JS bundles
-  [3] JS bundle +60% (450KB → 720KB) — new dependency or missing tree-shaking
+Branding:
+  --watermark <text>         Diagonal watermark ("DRAFT", "CONFIDENTIAL")
+  --header-template <html>   Custom running header
+  --footer-template <html>   Custom footer (mutex with --page-numbers)
+  --no-confidential          Suppress the CONFIDENTIAL right-footer
+
+Output:
+  --page-numbers             "N of M" footer (default on)
+  --tagged                   Accessible PDF (default on)
+  --outline                  PDF bookmarks from headings (default on)
+  --quiet                    Suppress progress on stderr
+  --verbose                  Per-stage timings
+
+Network:
+  --allow-network            Fetch external images. Off by default
+                             (blocks tracking pixels).
+
+Metadata:
+  --title "..."              Document title (defaults to first H1)
+  --author "..."             Author for cover + PDF metadata
+  --date "..."               Date for cover (defaults to today)
 ```
 
-**Regression thresholds:**
-- Timing metrics: >50% increase OR >500ms absolute increase = REGRESSION
-- Timing metrics: >20% increase = WARNING
-- Bundle size: >25% increase = REGRESSION
-- Bundle size: >10% increase = WARNING
-- Request count: >30% increase = WARNING
+## When Claude should run it
 
-### Phase 6: Slowest Resources
+Watch for markdown-to-PDF intent. Any of these patterns → run `$P generate`:
 
-```
-TOP 10 SLOWEST RESOURCES
-═════════════════════════
-#   Resource                  Type      Size      Duration
-1   vendor.chunk.js          script    320KB     480ms
-2   main.js                  script    250KB     320ms
-3   hero-image.webp          img       180KB     280ms
-4   analytics.js             script    45KB      250ms    ← third-party
-5   fonts/inter-var.woff2    font      95KB      180ms
-...
+- "Can you make this markdown a PDF"
+- "Export it as a PDF"
+- "Turn this letter into a PDF"
+- "I need a PDF of the essay"
+- "Print this as a PDF for me"
 
-RECOMMENDATIONS:
-- vendor.chunk.js: Consider code-splitting — 320KB is large for initial load
-- analytics.js: Load async/defer — blocks rendering for 250ms
-- hero-image.webp: Add width/height to prevent CLS, consider lazy loading
-```
+If the user has a `.md` file open and says "make it look nice", propose
+`$P generate --cover --toc` and ask before running.
 
-### Phase 7: Performance Budget
+## Debugging
 
-Check against industry budgets:
+- Output looks empty / blank → check browse daemon is running: `$B status`.
+- Fragmented text on copy-paste → highlight.js output (Phase 4). Retry with
+  `--no-syntax` once that flag exists. For now, remove fenced code blocks
+  and regenerate.
+- Paged.js timeout → probably no headings in the markdown. Drop `--toc`.
+- External image missing → add `--allow-network` (understand you're giving
+  the markdown file permission to fetch from its image URLs).
+- Generated PDF too tall/wide → `--page-size a4` or `--margins 0.75in`.
+
+## Output contract
 
 ```
-PERFORMANCE BUDGET CHECK
-════════════════════════
-Metric              Budget      Actual      Status
-────────            ──────      ──────      ──────
-FCP                 < 1.8s      0.48s       PASS
-LCP                 < 2.5s      1.6s        PASS
-Total JS            < 500KB     720KB       FAIL
-Total CSS           < 100KB     88KB        PASS
-Total Transfer      < 2MB       1.8MB       WARNING (90%)
-HTTP Requests       < 50        58          FAIL
+stdout: /tmp/letter.pdf          ← just the path, one line
+stderr: Rendering HTML...        ← progress spinner (unless --quiet)
+        Generating PDF...
+        Done in 1.5s. 43 words · 22KB · /tmp/letter.pdf
 
-Grade: B (4/6 passing)
+exit code: 0 success / 1 bad args / 2 render error / 3 Paged.js timeout
+           / 4 browse unavailable
 ```
 
-### Phase 8: Trend Analysis (--trend mode)
-
-Load historical baseline files and show trends:
-
-```
-PERFORMANCE TRENDS (last 5 benchmarks)
-══════════════════════════════════════
-Date        FCP     LCP     Bundle    Requests    Grade
-2026-03-10  420ms   750ms   380KB     38          A
-2026-03-12  440ms   780ms   410KB     40          A
-2026-03-14  450ms   800ms   450KB     42          A
-2026-03-16  460ms   850ms   520KB     48          B
-2026-03-18  480ms   1600ms  720KB     58          B
-
-TREND: Performance degrading. LCP doubled in 8 days.
-       JS bundle growing 50KB/week. Investigate.
-```
-
-### Phase 9: Save Report
-
-Write to `.gstack/benchmark-reports/{date}-benchmark.md` and `.gstack/benchmark-reports/{date}-benchmark.json`.
-
-## Important Rules
-
-- **Measure, don't guess.** Use actual performance.getEntries() data, not estimates.
-- **Baseline is essential.** Without a baseline, you can report absolute numbers but can't detect regressions. Always encourage baseline capture.
-- **Relative thresholds, not absolute.** 2000ms load time is fine for a complex dashboard, terrible for a landing page. Compare against YOUR baseline.
-- **Third-party scripts are context.** Flag them, but the user can't fix Google Analytics being slow. Focus recommendations on first-party resources.
-- **Bundle size is the leading indicator.** Load time varies with network. Bundle size is deterministic. Track it religiously.
-- **Read-only.** Produce the report. Don't modify code unless explicitly asked.
+Capture the path: `PDF=$($P generate letter.md)` — then use `$PDF`.

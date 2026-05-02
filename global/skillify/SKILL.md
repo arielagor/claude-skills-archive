@@ -1,27 +1,24 @@
 ---
-name: pair-agent
-version: 0.1.0
+name: skillify
+version: 1.0.0
 description: |
-  Pair a remote AI agent with your browser. One command generates a setup key and
-  prints instructions the other agent can follow to connect. Works with OpenClaw,
-  Hermes, Codex, Cursor, or any agent that can make HTTP requests. The remote agent
-  gets its own tab with scoped access (read+write by default, admin on request).
-  Use when asked to "pair agent", "connect agent", "share browser", "remote browser",
-  "let another agent use my browser", or "give browser access". (gstack)
-voice-triggers:
-  - "pair agent"
-  - "connect agent"
-  - "share my browser"
-  - "remote browser access"
-triggers:
-  - pair with agent
-  - connect remote agent
-  - share my browser
+  Codify the most recent successful /scrape flow into a permanent
+  browser-skill on disk. Future /scrape calls with the same intent run
+  the codified script in ~200ms instead of re-driving the page. Walks
+  back through the conversation, synthesizes script.ts + script.test.ts
+  + fixture, runs the test in a temp dir, and asks before committing.
+  Use when asked to "skillify", "codify", "save this scrape", or
+  "make this permanent". (gstack)
 allowed-tools:
   - Bash
   - Read
+  - Write
   - AskUserQuestion
-
+triggers:
+  - skillify
+  - codify this scrape
+  - save this scrape
+  - make this permanent
 ---
 <!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly -->
 <!-- Regenerate: bun run gen:skill-docs -->
@@ -61,7 +58,7 @@ _QUESTION_TUNING=$(~/.claude/skills/gstack/bin/gstack-config get question_tuning
 echo "QUESTION_TUNING: $_QUESTION_TUNING"
 mkdir -p ~/.gstack/analytics
 if [ "$_TEL" != "off" ]; then
-echo '{"skill":"pair-agent","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
+echo '{"skill":"skillify","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
 fi
 for _PF in $(find ~/.gstack/analytics -maxdepth 1 -name '.pending-*' 2>/dev/null); do
   if [ -f "$_PF" ]; then
@@ -83,7 +80,7 @@ if [ -f "$_LEARN_FILE" ]; then
 else
   echo "LEARNINGS: 0"
 fi
-~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"pair-agent","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
+~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"skillify","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
 _HAS_ROUTING="no"
 if [ -f CLAUDE.md ] && grep -q "## Skill routing" CLAUDE.md 2>/dev/null; then
   _HAS_ROUTING="yes"
@@ -596,7 +593,7 @@ Before each AskUserQuestion, choose `question_id` from `scripts/question-registr
 
 After answer, log best-effort:
 ```bash
-~/.claude/skills/gstack/bin/gstack-question-log '{"skill":"pair-agent","question_id":"<id>","question_summary":"<short>","category":"<approval|clarification|routing|cherry-pick|feedback-loop>","door_type":"<one-way|two-way>","options_count":N,"user_choice":"<key>","recommended":"<key>","session_id":"'"$_SESSION_ID"'"}' 2>/dev/null || true
+~/.claude/skills/gstack/bin/gstack-question-log '{"skill":"skillify","question_id":"<id>","question_summary":"<short>","category":"<approval|clarification|routing|cherry-pick|feedback-loop>","door_type":"<one-way|two-way>","options_count":N,"user_choice":"<key>","recommended":"<key>","session_id":"'"$_SESSION_ID"'"}' 2>/dev/null || true
 ```
 
 For two-way questions, offer: "Tune this question? Reply `tune: never-ask`, `tune: always-ask`, or free-form."
@@ -683,276 +680,435 @@ In plan mode before ExitPlanMode: if the plan file lacks `## GSTACK REVIEW REPOR
 
 PLAN MODE EXCEPTION — always allowed (it's the plan file).
 
-# /pair-agent — Share Your Browser With Another AI Agent
+# /skillify — codify the last scrape into a permanent skill
 
-You're sitting in Claude Code with a browser running. You also have another AI agent
-open (OpenClaw, Hermes, Codex, Cursor, whatever). You want that other agent to be
-able to browse the web using YOUR browser. This skill makes that happen.
+The productivity multiplier. `/scrape` discovered how to pull the data;
+`/skillify` writes it as deterministic Playwright-via-`browse-client`
+code so the next `/scrape` call on the same intent runs in ~200ms.
 
-## How it works
+Without this command, `/scrape` is a slow wrapper around `$B`. With it,
+every successful scrape is a one-time cost.
 
-Your gstack browser runs a local HTTP server. This skill creates a one-time setup key,
-prints a block of instructions, and you paste those instructions into the other agent.
-The other agent exchanges the key for a session token, creates its own tab, and starts
-browsing. Each agent gets its own tab. They can't mess with each other's tabs.
+## Iron contract — never write a half-broken skill to disk
 
-The setup key expires in 5 minutes and can only be used once. If it leaks, it's dead
-before anyone can abuse it. The session token lasts 24 hours.
+Skills are user-trust artifacts. A broken skill in `$B skill list` makes
+agents reach for the wrong tool and erodes confidence. This skill writes
+to a temp dir, runs the auto-generated test there, and only renames into
+the final tier path on (a) test pass + (b) explicit user approval. On
+either failure, the temp dir is removed entirely. There is no "almost
+shipped" state.
 
-**Same machine:** If the other agent is on the same machine (like OpenClaw running
-locally), you can skip the copy-paste ceremony and write the credentials directly to
-the agent's config directory.
+---
 
-**Remote:** If the other agent is on a different machine, you need an ngrok tunnel.
-The skill will tell you if one is needed and how to set it up.
+## Step 1 — Provenance guard (D1)
 
-## SETUP (run this check BEFORE any browse command)
+Walk back through the conversation, **at most 10 agent turns**, looking
+for the most recent `/scrape` invocation that:
 
-```bash
-_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-B=""
-[ -n "$_ROOT" ] && [ -x "$_ROOT/.claude/skills/gstack/browse/dist/browse" ] && B="$_ROOT/.claude/skills/gstack/browse/dist/browse"
-[ -z "$B" ] && B="$HOME/.claude/skills/gstack/browse/dist/browse"
-if [ -x "$B" ]; then
-  echo "READY: $B"
-else
-  echo "NEEDS_SETUP"
-fi
+- Was bounded (you can identify the user's intent line and the trailing
+  JSON the prototype produced)
+- Produced a JSON result the user did not subsequently invalidate
+  (e.g., did not say "that's wrong", did not ask you to retry)
+
+If you cannot find one, refuse with exactly this message:
+
+> "No recent /scrape result found in this conversation. Run /scrape
+> <intent> first, then say /skillify."
+
+Stop. Do not synthesize from chat fragments. Do not synthesize from a
+match-path /scrape result (matched skills are already codified — there's
+nothing to skillify).
+
+If you find a candidate but the user is currently three turns past it
+discussing something unrelated, ask once before proceeding:
+
+> "The last successful /scrape was '<intent line>' a few turns back.
+> Skillify that one?"
+
+A "yes" lets you continue. Anything else: refuse with the message above.
+
+## Step 2 — Propose name + triggers
+
+From the prototype intent, extract:
+
+- A short skill name: lowercase letters/digits/dashes, ≤32 chars,
+  starts with a letter, no consecutive dashes. E.g.,
+  `lobsters-frontpage`, `gh-issue-list`, `pypi-package-stats`.
+- 3–5 trigger phrases the agent should match against in future `/scrape`
+  calls. Mix the canonical phrase ("scrape lobsters frontpage") with
+  paraphrases ("top posts on lobste.rs", "lobsters front page").
+- The host (just the hostname, e.g. `lobste.rs`).
+
+Then **AskUserQuestion** to confirm:
+
+```
+D<N> — Skill name + tier
+Project/branch/task: codifying /scrape "<intent>" as a browser-skill.
+ELI10: Pick a short name we'll use to find this skill next time you say
+something similar. Pick a tier — global means every project on this
+machine sees it, project means just this repo.
+Stakes if we pick wrong: bad name buries the skill in $B skill list;
+wrong tier means future projects can't find it (or can find it when you
+didn't want them to).
+Recommendation: A — <proposed-name> at global tier — most scrape skills
+generalize across projects.
+Note: options differ in kind, not coverage — no completeness score.
+A) Keep "<proposed-name>" at global tier — ~/.gstack/browser-skills/<proposed-name>/  (recommended)
+B) Keep "<proposed-name>" but at project tier — <project>/.gstack/browser-skills/<proposed-name>/
+C) Rename it (free-form — say the new name)
 ```
 
-If `NEEDS_SETUP`:
-1. Tell the user: "gstack browse needs a one-time build (~10 seconds). OK to proceed?" Then STOP and wait.
-2. Run: `cd <SKILL_DIR> && ./setup`
-3. If `bun` is not installed:
-   ```bash
-   if ! command -v bun >/dev/null 2>&1; then
-     BUN_VERSION="1.3.10"
-     BUN_INSTALL_SHA="bab8acfb046aac8c72407bdcce903957665d655d7acaa3e11c7c4616beae68dd"
-     tmpfile=$(mktemp)
-     curl -fsSL "https://bun.sh/install" -o "$tmpfile"
-     actual_sha=$(shasum -a 256 "$tmpfile" | awk '{print $1}')
-     if [ "$actual_sha" != "$BUN_INSTALL_SHA" ]; then
-       echo "ERROR: bun install script checksum mismatch" >&2
-       echo "  expected: $BUN_INSTALL_SHA" >&2
-       echo "  got:      $actual_sha" >&2
-       rm "$tmpfile"; exit 1
-     fi
-     BUN_VERSION="$BUN_VERSION" bash "$tmpfile"
-     rm "$tmpfile"
-   fi
+**Tier-shadowing check.** Before showing the question, run `$B skill list`
+and check for an existing skill at the same name. If found, add to the
+question:
+
+> "Note: a <tier> skill named '<name>' already exists. Picking the same
+> name at a higher tier (project > global > bundled) shadows it; picking
+> the same tier collides and will be refused at write time. Pick a
+> different name to coexist."
+
+## Step 3 — Synthesize `script.ts` (D2)
+
+**Use only the final-attempt `$B` calls** that produced the JSON the
+user accepted, plus the user's intent string. Drop:
+
+- Failed selector attempts (the four selectors you tried before the
+  working one)
+- Unrelated `$B` commands from earlier turns
+- All conversation prose, summaries, your own reasoning
+
+The script imports the SDK from `./_lib/browse-client` (a sibling copy,
+written in step 6) and exports a parser function so `script.test.ts` can
+exercise it against the bundled fixture without spinning up the daemon.
+
+Mirror the bundled reference at `browser-skills/hackernews-frontpage/script.ts`:
+
+```ts
+import { browse } from './_lib/browse-client';
+
+export interface Item { /* one row of the JSON output */ }
+export interface Output { items: Item[]; count: number; }
+
+const TARGET_URL = '<the URL the prototype used>';
+
+export function parseFromHtml(html: string): Item[] {
+  // Pure function: HTML in, parsed Item[] out. No $B calls.
+  // Future fixture-replay tests call this directly.
+}
+
+if (import.meta.main) { await main(); }
+
+async function main(): Promise<void> {
+  await browse.goto(TARGET_URL);
+  const html = await browse.html();
+  const items = parseFromHtml(html);
+  const output: Output = { items, count: items.length };
+  process.stdout.write(JSON.stringify(output) + '\n');
+}
+```
+
+The parser MUST be a pure function. If your prototype used multiple `$B`
+calls (e.g., goto + click "Next" + html), keep all of them in `main()`
+but extract the parsing into pure helpers. The fixture-replay tests in
+step 5 only exercise the pure parts.
+
+## Step 4 — Capture the fixture
+
+```bash
+$B goto "<TARGET_URL>"
+$B html > /tmp/skillify-fixture-$$.html
+```
+
+The fixture filename inside the staged dir is
+`fixtures/<host-with-dashes>-<YYYY-MM-DD>.html`, where the date is today.
+E.g. `fixtures/lobste-rs-2026-04-27.html`.
+
+Read the file you wrote, store its contents in a variable, and use it
+when staging in step 7.
+
+## Step 5 — Write `script.test.ts`
+
+Mirror `browser-skills/hackernews-frontpage/script.test.ts`. The test
+must include at least one ★★ assertion — parsed output has the expected
+shape AND non-empty key fields — not a smoke ★ assertion. Smoke tests
+that only check `parseFromHtml` doesn't throw are insufficient.
+
+```ts
+import { describe, it, expect } from 'bun:test';
+import * as fs from 'fs';
+import * as path from 'path';
+import { parseFromHtml } from './script';
+
+describe('<name> parser', () => {
+  const fixturePath = path.join(import.meta.dir, 'fixtures', '<host>-<date>.html');
+  const html = fs.readFileSync(fixturePath, 'utf-8');
+  const items = parseFromHtml(html);
+
+  it('returns at least one item from the bundled fixture', () => {
+    expect(items.length).toBeGreaterThan(0);
+  });
+
+  it('every item has the required shape', () => {
+    for (const item of items) {
+      expect(typeof item.<keyfield>).toBe('<keytype>');
+      // ... assert on every required field
+    }
+  });
+});
+```
+
+## Step 6 — Resolve the canonical SDK path + read it
+
+The canonical SDK lives at `<gstack-install>/browse/src/browse-client.ts`.
+The bundled-skill loader walks the install tree to find it; mirror that.
+
+Resolve the gstack install dir. Two reliable signals (in order):
+
+1. The bundled `hackernews-frontpage` skill — look at its tier path from
+   `$B skill list` (the `bundled` row). The skill dir is
+   `<gstack-install>/browser-skills/hackernews-frontpage/`, so the install
+   dir is two `dirname` calls above its `_lib/browse-client.ts`.
+2. The active gstack skills install at `~/.claude/skills/gstack/`. Read
+   the symlink target if it's a symlink, otherwise use the path directly.
+
+Example (run as Bun, not bash, to avoid shell-redirect parsing issues):
+
+```ts
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+
+function resolveSdkPath(): string {
+  const candidates = [
+    path.join(os.homedir(), '.claude', 'skills', 'gstack', 'browse', 'src', 'browse-client.ts'),
+    // Add other install-dir candidates if your environment differs.
+  ];
+  for (const c of candidates) {
+    try {
+      const real = fs.realpathSync(c);
+      if (fs.existsSync(real)) return real;
+    } catch {}
+  }
+  throw new Error('Could not resolve canonical browse-client.ts');
+}
+
+const sdkContents = fs.readFileSync(resolveSdkPath(), 'utf-8');
+```
+
+Read the SDK contents into a variable. The staging step writes it as
+`_lib/browse-client.ts` byte-identical to the canonical. Phase 1 decision
+#4 — each skill is fully self-contained, no version drift possible.
+
+## Step 7 — Stage the skill (D3 atomic write)
+
+Use the helper at `browse/src/browser-skill-write.ts`. Construct an inline
+TypeScript snippet (or shell out to a small Bun one-liner) that calls:
+
+```ts
+import { stageSkill } from '<gstack-install>/browse/src/browser-skill-write';
+
+const stagedDir = stageSkill({
+  name: '<name>',
+  files: new Map([
+    ['SKILL.md', skillMd],
+    ['script.ts', scriptTs],
+    ['script.test.ts', scriptTestTs],
+    ['_lib/browse-client.ts', sdkContents],
+    ['fixtures/<host>-<date>.html', fixtureHtml],
+  ]),
+});
+console.log(stagedDir);
+```
+
+The SKILL.md content for `<name>` follows the Phase 1 frontmatter
+contract:
+
+```yaml
+---
+name: <name>
+description: <one-line, what data this returns>
+host: <hostname>
+trusted: false       # agent-authored skills are untrusted by default
+source: agent
+version: 1.0.0
+args: []             # extend if your script accepts --arg key=value
+triggers:
+  - <phrase 1>
+  - <phrase 2>
+  - <phrase 3>
+---
+
+# <Name> scraper
+
+<2-3 sentences on what the script does, what URL it hits, and what
+shape of JSON it returns. NO conversation context. NO chat fragments.
+This is a durable on-disk artifact — keep it tight.>
+
+## Usage
+
+\`\`\`
+$ $B skill run <name>
+{ "items": [...], "count": N }
+\`\`\`
+```
+
+Capture `stagedDir` (the path returned by `stageSkill`). You'll pass it
+to `$B skill test` next, then to `commitSkill` or `discardStaged`.
+
+## Step 8 — Run `$B skill test` against the staged dir
+
+```bash
+$B skill test "<name>" --dir "<stagedDir>"
+```
+
+If `$B skill test` does not yet accept `--dir`, fall back to invoking the
+test runner directly against the staged path:
+
+```bash
+( cd "<stagedDir>" && bun test script.test.ts )
+```
+
+If the test fails:
+
+1. Read the test output. If the failure is a fixable parser bug,
+   rewrite `script.ts` and `script.test.ts` (still inside the staged
+   dir) and retry — at most twice. Show the diff to the user before
+   each retry.
+2. If still failing after two retries, OR the failure is an
+   environmental issue (SDK import, daemon connection):
+
+   ```ts
+   import { discardStaged } from '<gstack-install>/browse/src/browser-skill-write';
+   discardStaged('<stagedDir>');
    ```
 
-## Step 1: Check prerequisites
+   Report the failure to the user, show them the staged `script.ts` for
+   reference, and stop. No on-disk artifact.
 
-```bash
-$B status 2>/dev/null
+## Step 9 — Approval gate
+
+Tests passed. Now ask the user before committing:
+
+```
+D<N> — Commit skill "<name>" at <resolved-tier-path>?
+Project/branch/task: codified /scrape "<intent>" — tests pass against fixture.
+ELI10: The script ran clean against the snapshot we captured. Saying yes
+moves the staged folder into ~/.gstack/browser-skills/ where /scrape
+will find it next time. Saying no removes the staged folder and nothing
+lands on disk.
+Stakes if we pick wrong: yes commits an artifact you have to manually rm
+later if you regret it ($B skill rm <name> --global). No throws away
+~30s of synthesis work.
+Recommendation: A — tests passed, the script is self-contained, this is
+the productivity payoff for the prototype.
+Note: options differ in kind, not coverage — no completeness score.
+A) Commit it (recommended)
+B) Look at the script first (I'll print SKILL.md + script.ts and re-ask)
+C) Discard — don't commit
 ```
 
-If the browse server is not running, start it:
+If the user picks B, print the staged `SKILL.md` and `script.ts` (NOT
+the fixture or _lib/), then re-ask the same A/B/C question (without B
+this time — they already saw it).
 
-```bash
-$B goto about:blank
+## Step 10 — Commit (atomic) or discard
+
+If the user approved:
+
+```ts
+import { commitSkill } from '<gstack-install>/browse/src/browser-skill-write';
+const dest = commitSkill({
+  name: '<name>',
+  tier: '<global|project>',  // from step 2 answer
+  stagedDir: '<stagedDir>',
+});
+console.log(`Committed: ${dest}`);
 ```
 
-This ensures the server is up and healthy before pairing.
+If `commitSkill` throws "already exists" (tier-shadowing collision the
+user dismissed in step 2), report and ask whether to:
 
-## Step 2: Ask what they want
+- Pick a different name (back to step 2)
+- `$B skill rm <name>` then retry
+- Discard
 
-Use AskUserQuestion:
+If the user rejected in step 9:
 
-> Which agent do you want to pair with your browser? This determines the
-> instructions format and where credentials get written.
-
-Options:
-- A) OpenClaw (local or remote)
-- B) Codex / OpenAI Agents (local)
-- C) Cursor (local)
-- D) Another Claude Code session (local or remote)
-- E) Something else (generic HTTP instructions — use this for Hermes)
-
-Based on the answer, set `TARGET_HOST`:
-- A → `openclaw`
-- B → `codex`
-- C → `cursor`
-- D → `claude`
-- E → generic (no host-specific config)
-
-## Step 3: Local or remote?
-
-Use AskUserQuestion:
-
-> Is the other agent running on this same machine, or on a different machine/server?
->
-> **Same machine** skips the copy-paste ceremony. Credentials are written directly to
-> the agent's config directory. No tunnel needed.
->
-> **Different machine** generates a setup key and instruction block. If ngrok is
-> installed, the tunnel starts automatically. If not, I'll walk you through setup.
->
-> RECOMMENDATION: Choose A if the agent is local. It's instant, no copy-paste needed.
-
-Options:
-- A) Same machine (write credentials directly)
-- B) Different machine (generate instruction block for copy-paste)
-
-## Step 4: Execute pairing
-
-### If same machine (option A):
-
-Run pair-agent with --local flag:
-
-```bash
-$B pair-agent --local TARGET_HOST
+```ts
+import { discardStaged } from '<gstack-install>/browse/src/browser-skill-write';
+discardStaged('<stagedDir>');
 ```
 
-Replace `TARGET_HOST` with the value from Step 2 (openclaw, codex, cursor, etc.).
+Report: "Discarded. No skill was written to disk."
 
-If it succeeds, tell the user:
-"Done. TARGET_HOST can now use your browser. It will read credentials from the
-config file that was written. Try asking it to navigate to a URL."
+## Step 11 — Confirm + verify
 
-If it fails (host not found, write permission error), show the error and suggest
-using the generic remote flow instead.
-
-### If different machine (option B):
-
-First, detect ngrok status:
+After a successful commit, run one verification:
 
 ```bash
-which ngrok 2>/dev/null && echo "NGROK_INSTALLED" || echo "NGROK_NOT_INSTALLED"
-ngrok config check 2>/dev/null && echo "NGROK_AUTHED" || echo "NGROK_NOT_AUTHED"
+$B skill list | grep <name>
+$B skill run <name>    # should match the JSON the prototype produced
 ```
 
-**If ngrok is installed and authed:** Just run the command. The CLI will auto-detect
-ngrok, start the tunnel, and print the instruction block with the tunnel URL:
+If the post-commit run does not match the prototype output, something
+in synthesis drifted. Surface this to the user — they may want to
+`$B skill rm <name>` and retry. Do NOT silently roll back; the user
+deserves to see the discrepancy.
+
+End the skill with one line: "Skill '<name>' committed at <tier>. Future
+/scrape calls matching '<canonical-trigger>' will run in ~200ms."
+
+---
+
+## Limits (be honest)
+
+- **Bun runtime required.** The codified skill runs as a Bun process
+  (`bun run script.ts`). Phase 1 design carry-over (Codex finding #7).
+  Real fix lands in Phase 4 (self-contained binary or Node fallback).
+  For now: the skill works on any machine that has gstack installed,
+  which means it has Bun.
+- **Fixture-replay tests are point-in-time.** When the target site
+  rotates HTML, the fixture goes stale and the test passes against an
+  outdated snapshot. Phase 4 will add fixture-staleness detection.
+- **Synthesis is best-effort.** You're writing a script from your own
+  conversation memory. If the prototype was complex (multi-page, JS
+  hydration, lazy load) the codified script may need a hand-edit before
+  it's reliable. The post-commit verify step catches obvious drift.
+- **Single-target only.** One `$B goto` URL per skill. Multi-page
+  crawls are out of scope — write a separate skill per target, or
+  parameterize via `args:` if the URL pattern is regular.
+
+## What this skill does NOT do
+
+- Codify match-path /scrape results (matched skills are already codified)
+- Codify mutating flows (those are /automate's job — Phase 2 P0)
+- Run skills (that's `$B skill run` — codified skills are run via /scrape's
+  match path or directly)
+- Edit existing skills ($EDITOR + the skill dir is the surface — `$B skill
+  show <name>` finds the path)
+- Tombstone or remove ($B skill rm)
+
+## Capture Learnings
+
+If you discovered a non-obvious pattern, pitfall, or architectural insight during
+this session, log it for future sessions:
 
 ```bash
-$B pair-agent --client TARGET_HOST
+~/.claude/skills/gstack/bin/gstack-learnings-log '{"skill":"skillify","type":"TYPE","key":"SHORT_KEY","insight":"DESCRIPTION","confidence":N,"source":"SOURCE","files":["path/to/relevant/file"]}'
 ```
 
-If the user also needs admin access (JS execution, cookies, storage):
+**Types:** `pattern` (reusable approach), `pitfall` (what NOT to do), `preference`
+(user stated), `architecture` (structural decision), `tool` (library/framework insight),
+`operational` (project environment/CLI/workflow knowledge).
 
-```bash
-$B pair-agent --admin --client TARGET_HOST
-```
+**Sources:** `observed` (you found this in the code), `user-stated` (user told you),
+`inferred` (AI deduction), `cross-model` (both Claude and Codex agree).
 
-**CRITICAL: You MUST output the full instruction block to the user.** The command
-prints everything between ═══ lines. Copy the ENTIRE block verbatim into your
-response so the user can copy-paste it into their other agent. Do NOT summarize it,
-do NOT skip it, do NOT just say "here's the output." The user needs to SEE the block
-to copy it. Output it inside a markdown code block so it's easy to select and copy.
+**Confidence:** 1-10. Be honest. An observed pattern you verified in the code is 8-9.
+An inference you're not sure about is 4-5. A user preference they explicitly stated is 10.
 
-Then tell the user:
-"Copy the block above and paste it into your other agent's chat. The setup key
-expires in 5 minutes."
+**files:** Include the specific file paths this learning references. This enables
+staleness detection: if those files are later deleted, the learning can be flagged.
 
-**If ngrok is installed but NOT authed:** Walk the user through authentication:
-
-Tell the user:
-"ngrok is installed but not logged in. Let's fix that:
-
-1. Go to https://dashboard.ngrok.com/get-started/your-authtoken
-2. Copy your auth token
-3. Come back here and I'll run the auth command for you."
-
-STOP here and wait for the user to provide their auth token.
-
-When they provide it, run:
-```bash
-ngrok config add-authtoken THEIR_TOKEN
-```
-
-Then retry `$B pair-agent --client TARGET_HOST`.
-
-**If ngrok is NOT installed:** Walk the user through installation:
-
-Tell the user:
-"To connect a remote agent, we need ngrok (a tunnel that exposes your local
-browser to the internet securely).
-
-1. Go to https://ngrok.com and sign up (free tier works)
-2. Install ngrok:
-   - macOS: `brew install ngrok`
-   - Linux: `snap install ngrok` or download from ngrok.com/download
-3. Auth it: `ngrok config add-authtoken YOUR_TOKEN`
-   (get your token from https://dashboard.ngrok.com/get-started/your-authtoken)
-4. Come back here and run `/pair-agent` again."
-
-STOP here. Wait for the user to install ngrok and re-invoke.
-
-## Step 5: Verify connection
-
-After the user pastes the instructions into the other agent, wait a moment then check:
-
-```bash
-$B status
-```
-
-Look for the connected agent in the status output. If it appears, tell the user:
-"The remote agent is connected and has its own tab. You'll see its activity in the
-side panel if you have GStack Browser open."
-
-## What the remote agent can do
-
-With default (read+write) access:
-- Navigate to URLs, click elements, fill forms, take screenshots
-- Read page content (text, HTML, snapshot)
-- Create new tabs (each agent gets its own)
-- Cannot execute arbitrary JavaScript, read cookies, or access storage
-
-With admin access (--admin flag):
-- Everything above, plus JS execution, cookie access, storage access
-- Use sparingly. Only for agents you fully trust.
-
-## Troubleshooting
-
-**"Tab not owned by your agent"** — The remote agent tried to interact with a tab
-it didn't create. Tell it to run `newtab` first to get its own tab.
-
-**"Domain not allowed"** — The token has domain restrictions. Re-pair with broader
-domain access or no domain restrictions.
-
-**"Rate limit exceeded"** — The agent is sending > 10 requests/second. It should
-wait for the Retry-After header and slow down.
-
-**"Token expired"** — The 24-hour session expired. Run `/pair-agent` again to
-generate a new setup key.
-
-**Agent can't reach the server** — If remote, check the ngrok tunnel is running
-(`$B status`). If local, check the browse server is running.
-
-## Platform-specific notes
-
-### OpenClaw / AlphaClaw
-
-OpenClaw agents use the `exec` tool instead of `Bash`. The instruction block uses
-`exec curl` syntax which OpenClaw understands natively. When using `--local openclaw`,
-credentials are written to `~/.openclaw/skills/gstack/browse-remote.json`.
-
-
-### Codex
-
-Codex agents can execute shell commands via `codex exec`. The instruction block's
-curl commands work directly. When using `--local codex`, credentials are written
-to `~/.codex/skills/gstack/browse-remote.json`.
-
-### Cursor
-
-Cursor's AI can run terminal commands. The instruction block works as-is.
-When using `--local cursor`, credentials are written to
-`~/.cursor/skills/gstack/browse-remote.json`.
-
-## Revoking access
-
-To disconnect a specific agent:
-
-```bash
-$B tunnel revoke AGENT_NAME
-```
-
-To disconnect all agents and rotate the root token:
-
-```bash
-# This invalidates ALL scoped tokens immediately
-$B tunnel rotate
-```
+**Only log genuine discoveries.** Don't log obvious things. Don't log things the user
+already knows. A good test: would this insight save time in a future session? If yes, log it.

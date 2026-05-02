@@ -1,25 +1,26 @@
 ---
-name: benchmark
+name: benchmark-models
 preamble-tier: 1
 version: 1.0.0
 description: |
-  Performance regression detection using the browse daemon. Establishes
-  baselines for page load times, Core Web Vitals, and resource sizes.
-  Compares before/after on every PR. Tracks performance trends over time.
-  Use when: "performance", "benchmark", "page speed", "lighthouse", "web vitals",
-  "bundle size", "load time". (gstack)
+  Cross-model benchmark for gstack skills. Runs the same prompt through Claude,
+  GPT (via Codex CLI), and Gemini side-by-side — compares latency, tokens, cost,
+  and optionally quality via LLM judge. Answers "which model is actually best
+  for this skill?" with data instead of vibes. Separate from /benchmark, which
+  measures web page performance. Use when: "benchmark models", "compare models",
+  "which model is best for X", "cross-model comparison", "model shootout". (gstack)
 voice-triggers:
-  - "speed test"
-  - "check performance"
+  - "compare models"
+  - "model shootout"
+  - "which model is best"
 triggers:
-  - performance benchmark
-  - check page speed
-  - detect performance regression
+  - cross model benchmark
+  - compare claude gpt gemini
+  - benchmark skill across models
+  - which model should I use
 allowed-tools:
   - Bash
   - Read
-  - Write
-  - Glob
   - AskUserQuestion
 ---
 <!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly -->
@@ -60,7 +61,7 @@ _QUESTION_TUNING=$(~/.claude/skills/gstack/bin/gstack-config get question_tuning
 echo "QUESTION_TUNING: $_QUESTION_TUNING"
 mkdir -p ~/.gstack/analytics
 if [ "$_TEL" != "off" ]; then
-echo '{"skill":"benchmark","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
+echo '{"skill":"benchmark-models","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
 fi
 for _PF in $(find ~/.gstack/analytics -maxdepth 1 -name '.pending-*' 2>/dev/null); do
   if [ -f "$_PF" ]; then
@@ -82,7 +83,7 @@ if [ -f "$_LEARN_FILE" ]; then
 else
   echo "LEARNINGS: 0"
 fi
-~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"benchmark","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
+~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"benchmark-models","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
 _HAS_ROUTING="no"
 if [ -f CLAUDE.md ] && grep -q "## Skill routing" CLAUDE.md 2>/dev/null; then
   _HAS_ROUTING="yes"
@@ -429,251 +430,126 @@ In plan mode before ExitPlanMode: if the plan file lacks `## GSTACK REVIEW REPOR
 
 PLAN MODE EXCEPTION — always allowed (it's the plan file).
 
-## SETUP (run this check BEFORE any browse command)
+# /benchmark-models — Cross-Model Skill Benchmark
+
+You are running the `/benchmark-models` workflow. Wraps the `gstack-model-benchmark` binary with an interactive flow that picks a prompt, confirms providers, previews auth, and runs the benchmark.
+
+Different from `/benchmark` — that skill measures web page performance (Core Web Vitals, load times). This skill measures AI model performance on gstack skills or arbitrary prompts.
+
+---
+
+## Step 0: Locate the binary
 
 ```bash
-_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-B=""
-[ -n "$_ROOT" ] && [ -x "$_ROOT/.claude/skills/gstack/browse/dist/browse" ] && B="$_ROOT/.claude/skills/gstack/browse/dist/browse"
-[ -z "$B" ] && B="$HOME/.claude/skills/gstack/browse/dist/browse"
-if [ -x "$B" ]; then
-  echo "READY: $B"
-else
-  echo "NEEDS_SETUP"
-fi
+BIN="$HOME/.claude/skills/gstack/bin/gstack-model-benchmark"
+[ -x "$BIN" ] || BIN=".claude/skills/gstack/bin/gstack-model-benchmark"
+[ -x "$BIN" ] || { echo "ERROR: gstack-model-benchmark not found. Run ./setup in the gstack install dir." >&2; exit 1; }
+echo "BIN: $BIN"
 ```
 
-If `NEEDS_SETUP`:
-1. Tell the user: "gstack browse needs a one-time build (~10 seconds). OK to proceed?" Then STOP and wait.
-2. Run: `cd <SKILL_DIR> && ./setup`
-3. If `bun` is not installed:
-   ```bash
-   if ! command -v bun >/dev/null 2>&1; then
-     BUN_VERSION="1.3.10"
-     BUN_INSTALL_SHA="bab8acfb046aac8c72407bdcce903957665d655d7acaa3e11c7c4616beae68dd"
-     tmpfile=$(mktemp)
-     curl -fsSL "https://bun.sh/install" -o "$tmpfile"
-     actual_sha=$(shasum -a 256 "$tmpfile" | awk '{print $1}')
-     if [ "$actual_sha" != "$BUN_INSTALL_SHA" ]; then
-       echo "ERROR: bun install script checksum mismatch" >&2
-       echo "  expected: $BUN_INSTALL_SHA" >&2
-       echo "  got:      $actual_sha" >&2
-       rm "$tmpfile"; exit 1
-     fi
-     BUN_VERSION="$BUN_VERSION" bash "$tmpfile"
-     rm "$tmpfile"
-   fi
-   ```
+If not found, stop and tell the user to reinstall gstack.
 
-# /benchmark — Performance Regression Detection
+---
 
-You are a **Performance Engineer** who has optimized apps serving millions of requests. You know that performance doesn't degrade in one big regression — it dies by a thousand paper cuts. Each PR adds 50ms here, 20KB there, and one day the app takes 8 seconds to load and nobody knows when it got slow.
+## Step 1: Choose a prompt
 
-Your job is to measure, baseline, compare, and alert. You use the browse daemon's `perf` command and JavaScript evaluation to gather real performance data from running pages.
+Use AskUserQuestion with the preamble format:
+- **Re-ground:** current project + branch.
+- **Simplify:** "A cross-model benchmark runs the same prompt through 2-3 AI models and shows you how they compare on speed, cost, and output quality. What prompt should we use?"
+- **RECOMMENDATION:** A because benchmarking against a real skill exposes tool-use differences, not just raw generation.
+- **Options:**
+  - A) Benchmark one of my gstack skills (we'll pick which skill next). Completeness: 10/10.
+  - B) Use an inline prompt — type it on the next turn. Completeness: 8/10.
+  - C) Point at a prompt file on disk — specify path on the next turn. Completeness: 8/10.
 
-## User-invocable
-When the user types `/benchmark`, run this skill.
+If A: list top-level gstack skills that have SKILL.md files (from `find . -maxdepth 2 -name SKILL.md -not -path './.*'`), ask the user to pick one via a second AskUserQuestion. Use the picked SKILL.md path as the prompt file.
 
-## Arguments
-- `/benchmark <url>` — full performance audit with baseline comparison
-- `/benchmark <url> --baseline` — capture baseline (run before making changes)
-- `/benchmark <url> --quick` — single-pass timing check (no baseline needed)
-- `/benchmark <url> --pages /,/dashboard,/api/health` — specify pages
-- `/benchmark --diff` — benchmark only pages affected by current branch
-- `/benchmark --trend` — show performance trends from historical data
+If B: ask the user for the inline prompt. Use it verbatim via `--prompt "<text>"`.
 
-## Instructions
+If C: ask for the path. Verify it exists. Use as positional argument.
 
-### Phase 1: Setup
+---
+
+## Step 2: Choose providers
 
 ```bash
-eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null || echo "SLUG=unknown")"
-mkdir -p .gstack/benchmark-reports
-mkdir -p .gstack/benchmark-reports/baselines
+"$BIN" --prompt "unused, dry-run" --models claude,gpt,gemini --dry-run
 ```
 
-### Phase 2: Page Discovery
+Show the dry-run output. The "Adapter availability" section tells the user which providers will actually run (OK) vs skip (NOT READY — remediation hint included).
 
-Same as /canary — auto-discover from navigation or use `--pages`.
+If ALL three show NOT READY: stop with a clear message — benchmark can't run without at least one authed provider. Suggest `claude login`, `codex login`, or `gemini login` / `export GOOGLE_API_KEY`.
 
-If `--diff` mode:
-```bash
-git diff $(gh pr view --json baseRefName -q .baseRefName 2>/dev/null || gh repo view --json defaultBranchRef -q .defaultBranchRef.name 2>/dev/null || echo main)...HEAD --name-only
-```
+If at least one is OK: AskUserQuestion:
+- **Simplify:** "Which models should we include? The dry-run above showed which are authed. Unauthed ones will be skipped cleanly — they won't abort the batch."
+- **RECOMMENDATION:** A (all authed providers) because running as many as possible gives the richest comparison.
+- **Options:**
+  - A) All authed providers. Completeness: 10/10.
+  - B) Only Claude. Completeness: 6/10 (no cross-model signal — use /ship's review for solo claude benchmarks instead).
+  - C) Pick two — specify on next turn. Completeness: 8/10.
 
-### Phase 3: Performance Data Collection
+---
 
-For each page, collect comprehensive performance metrics:
-
-```bash
-$B goto <page-url>
-$B perf
-```
-
-Then gather detailed metrics via JavaScript:
+## Step 3: Decide on judge
 
 ```bash
-$B eval "JSON.stringify(performance.getEntriesByType('navigation')[0])"
+[ -n "$ANTHROPIC_API_KEY" ] || grep -q 'ANTHROPIC' "$HOME/.claude/.credentials.json" 2>/dev/null && echo "JUDGE_AVAILABLE" || echo "JUDGE_UNAVAILABLE"
 ```
 
-Extract key metrics:
-- **TTFB** (Time to First Byte): `responseStart - requestStart`
-- **FCP** (First Contentful Paint): from PerformanceObserver or `paint` entries
-- **LCP** (Largest Contentful Paint): from PerformanceObserver
-- **DOM Interactive**: `domInteractive - navigationStart`
-- **DOM Complete**: `domComplete - navigationStart`
-- **Full Load**: `loadEventEnd - navigationStart`
+If judge is available, AskUserQuestion:
+- **Simplify:** "The quality judge scores each model's output on a 0-10 scale using Anthropic's Claude as a tiebreaker. Adds ~$0.05/run. Recommended if you care about output quality, not just latency and cost."
+- **RECOMMENDATION:** A — the whole point is comparing quality, not just speed.
+- **Options:**
+  - A) Enable judge (adds ~$0.05). Completeness: 10/10.
+  - B) Skip judge — speed/cost/tokens only. Completeness: 7/10.
 
-Resource analysis:
+If judge is NOT available, skip this question and omit the `--judge` flag.
+
+---
+
+## Step 4: Run the benchmark
+
+Construct the command from Step 1, 2, 3 decisions:
+
 ```bash
-$B eval "JSON.stringify(performance.getEntriesByType('resource').map(r => ({name: r.name.split('/').pop().split('?')[0], type: r.initiatorType, size: r.transferSize, duration: Math.round(r.duration)})).sort((a,b) => b.duration - a.duration).slice(0,15))"
+"$BIN" <prompt-spec> --models <picked-models> [--judge] --output table
 ```
 
-Bundle size check:
-```bash
-$B eval "JSON.stringify(performance.getEntriesByType('resource').filter(r => r.initiatorType === 'script').map(r => ({name: r.name.split('/').pop().split('?')[0], size: r.transferSize})))"
-$B eval "JSON.stringify(performance.getEntriesByType('resource').filter(r => r.initiatorType === 'css').map(r => ({name: r.name.split('/').pop().split('?')[0], size: r.transferSize})))"
-```
+Where `<prompt-spec>` is either `--prompt "<text>"` (Step 1B), a file path (Step 1A or 1C), and `<picked-models>` is the comma-separated list from Step 2.
 
-Network summary:
-```bash
-$B eval "(() => { const r = performance.getEntriesByType('resource'); return JSON.stringify({total_requests: r.length, total_transfer: r.reduce((s,e) => s + (e.transferSize||0), 0), by_type: Object.entries(r.reduce((a,e) => { a[e.initiatorType] = (a[e.initiatorType]||0) + 1; return a; }, {})).sort((a,b) => b[1]-a[1])})})()"
-```
+Stream the output as it arrives. This is slow — each provider runs the prompt fully. Expect 30s-5min depending on prompt complexity and whether `--judge` is on.
 
-### Phase 4: Baseline Capture (--baseline mode)
+---
 
-Save metrics to baseline file:
+## Step 5: Interpret results
 
-```json
-{
-  "url": "<url>",
-  "timestamp": "<ISO>",
-  "branch": "<branch>",
-  "pages": {
-    "/": {
-      "ttfb_ms": 120,
-      "fcp_ms": 450,
-      "lcp_ms": 800,
-      "dom_interactive_ms": 600,
-      "dom_complete_ms": 1200,
-      "full_load_ms": 1400,
-      "total_requests": 42,
-      "total_transfer_bytes": 1250000,
-      "js_bundle_bytes": 450000,
-      "css_bundle_bytes": 85000,
-      "largest_resources": [
-        {"name": "main.js", "size": 320000, "duration": 180},
-        {"name": "vendor.js", "size": 130000, "duration": 90}
-      ]
-    }
-  }
-}
-```
+After the table prints, summarize for the user:
+- **Fastest** — provider with lowest latency.
+- **Cheapest** — provider with lowest cost.
+- **Highest quality** (if `--judge` ran) — provider with highest score.
+- **Best overall** — use judgment. If judge ran: quality-weighted. Otherwise: note the tradeoff the user needs to make.
 
-Write to `.gstack/benchmark-reports/baselines/baseline.json`.
+If any provider hit an error (auth/timeout/rate_limit), call it out with the remediation path.
 
-### Phase 5: Comparison
+---
 
-If baseline exists, compare current metrics against it:
+## Step 6: Offer to save results
 
-```
-PERFORMANCE REPORT — [url]
-══════════════════════════
-Branch: [current-branch] vs baseline ([baseline-branch])
+AskUserQuestion:
+- **Simplify:** "Save this benchmark as JSON so you can compare future runs against it?"
+- **RECOMMENDATION:** A — skill performance drifts as providers update their models; a saved baseline catches quality regressions.
+- **Options:**
+  - A) Save to `~/.gstack/benchmarks/<date>-<skill-or-prompt-slug>.json`. Completeness: 10/10.
+  - B) Just print, don't save. Completeness: 5/10 (loses trend data).
 
-Page: /
-─────────────────────────────────────────────────────
-Metric              Baseline    Current     Delta    Status
-────────            ────────    ───────     ─────    ──────
-TTFB                120ms       135ms       +15ms    OK
-FCP                 450ms       480ms       +30ms    OK
-LCP                 800ms       1600ms      +800ms   REGRESSION
-DOM Interactive     600ms       650ms       +50ms    OK
-DOM Complete        1200ms      1350ms      +150ms   WARNING
-Full Load           1400ms      2100ms      +700ms   REGRESSION
-Total Requests      42          58          +16      WARNING
-Transfer Size       1.2MB       1.8MB       +0.6MB   REGRESSION
-JS Bundle           450KB       720KB       +270KB   REGRESSION
-CSS Bundle          85KB        88KB        +3KB     OK
+If A: re-run with `--output json` and tee to the dated file. Print the path so the user can diff future runs against it.
 
-REGRESSIONS DETECTED: 3
-  [1] LCP doubled (800ms → 1600ms) — likely a large new image or blocking resource
-  [2] Total transfer +50% (1.2MB → 1.8MB) — check new JS bundles
-  [3] JS bundle +60% (450KB → 720KB) — new dependency or missing tree-shaking
-```
-
-**Regression thresholds:**
-- Timing metrics: >50% increase OR >500ms absolute increase = REGRESSION
-- Timing metrics: >20% increase = WARNING
-- Bundle size: >25% increase = REGRESSION
-- Bundle size: >10% increase = WARNING
-- Request count: >30% increase = WARNING
-
-### Phase 6: Slowest Resources
-
-```
-TOP 10 SLOWEST RESOURCES
-═════════════════════════
-#   Resource                  Type      Size      Duration
-1   vendor.chunk.js          script    320KB     480ms
-2   main.js                  script    250KB     320ms
-3   hero-image.webp          img       180KB     280ms
-4   analytics.js             script    45KB      250ms    ← third-party
-5   fonts/inter-var.woff2    font      95KB      180ms
-...
-
-RECOMMENDATIONS:
-- vendor.chunk.js: Consider code-splitting — 320KB is large for initial load
-- analytics.js: Load async/defer — blocks rendering for 250ms
-- hero-image.webp: Add width/height to prevent CLS, consider lazy loading
-```
-
-### Phase 7: Performance Budget
-
-Check against industry budgets:
-
-```
-PERFORMANCE BUDGET CHECK
-════════════════════════
-Metric              Budget      Actual      Status
-────────            ──────      ──────      ──────
-FCP                 < 1.8s      0.48s       PASS
-LCP                 < 2.5s      1.6s        PASS
-Total JS            < 500KB     720KB       FAIL
-Total CSS           < 100KB     88KB        PASS
-Total Transfer      < 2MB       1.8MB       WARNING (90%)
-HTTP Requests       < 50        58          FAIL
-
-Grade: B (4/6 passing)
-```
-
-### Phase 8: Trend Analysis (--trend mode)
-
-Load historical baseline files and show trends:
-
-```
-PERFORMANCE TRENDS (last 5 benchmarks)
-══════════════════════════════════════
-Date        FCP     LCP     Bundle    Requests    Grade
-2026-03-10  420ms   750ms   380KB     38          A
-2026-03-12  440ms   780ms   410KB     40          A
-2026-03-14  450ms   800ms   450KB     42          A
-2026-03-16  460ms   850ms   520KB     48          B
-2026-03-18  480ms   1600ms  720KB     58          B
-
-TREND: Performance degrading. LCP doubled in 8 days.
-       JS bundle growing 50KB/week. Investigate.
-```
-
-### Phase 9: Save Report
-
-Write to `.gstack/benchmark-reports/{date}-benchmark.md` and `.gstack/benchmark-reports/{date}-benchmark.json`.
+---
 
 ## Important Rules
 
-- **Measure, don't guess.** Use actual performance.getEntries() data, not estimates.
-- **Baseline is essential.** Without a baseline, you can report absolute numbers but can't detect regressions. Always encourage baseline capture.
-- **Relative thresholds, not absolute.** 2000ms load time is fine for a complex dashboard, terrible for a landing page. Compare against YOUR baseline.
-- **Third-party scripts are context.** Flag them, but the user can't fix Google Analytics being slow. Focus recommendations on first-party resources.
-- **Bundle size is the leading indicator.** Load time varies with network. Bundle size is deterministic. Track it religiously.
-- **Read-only.** Produce the report. Don't modify code unless explicitly asked.
+- **Never run a real benchmark without Step 2's dry-run first.** Users need to see auth status before spending API calls.
+- **Never hardcode model names.** Always pass providers from user's Step 2 choice — the binary handles the rest.
+- **Never auto-include `--judge`.** It adds real cost; user must opt in.
+- **If zero providers are authed, STOP.** Don't attempt the benchmark — it produces no useful output.
+- **Cost is visible.** Every run shows per-provider cost in the table. Users should see it before the next run.

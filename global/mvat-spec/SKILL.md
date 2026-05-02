@@ -20,10 +20,9 @@ Create a new agent specification from the template.
 2. Prompt for key fields:
    - Agent name and description
    - Department (product, design, engineering, testing, marketing, analytics, finance, governance)
-   - Model tier (opus, sonnet, haiku) — follow tier rules:
-     - Opus: writes production code or makes gating decisions
-     - Sonnet: writes content, specs, or substantive analysis
-     - Haiku: read-only analysis and reporting
+   - Model tier (opus or haiku) — follow tier rules:
+     - Opus: writes production code, content, specs, gating decisions, or substantive analysis (default for any agent that produces output)
+     - Haiku: read-only analysis and reporting only
    - Tools needed (Read, Write, Edit, Bash, Glob, Grep, Agent)
    - Max turns
 3. Fill template with provided values

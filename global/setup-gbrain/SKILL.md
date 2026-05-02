@@ -1,27 +1,27 @@
 ---
-name: pair-agent
-version: 0.1.0
+name: setup-gbrain
+preamble-tier: 2
+version: 1.0.0
 description: |
-  Pair a remote AI agent with your browser. One command generates a setup key and
-  prints instructions the other agent can follow to connect. Works with OpenClaw,
-  Hermes, Codex, Cursor, or any agent that can make HTTP requests. The remote agent
-  gets its own tab with scoped access (read+write by default, admin on request).
-  Use when asked to "pair agent", "connect agent", "share browser", "remote browser",
-  "let another agent use my browser", or "give browser access". (gstack)
-voice-triggers:
-  - "pair agent"
-  - "connect agent"
-  - "share my browser"
-  - "remote browser access"
+  Set up gbrain for this coding agent: install the CLI, initialize a
+  local PGLite or Supabase brain, register MCP, capture per-remote trust
+  policy. One command from zero to "gbrain is running, and this agent
+  can call it." Use when: "setup gbrain", "connect gbrain", "start
+  gbrain", "install gbrain", "configure gbrain for this machine". (gstack)
 triggers:
-  - pair with agent
-  - connect remote agent
-  - share my browser
+  - setup gbrain
+  - install gbrain
+  - connect gbrain
+  - start gbrain
+  - configure gbrain
 allowed-tools:
   - Bash
   - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
   - AskUserQuestion
-
 ---
 <!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly -->
 <!-- Regenerate: bun run gen:skill-docs -->
@@ -61,7 +61,7 @@ _QUESTION_TUNING=$(~/.claude/skills/gstack/bin/gstack-config get question_tuning
 echo "QUESTION_TUNING: $_QUESTION_TUNING"
 mkdir -p ~/.gstack/analytics
 if [ "$_TEL" != "off" ]; then
-echo '{"skill":"pair-agent","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
+echo '{"skill":"setup-gbrain","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
 fi
 for _PF in $(find ~/.gstack/analytics -maxdepth 1 -name '.pending-*' 2>/dev/null); do
   if [ -f "$_PF" ]; then
@@ -83,7 +83,7 @@ if [ -f "$_LEARN_FILE" ]; then
 else
   echo "LEARNINGS: 0"
 fi
-~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"pair-agent","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
+~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"setup-gbrain","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
 _HAS_ROUTING="no"
 if [ -f CLAUDE.md ] && grep -q "## Skill routing" CLAUDE.md 2>/dev/null; then
   _HAS_ROUTING="yes"
@@ -596,7 +596,7 @@ Before each AskUserQuestion, choose `question_id` from `scripts/question-registr
 
 After answer, log best-effort:
 ```bash
-~/.claude/skills/gstack/bin/gstack-question-log '{"skill":"pair-agent","question_id":"<id>","question_summary":"<short>","category":"<approval|clarification|routing|cherry-pick|feedback-loop>","door_type":"<one-way|two-way>","options_count":N,"user_choice":"<key>","recommended":"<key>","session_id":"'"$_SESSION_ID"'"}' 2>/dev/null || true
+~/.claude/skills/gstack/bin/gstack-question-log '{"skill":"setup-gbrain","question_id":"<id>","question_summary":"<short>","category":"<approval|clarification|routing|cherry-pick|feedback-loop>","door_type":"<one-way|two-way>","options_count":N,"user_choice":"<key>","recommended":"<key>","session_id":"'"$_SESSION_ID"'"}' 2>/dev/null || true
 ```
 
 For two-way questions, offer: "Tune this question? Reply `tune: never-ask`, `tune: always-ask`, or free-form."
@@ -609,24 +609,6 @@ Write (only after confirmation for free-form):
 ```
 
 Exit code 2 = rejected as not user-originated; do not retry. On success: "Set `<id>` → `<preference>`. Active immediately."
-
-## Repo Ownership — See Something, Say Something
-
-`REPO_MODE` controls how to handle issues outside your branch:
-- **`solo`** — You own everything. Investigate and offer to fix proactively.
-- **`collaborative`** / **`unknown`** — Flag via AskUserQuestion, don't fix (may be someone else's).
-
-Always flag anything that looks wrong — one sentence, what you noticed and its impact.
-
-## Search Before Building
-
-Before building anything unfamiliar, **search first.** See `~/.claude/skills/gstack/ETHOS.md`.
-- **Layer 1** (tried and true) — don't reinvent. **Layer 2** (new and popular) — scrutinize. **Layer 3** (first principles) — prize above all.
-
-**Eureka:** When first-principles reasoning contradicts conventional wisdom, name it and log:
-```bash
-jq -n --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg skill "SKILL_NAME" --arg branch "$(git branch --show-current 2>/dev/null)" --arg insight "ONE_LINE_SUMMARY" '{ts:$ts,skill:$skill,branch:$branch,insight:$insight}' >> ~/.gstack/analytics/eureka.jsonl 2>/dev/null || true
-```
 
 ## Completion Status Protocol
 
@@ -683,276 +665,471 @@ In plan mode before ExitPlanMode: if the plan file lacks `## GSTACK REVIEW REPOR
 
 PLAN MODE EXCEPTION — always allowed (it's the plan file).
 
-# /pair-agent — Share Your Browser With Another AI Agent
+# /setup-gbrain — Coding-Agent Onboarding for gbrain
 
-You're sitting in Claude Code with a browser running. You also have another AI agent
-open (OpenClaw, Hermes, Codex, Cursor, whatever). You want that other agent to be
-able to browse the web using YOUR browser. This skill makes that happen.
+You are setting up gbrain (https://github.com/garrytan/gbrain), a persistent
+knowledge base, on the user's local Mac so that this coding agent (typically
+Claude Code) can call it as both a CLI and an MCP tool.
 
-## How it works
+**Scope honesty:** This skill's MCP registration step (5a) uses
+`claude mcp add` and targets Claude Code specifically. Other local hosts
+(Cursor, Codex CLI, etc.) will still get the gbrain CLI on PATH — they can
+register `gbrain serve` in their own MCP config manually after setup.
 
-Your gstack browser runs a local HTTP server. This skill creates a one-time setup key,
-prints a block of instructions, and you paste those instructions into the other agent.
-The other agent exchanges the key for a session token, creates its own tab, and starts
-browsing. Each agent gets its own tab. They can't mess with each other's tabs.
+**Audience:** local-Mac users. openclaw/hermes agents typically run in cloud
+docker containers with their own gbrain; "sharing" a brain between them and
+local Claude Code is only possible through shared Postgres (Supabase).
 
-The setup key expires in 5 minutes and can only be used once. If it leaks, it's dead
-before anyone can abuse it. The session token lasts 24 hours.
+## User-invocable
+When the user types `/setup-gbrain`, run this skill. Three shortcut modes:
 
-**Same machine:** If the other agent is on the same machine (like OpenClaw running
-locally), you can skip the copy-paste ceremony and write the credentials directly to
-the agent's config directory.
+- `/setup-gbrain` — full flow (default)
+- `/setup-gbrain --repo` — only flip the per-remote policy for the current repo
+- `/setup-gbrain --switch` — only migrate the engine (PGLite ↔ Supabase)
+- `/setup-gbrain --resume-provision <ref>` — re-enter a previously interrupted
+  Supabase auto-provision at the polling step
+- `/setup-gbrain --cleanup-orphans` — list + delete in-flight Supabase projects
 
-**Remote:** If the other agent is on a different machine, you need an ngrok tunnel.
-The skill will tell you if one is needed and how to set it up.
+Parse the invocation args yourself — these are prose hints to the skill, not
+implemented as a dispatcher binary.
 
-## SETUP (run this check BEFORE any browse command)
+---
 
-```bash
-_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-B=""
-[ -n "$_ROOT" ] && [ -x "$_ROOT/.claude/skills/gstack/browse/dist/browse" ] && B="$_ROOT/.claude/skills/gstack/browse/dist/browse"
-[ -z "$B" ] && B="$HOME/.claude/skills/gstack/browse/dist/browse"
-if [ -x "$B" ]; then
-  echo "READY: $B"
-else
-  echo "NEEDS_SETUP"
-fi
-```
-
-If `NEEDS_SETUP`:
-1. Tell the user: "gstack browse needs a one-time build (~10 seconds). OK to proceed?" Then STOP and wait.
-2. Run: `cd <SKILL_DIR> && ./setup`
-3. If `bun` is not installed:
-   ```bash
-   if ! command -v bun >/dev/null 2>&1; then
-     BUN_VERSION="1.3.10"
-     BUN_INSTALL_SHA="bab8acfb046aac8c72407bdcce903957665d655d7acaa3e11c7c4616beae68dd"
-     tmpfile=$(mktemp)
-     curl -fsSL "https://bun.sh/install" -o "$tmpfile"
-     actual_sha=$(shasum -a 256 "$tmpfile" | awk '{print $1}')
-     if [ "$actual_sha" != "$BUN_INSTALL_SHA" ]; then
-       echo "ERROR: bun install script checksum mismatch" >&2
-       echo "  expected: $BUN_INSTALL_SHA" >&2
-       echo "  got:      $actual_sha" >&2
-       rm "$tmpfile"; exit 1
-     fi
-     BUN_VERSION="$BUN_VERSION" bash "$tmpfile"
-     rm "$tmpfile"
-   fi
-   ```
-
-## Step 1: Check prerequisites
+## Step 1: Detect current state
 
 ```bash
-$B status 2>/dev/null
+~/.claude/skills/gstack/bin/gstack-gbrain-detect
 ```
 
-If the browse server is not running, start it:
+Capture the JSON output. It contains: `gbrain_on_path`, `gbrain_version`,
+`gbrain_config_exists`, `gbrain_engine`, `gbrain_doctor_ok`,
+`gstack_brain_sync_mode`, `gstack_brain_git`.
+
+Skip downstream steps that are already done. Report the detected state in
+one line so the user knows what you found:
+
+> "Detected: gbrain v0.18.2 on PATH, engine=postgres, doctor=ok,
+>  sync=artifacts-only. Nothing to install; jumping to the policy check."
+
+Branch on the `--repo`, `--switch`, `--resume-provision`, `--cleanup-orphans`
+invocation flags here and skip to the matching step.
+
+---
+
+## Step 2: Pick a path (AskUserQuestion)
+
+Only fire this if Step 1 shows no existing working config AND no shortcut
+flag was passed. The question title: "Where should your brain live?"
+
+Options (present based on detected state):
+
+- **1 — Supabase, I already have a connection string.** Cloud-agent users
+  whose openclaw/hermes provisioned one already. Paste the Session Pooler
+  URL from the Supabase dashboard (Settings → Database → Connection Pooler
+  → Session). *Trust-surface caveat to include in the prompt:* "Pasting this
+  URL gives your local Claude Code full read/write access to every page your
+  cloud agent can see. If that's not the trust level you want, pick PGLite
+  local instead and accept the brains are disjoint."
+- **2a — Supabase, auto-provision a new project.** You'll need a Supabase
+  Personal Access Token (~90 seconds). Best choice for a shared team brain.
+- **2b — Supabase, create manually.** Walk through supabase.com signup
+  yourself; paste the URL back when ready.
+- **3 — PGLite local.** Zero accounts, ~30 seconds. Isolated brain on this
+  Mac only. Best for try-first.
+- **Switch** (only if Step 1 detected an existing engine): "You already have
+  a `<engine>` brain. Migrate it to the other engine?" → runs
+  `gbrain migrate --to <other>` wrapped in `timeout 180s` (D9).
+
+Do NOT silently pick; fire the AskUserQuestion.
+
+---
+
+## Step 3: Install gbrain CLI (if missing)
+
+Only if `gbrain_on_path=false`:
 
 ```bash
-$B goto about:blank
+~/.claude/skills/gstack/bin/gstack-gbrain-install
 ```
 
-This ensures the server is up and healthy before pairing.
+The installer runs D5 detect-first (probes `~/git/gbrain`, `~/gbrain` first),
+then D19 PATH-shadow validation (post-link `gbrain --version` must match
+install-dir `package.json`). On D19 failure the installer exits 3 with a
+clear remediation menu; surface the full output to the user and STOP. Do not
+continue the skill — the environment is broken until the user fixes PATH.
 
-## Step 2: Ask what they want
+---
 
-Use AskUserQuestion:
+## Step 4: Initialize the brain
 
-> Which agent do you want to pair with your browser? This determines the
-> instructions format and where credentials get written.
+Path-specific.
+
+### Path 1 (Supabase, existing URL)
+
+Source the secret-read helper, collect URL with `read -s` + redacted preview:
+
+```bash
+. ~/.claude/skills/gstack/bin/gstack-gbrain-lib.sh
+read_secret_to_env GBRAIN_POOLER_URL "Paste Session Pooler URL: " \
+  --echo-redacted 's#://[^@]*@#://***@#'
+```
+
+Then validate structurally:
+
+```bash
+printf '%s' "$GBRAIN_POOLER_URL" | ~/.claude/skills/gstack/bin/gstack-gbrain-supabase-verify -
+```
+
+If the verify exit code is 3 (direct-connection URL), the verifier's own
+message explains the fix; surface it and re-prompt for a Session Pooler URL.
+
+On success, hand off to gbrain via env var (D10, never argv):
+
+```bash
+GBRAIN_DATABASE_URL="$GBRAIN_POOLER_URL" gbrain init --non-interactive --json
+```
+
+Then `unset GBRAIN_POOLER_URL GBRAIN_DATABASE_URL` immediately. The URL is
+now persisted in `~/.gbrain/config.json` at mode 0600 by gbrain itself.
+
+### Path 2a (Supabase, auto-provision — D7)
+
+Show the D11 PAT scope disclosure verbatim BEFORE collecting the token:
+
+> *This Supabase Personal Access Token grants full read/write/delete access
+> to every project in your Supabase account, not just the `gbrain` one we're
+> about to create. Supabase doesn't currently support scoped tokens. We use
+> this PAT only to: create one project, poll it until healthy, read the
+> Session Pooler URL — then discard it from process memory. The token
+> remains valid on Supabase's side until you manually revoke it at
+> https://supabase.com/dashboard/account/tokens — we recommend revoking
+> immediately after setup completes.*
+
+Then:
+
+```bash
+. ~/.claude/skills/gstack/bin/gstack-gbrain-lib.sh
+read_secret_to_env SUPABASE_ACCESS_TOKEN "Paste PAT: "
+```
+
+Ask the D17 tier prompt via AskUserQuestion: "Which Supabase tier?" Present
+Free (2-project limit, pauses after 7d inactivity) vs Pro ($25/mo, no
+pauses, recommended for real use). Explain that tier is **org-level** (per
+the Management API contract) — user picks their org based on its current
+tier. Pro may require them to upgrade the org first at supabase.com.
+
+List orgs, pick one (AskUserQuestion if multiple):
+
+```bash
+orgs=$(~/.claude/skills/gstack/bin/gstack-gbrain-supabase-provision list-orgs --json)
+```
+
+If the `.orgs` array is empty, surface: "Your Supabase account has no
+organizations. Create one at https://supabase.com/dashboard, then re-run
+`/setup-gbrain`." STOP.
+
+Ask the user for a region (default `us-east-1`; valid values are the 18
+enum values in the Supabase Management API — list a few common ones, let
+them pick "Other" for a full list).
+
+Generate the DB password (never shown to the user):
+
+```bash
+export DB_PASS=$(openssl rand -base64 24)
+```
+
+Set up a SIGINT trap (D12 basic recovery):
+
+```bash
+trap 'echo ""; echo "gstack-gbrain: interrupted. In-flight ref: $INFLIGHT_REF"; \
+      echo "Resume: /setup-gbrain --resume-provision $INFLIGHT_REF"; \
+      echo "Delete: https://supabase.com/dashboard/project/$INFLIGHT_REF"; \
+      unset SUPABASE_ACCESS_TOKEN DB_PASS; exit 130' INT TERM
+```
+
+Create + wait + fetch:
+
+```bash
+result=$(~/.claude/skills/gstack/bin/gstack-gbrain-supabase-provision \
+  create gbrain "$REGION" "$ORG_SLUG" --json)
+INFLIGHT_REF=$(echo "$result" | jq -r .ref)
+~/.claude/skills/gstack/bin/gstack-gbrain-supabase-provision wait "$INFLIGHT_REF" --json
+pooler=$(~/.claude/skills/gstack/bin/gstack-gbrain-supabase-provision \
+  pooler-url "$INFLIGHT_REF" --json)
+GBRAIN_DATABASE_URL=$(echo "$pooler" | jq -r .pooler_url)
+export GBRAIN_DATABASE_URL
+gbrain init --non-interactive --json
+unset SUPABASE_ACCESS_TOKEN DB_PASS GBRAIN_DATABASE_URL INFLIGHT_REF
+trap - INT TERM
+```
+
+After success, emit the PAT revocation reminder:
+
+> "Setup complete. Revoke the PAT you pasted at
+> https://supabase.com/dashboard/account/tokens — we've already discarded
+> it from memory and don't need it again. The gbrain project will continue
+> working because it uses its own embedded database password."
+
+### Path 2b (Supabase, manual)
+
+Walk the user through the supabase.com steps:
+1. Login at https://supabase.com/dashboard
+2. Click "New Project," name it `gbrain`, pick a region, copy the generated
+   database password (you'll need it for paste-back? no — it's embedded in
+   the pooler URL we collect next)
+3. Wait ~2 min for the project to initialize
+4. Settings → Database → Connection Pooler → Session → copy the URL (port
+   6543)
+
+Then follow the same secret-read + verify + init flow as Path 1.
+
+### Path 3 (PGLite local)
+
+```bash
+gbrain init --pglite --json
+```
+
+Done. No network, no secrets.
+
+### Switch (from detect's existing-engine state)
+
+```bash
+# Going PGLite → Supabase, collect URL first (Path 1 flow), then:
+timeout 180s gbrain migrate --to supabase --url "$URL" --json
+# Going Supabase → PGLite:
+timeout 180s gbrain migrate --to pglite --json
+```
+
+If `timeout` returns 124 (exit code for timeout): surface D9 message
+("Migration didn't complete in 3 minutes — another gstack session may be
+holding a lock on the source brain. Close other workspaces and re-run
+`/setup-gbrain --switch`. Your original brain is untouched."). STOP.
+
+---
+
+## Step 5: Verify gbrain doctor
+
+```bash
+doctor=$(gbrain doctor --json)
+status=$(echo "$doctor" | jq -r .status)
+```
+
+If status is `ok` or `warnings`, proceed. Anything else → surface the full
+doctor output and STOP.
+
+---
+
+## Step 5a: Register gbrain as Claude Code MCP (D18)
+
+Only if `which claude` resolves. Ask: "Give Claude Code a typed tool surface
+for gbrain? (recommended yes)"
+
+If yes, register at **user scope** with an **absolute path** to the gbrain
+binary. User scope makes the MCP available in every Claude Code session on
+this machine, not just the current workspace. Absolute path avoids PATH
+resolution issues when Claude Code spawns `gbrain serve` as a subprocess.
+
+```bash
+GBRAIN_BIN=$(command -v gbrain)
+[ -z "$GBRAIN_BIN" ] && GBRAIN_BIN="$HOME/.bun/bin/gbrain"
+claude mcp add --scope user gbrain -- "$GBRAIN_BIN" serve
+claude mcp list | grep gbrain  # verify: should show "✓ Connected"
+```
+
+If the user already had a local-scope registration from an earlier run,
+remove it first so both scopes don't conflict:
+```bash
+claude mcp remove gbrain 2>/dev/null || true
+```
+
+If `claude` is not on PATH: emit "MCP registration skipped — this skill is
+Claude-Code-targeted; register `gbrain serve` in your agent's MCP config
+manually." Continue to step 6.
+
+**Heads-up for the user:** an already-open Claude Code session will not
+pick up the new MCP tools until restart. Tell them: "Restart any open
+Claude Code sessions to see `mcp__gbrain__*` tools — they're loaded at
+session start, not mid-session."
+
+---
+
+## Step 6: Per-remote policy (D3 triad, gated repo-import)
+
+If we're in a git repo with an `origin` remote, check the policy:
+
+```bash
+current_tier=$(~/.claude/skills/gstack/bin/gstack-gbrain-repo-policy get)
+```
+
+Branches:
+- `read-write` → import this repo: `gbrain import "$(pwd)" --no-embed` then
+  `gbrain embed --stale &` in the background.
+- `read-only` → skip import entirely (this tier is enforced by the future
+  auto-import hook + by gbrain resolver injection, not here).
+- `deny` → do nothing.
+- `unset` → AskUserQuestion: "How should `<normalized-remote>` interact with
+  gbrain?"
+  - `read-write` — agent can search AND write new pages from this repo
+  - `read-only` — agent can search but never write
+  - `deny` — no interaction at all
+  - `skip-for-now` — don't persist, ask next time
+
+  On answer (other than skip-for-now):
+  ```bash
+  ~/.claude/skills/gstack/bin/gstack-gbrain-repo-policy set "$REMOTE" "$TIER"
+  ```
+  Then import iff `read-write`.
+
+If outside a git repo OR no origin remote: skip this step with a note.
+
+For `/setup-gbrain --repo` invocations, execute ONLY Step 6 and exit.
+
+---
+
+## Step 7: Offer gstack-brain-sync + wire it into gbrain
+
+Separate AskUserQuestion: "Also sync your gstack session memory (learnings,
+plans, retros) to a private git repo that gbrain can index across machines?"
 
 Options:
-- A) OpenClaw (local or remote)
-- B) Codex / OpenAI Agents (local)
-- C) Cursor (local)
-- D) Another Claude Code session (local or remote)
-- E) Something else (generic HTTP instructions — use this for Hermes)
+- Yes, full sync (everything allowlisted)
+- Yes, artifacts-only (plans, designs, retros — skip behavioral data)
+- No thanks
 
-Based on the answer, set `TARGET_HOST`:
-- A → `openclaw`
-- B → `codex`
-- C → `cursor`
-- D → `claude`
-- E → generic (no host-specific config)
-
-## Step 3: Local or remote?
-
-Use AskUserQuestion:
-
-> Is the other agent running on this same machine, or on a different machine/server?
->
-> **Same machine** skips the copy-paste ceremony. Credentials are written directly to
-> the agent's config directory. No tunnel needed.
->
-> **Different machine** generates a setup key and instruction block. If ngrok is
-> installed, the tunnel starts automatically. If not, I'll walk you through setup.
->
-> RECOMMENDATION: Choose A if the agent is local. It's instant, no copy-paste needed.
-
-Options:
-- A) Same machine (write credentials directly)
-- B) Different machine (generate instruction block for copy-paste)
-
-## Step 4: Execute pairing
-
-### If same machine (option A):
-
-Run pair-agent with --local flag:
+If yes:
 
 ```bash
-$B pair-agent --local TARGET_HOST
+~/.claude/skills/gstack/bin/gstack-brain-init
+~/.claude/skills/gstack/bin/gstack-config set gbrain_sync_mode artifacts-only
+# or "full" if user picked yes-full
 ```
 
-Replace `TARGET_HOST` with the value from Step 2 (openclaw, codex, cursor, etc.).
+Then wire the brain repo into gbrain so its content is searchable from any
+gbrain client (this Claude Code session, future Macs, optional cloud agents).
+The helper creates a `git worktree` of `~/.gstack/`, registers it as a
+federated source on the user's gbrain (Supabase or PGLite), and runs an
+initial `gbrain sync`. Local-Mac only. No cloud agent required. Subsequent
+skill runs trigger incremental sync via the existing skill-end push hook.
 
-If it succeeds, tell the user:
-"Done. TARGET_HOST can now use your browser. It will read credentials from the
-config file that was written. Try asking it to navigate to a URL."
-
-If it fails (host not found, write permission error), show the error and suggest
-using the generic remote flow instead.
-
-### If different machine (option B):
-
-First, detect ngrok status:
+Capture the database URL out of `~/.gbrain/config.json` first and pass it
+explicitly so the wireup is robust against any other process rewriting
+`~/.gbrain/config.json` mid-sync (e.g., concurrent `gbrain init` runs
+elsewhere on the machine):
 
 ```bash
-which ngrok 2>/dev/null && echo "NGROK_INSTALLED" || echo "NGROK_NOT_INSTALLED"
-ngrok config check 2>/dev/null && echo "NGROK_AUTHED" || echo "NGROK_NOT_AUTHED"
+GBRAIN_URL=$(python3 -c "
+import json, os, sys
+try:
+    c = json.load(open(os.path.expanduser('~/.gbrain/config.json')))
+    print(c.get('database_url', ''))
+except Exception:
+    pass
+")
+~/.claude/skills/gstack/bin/gstack-gbrain-source-wireup --strict \
+  ${GBRAIN_URL:+--database-url "$GBRAIN_URL"}
 ```
 
-**If ngrok is installed and authed:** Just run the command. The CLI will auto-detect
-ngrok, start the tunnel, and print the instruction block with the tunnel URL:
+`--strict` exits non-zero on missing prereqs (gbrain not installed, < 0.18.0,
+or no `~/.gstack/.git` yet) so the user sees the failure rather than silently
+ending up with an unwired brain. On non-zero exit, surface the helper's
+output and STOP per skill rules — search-across-machines won't work until
+the prereq is fixed.
+
+---
+
+## Step 8: Persist `## GBrain Configuration` in CLAUDE.md
+
+Find-and-replace (or append) this section in CLAUDE.md:
+
+```markdown
+## GBrain Configuration (configured by /setup-gbrain)
+- Engine: {pglite|postgres}
+- Config file: ~/.gbrain/config.json (mode 0600)
+- Setup date: {today}
+- MCP registered: {yes/no}
+- Memory sync: {off|artifacts-only|full}
+- Current repo policy: {read-write|read-only|deny|unset}
+```
+
+---
+
+## Step 9: Smoke test
 
 ```bash
-$B pair-agent --client TARGET_HOST
+SLUG="setup-gbrain-smoke-test-$(date +%s)"
+echo "Set up on $(date). Smoke test for /setup-gbrain." | gbrain put "$SLUG"
+gbrain search "smoke test" | grep -i "$SLUG"
 ```
 
-If the user also needs admin access (JS execution, cookies, storage):
+Confirms the round trip. On failure, surface `gbrain doctor --json` output
+and STOP with a NEEDS_CONTEXT escalation.
+
+---
+
+## `/setup-gbrain --cleanup-orphans` (D20)
+
+Re-collect a PAT (Step 4 path-2a scope disclosure), then:
 
 ```bash
-$B pair-agent --admin --client TARGET_HOST
+# List user's Supabase projects (user has to pipe this through their own
+# shell to review; we don't rely on a stored PAT).
+export SUPABASE_ACCESS_TOKEN="<collected from read_secret_to_env>"
+projects=$(curl -s -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+  https://api.supabase.com/v1/projects)
 ```
 
-**CRITICAL: You MUST output the full instruction block to the user.** The command
-prints everything between ═══ lines. Copy the ENTIRE block verbatim into your
-response so the user can copy-paste it into their other agent. Do NOT summarize it,
-do NOT skip it, do NOT just say "here's the output." The user needs to SEE the block
-to copy it. Output it inside a markdown code block so it's easy to select and copy.
+Parse the response, identify any project named starting with `gbrain` whose
+`ref` doesn't match the user's active `~/.gbrain/config.json` pooler URL.
+For each orphan, AskUserQuestion per project: "Delete orphan project
+`<ref>` (`<name>`, created `<created_at>`)?" — NEVER batch; per-project
+confirm is a one-way door.
 
-Then tell the user:
-"Copy the block above and paste it into your other agent's chat. The setup key
-expires in 5 minutes."
-
-**If ngrok is installed but NOT authed:** Walk the user through authentication:
-
-Tell the user:
-"ngrok is installed but not logged in. Let's fix that:
-
-1. Go to https://dashboard.ngrok.com/get-started/your-authtoken
-2. Copy your auth token
-3. Come back here and I'll run the auth command for you."
-
-STOP here and wait for the user to provide their auth token.
-
-When they provide it, run:
+On confirmed delete:
 ```bash
-ngrok config add-authtoken THEIR_TOKEN
+curl -s -X DELETE -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+  https://api.supabase.com/v1/projects/$REF
 ```
 
-Then retry `$B pair-agent --client TARGET_HOST`.
+Never delete the active brain without a second explicit confirmation.
 
-**If ngrok is NOT installed:** Walk the user through installation:
+At end: `unset SUPABASE_ACCESS_TOKEN`. Revocation reminder.
 
-Tell the user:
-"To connect a remote agent, we need ngrok (a tunnel that exposes your local
-browser to the internet securely).
+---
 
-1. Go to https://ngrok.com and sign up (free tier works)
-2. Install ngrok:
-   - macOS: `brew install ngrok`
-   - Linux: `snap install ngrok` or download from ngrok.com/download
-3. Auth it: `ngrok config add-authtoken YOUR_TOKEN`
-   (get your token from https://dashboard.ngrok.com/get-started/your-authtoken)
-4. Come back here and run `/pair-agent` again."
+## Telemetry (D4)
 
-STOP here. Wait for the user to install ngrok and re-invoke.
+The preamble's Telemetry block logs skill success/failure at exit. When
+emitting the event, add these enumerated categorical values to the
+telemetry payload (SAFE — no free-form secrets, never the URL or PAT):
 
-## Step 5: Verify connection
+- `scenario`: `supabase-existing` | `supabase-auto-provision` |
+  `supabase-manual` | `pglite-local` | `switch-to-supabase` |
+  `switch-to-pglite` | `repo-flip-only` | `cleanup-orphans` |
+  `resume-provision`
+- `install_performed`: `yes` | `no` (D5 reuse) | `skipped` (pre-existing)
+- `mcp_registered`: `yes` | `no` | `claude-missing`
+- `trust_tier_set`: `read-write` | `read-only` | `deny` |
+  `skip-for-now` | `n/a` (outside git repo)
 
-After the user pastes the instructions into the other agent, wait a moment then check:
+Never pass `SUPABASE_ACCESS_TOKEN`, `DB_PASS`, `GBRAIN_POOLER_URL`,
+`GBRAIN_DATABASE_URL`, or any `postgresql://` substring to the telemetry
+invocation. The CI grep test in `test/skill-validation.test.ts` enforces
+this at build time.
 
-```bash
-$B status
-```
+---
 
-Look for the connected agent in the status output. If it appears, tell the user:
-"The remote agent is connected and has its own tab. You'll see its activity in the
-side panel if you have GStack Browser open."
+## Important Rules
 
-## What the remote agent can do
-
-With default (read+write) access:
-- Navigate to URLs, click elements, fill forms, take screenshots
-- Read page content (text, HTML, snapshot)
-- Create new tabs (each agent gets its own)
-- Cannot execute arbitrary JavaScript, read cookies, or access storage
-
-With admin access (--admin flag):
-- Everything above, plus JS execution, cookie access, storage access
-- Use sparingly. Only for agents you fully trust.
-
-## Troubleshooting
-
-**"Tab not owned by your agent"** — The remote agent tried to interact with a tab
-it didn't create. Tell it to run `newtab` first to get its own tab.
-
-**"Domain not allowed"** — The token has domain restrictions. Re-pair with broader
-domain access or no domain restrictions.
-
-**"Rate limit exceeded"** — The agent is sending > 10 requests/second. It should
-wait for the Retry-After header and slow down.
-
-**"Token expired"** — The 24-hour session expired. Run `/pair-agent` again to
-generate a new setup key.
-
-**Agent can't reach the server** — If remote, check the ngrok tunnel is running
-(`$B status`). If local, check the browse server is running.
-
-## Platform-specific notes
-
-### OpenClaw / AlphaClaw
-
-OpenClaw agents use the `exec` tool instead of `Bash`. The instruction block uses
-`exec curl` syntax which OpenClaw understands natively. When using `--local openclaw`,
-credentials are written to `~/.openclaw/skills/gstack/browse-remote.json`.
-
-
-### Codex
-
-Codex agents can execute shell commands via `codex exec`. The instruction block's
-curl commands work directly. When using `--local codex`, credentials are written
-to `~/.codex/skills/gstack/browse-remote.json`.
-
-### Cursor
-
-Cursor's AI can run terminal commands. The instruction block works as-is.
-When using `--local cursor`, credentials are written to
-`~/.cursor/skills/gstack/browse-remote.json`.
-
-## Revoking access
-
-To disconnect a specific agent:
-
-```bash
-$B tunnel revoke AGENT_NAME
-```
-
-To disconnect all agents and rotate the root token:
-
-```bash
-# This invalidates ALL scoped tokens immediately
-$B tunnel rotate
-```
+- **One rule for every secret.** PAT, DB_PASS, pooler URL: env-var only,
+  never argv, never logged, never persisted to disk by us. The only file
+  that holds the pooler URL long-term is `~/.gbrain/config.json`, written
+  by gbrain's own `init` at mode 0600 — that's gbrain's discipline, not
+  ours.
+- **STOP points are hard.** Gbrain doctor not healthy, D19 PATH shadow, D9
+  migrate timeout, smoke test failure — each is a STOP. Do not paper over.
+- **Concurrent-run lock.** At skill start, `mkdir ~/.gstack/.setup-gbrain.lock.d`
+  (atomic). If the mkdir fails, abort with: "Another `/setup-gbrain` instance
+  is running. Wait for it, or `rm -rf ~/.gstack/.setup-gbrain.lock.d` if
+  you're sure it's stale." Release on normal exit AND in the SIGINT trap.
+- **CLAUDE.md is the audit trail.** Always update it in Step 8 after a
+  successful setup.
