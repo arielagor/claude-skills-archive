@@ -1221,12 +1221,11 @@ If multiple suites need to run, run them sequentially (each needs a test lane). 
 
 **5. Save eval output** — include eval results and cost dashboard in the PR body (Step 19).
 
-**Tier reference (for context — /ship always uses `full`):**
+**Tier reference (for context — /ship always uses `full`; Sonnet tier is banned/removed):**
 | Tier | When | Speed (cached) | Cost |
 |------|------|----------------|------|
 | `fast` (Haiku) | Dev iteration, smoke tests | ~5s (14x faster) | ~$0.07/run |
-| `standard` (Sonnet) | Default dev, `bin/test-lane --eval` | ~17s (4x faster) | ~$0.37/run |
-| `full` (Opus persona) | **`/ship` and pre-merge** | ~72s (baseline) | ~$1.27/run |
+| `full` (Opus structural + Opus persona) | Default dev AND `/ship`/pre-merge — there is no middle tier in this stack | ~72s (baseline) | ~$1.27/run |
 
 ---
 
