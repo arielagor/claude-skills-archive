@@ -128,8 +128,8 @@ List all agent specs with summary info.
 MVAT Agent Specs
 ━━━━━━━━━━━━━━━━
 Product (5 agents):
-  product-strategist  v2.1.0  Sonnet  Lead  — "Defines product strategy"
-  spec-writer         v1.0.0  Sonnet        — "Writes PRDs from strategy"
+  product-strategist  v2.1.0  Opus    Lead  — "Defines product strategy"
+  spec-writer         v1.0.0  Opus          — "Writes PRDs from strategy"
   ...
 
 Engineering (8 agents):
