@@ -19,9 +19,9 @@ Launch a specific agent to perform work.
 3. Check circuit-breaker state in `governance/circuit-breakers.json`
 4. Check rate limits in `governance/rate-limits.json`
 5. Determine the correct model tier from the agent spec frontmatter:
-   - **Opus** (`claude-opus-4-6`): architect, frontend-engineer, backend-engineer, code-reviewer, quality-sentinel, pipeline-judge, spec-evolver
-   - **Sonnet** (`claude-sonnet-4-6`): product-strategist, spec-writer, ui-designer, test-strategist, content-writer, and other content/analysis agents
-   - **Haiku** (`claude-haiku-4-5`): market-researcher, anomaly-detector, crash-reporter, budget-manager, and other read-only analysis agents
+   - **Opus** (`claude-opus-4-7`): default for any agent that produces output — architect, frontend-engineer, backend-engineer, code-reviewer, quality-sentinel, pipeline-judge, spec-evolver, product-strategist, spec-writer, ui-designer, test-strategist, content-writer, and all other content/analysis/coding agents
+   - **Haiku** (`claude-haiku-4-5-20251001`): read-only analysis only — market-researcher, anomaly-detector, crash-reporter, budget-manager
+   - **Sonnet is BANNED** in this stack. Any agent spec that frontmatter-declares Sonnet must be re-tiered to Opus before launch.
 6. Launch the agent using the Agent tool with:
    - `subagent_type` matching the agent name
    - `model` matching the tier from the spec
