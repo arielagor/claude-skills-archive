@@ -158,6 +158,7 @@ Every agent spec MUST include:
 - Ambiguous authority phrases: "try to", "if possible", "generally", "when appropriate"
 - Missing NEVER boundaries
 - Haiku agents with write authority over content/code
+- Sonnet agents (Sonnet is banned in this stack — use Opus for any agent that produces output)
 - Agents that can modify their own spec
 - Interactive tool usage (AskUserQuestion, EnterPlanMode) in pipeline agents
 
@@ -165,5 +166,4 @@ Every agent spec MUST include:
 | Tier | Can Write Code | Can Write Content | Can Gate | Can Analyze |
 |------|---------------|-------------------|----------|-------------|
 | Opus | ✓ | ✓ | ✓ | ✓ |
-| Sonnet | ✗ | ✓ | ✗ | ✓ |
 | Haiku | ✗ | ✗ | ✗ | ✓ |
