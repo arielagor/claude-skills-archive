@@ -19,8 +19,8 @@ Launch a specific agent to perform work.
 3. Check circuit-breaker state in `governance/circuit-breakers.json`
 4. Check rate limits in `governance/rate-limits.json`
 5. Determine the correct model tier from the agent spec frontmatter:
-   - **Opus** (`claude-opus-4-7`): default for any agent that produces output — architect, frontend-engineer, backend-engineer, code-reviewer, quality-sentinel, pipeline-judge, spec-evolver, product-strategist, spec-writer, ui-designer, test-strategist, content-writer, and all other content/analysis/coding agents
-   - **Haiku** (`claude-haiku-4-5-20251001`): read-only analysis only — market-researcher, anomaly-detector, crash-reporter, budget-manager
+   - **Opus** (alias `opus`): default for any agent that produces output — architect, frontend-engineer, backend-engineer, code-reviewer, quality-sentinel, pipeline-judge, spec-evolver, product-strategist, spec-writer, ui-designer, test-strategist, content-writer, and all other content/analysis/coding agents
+   - **Haiku** (alias `haiku`): read-only analysis only — market-researcher, anomaly-detector, crash-reporter, budget-manager
    - **Sonnet is BANNED** in this stack. Any agent spec that frontmatter-declares Sonnet must be re-tiered to Opus before launch.
 6. Launch the agent using the Agent tool with:
    - `subagent_type` matching the agent name
@@ -116,8 +116,8 @@ Reset an agent's circuit breaker and rate limits.
 
 | Tier | Model | Use Case | Agents |
 |------|-------|----------|--------|
-| Opus | `claude-opus-4-7` | Default for any agent that produces output (code, content, analysis, gating) | architect, frontend-engineer, backend-engineer, code-reviewer, quality-sentinel, pipeline-judge, spec-evolver, product-strategist, spec-writer, ui-designer, test-strategist, content-writer, + all other producing agents |
-| Haiku | `claude-haiku-4-5-20251001` | Read-only analysis, reporting | market-researcher, anomaly-detector, budget-manager, + 10 more |
+| Opus | alias `opus` | Default for any agent that produces output (code, content, analysis, gating) | architect, frontend-engineer, backend-engineer, code-reviewer, quality-sentinel, pipeline-judge, spec-evolver, product-strategist, spec-writer, ui-designer, test-strategist, content-writer, + all other producing agents |
+| Haiku | alias `haiku` | Read-only analysis, reporting | market-researcher, anomaly-detector, budget-manager, + 10 more |
 
 **Rules:**
 - Sonnet is BANNED in this stack. Any agent specifying Sonnet must be re-tiered to Opus.
