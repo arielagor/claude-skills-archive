@@ -66,18 +66,19 @@ Sets a meaningful custom title on the current session's `.jsonl` so that `claude
    ```
    Then verify by reading back the last line.
 
-7. **Communicate that the rename is already done.** The JSONL write IS the rename for every future `--resume` and `/resume` picker — `verified: true` from step 6 means it's persistent and durable. Nothing else is required for the rename to "work."
+7. **Confirm both writes succeeded.** `rename.mjs --title` now does two writes, not one:
 
-   The native `/rename` command's only *additional* effect is updating the in-memory window/tab title of the CURRENT terminal session. That update is purely cosmetic and dies when the session exits. **Skills cannot invoke `/rename` — slash commands are intercepted by the Claude Code harness layer before any tool or model can act on them; there is no `SlashCommand` tool, no IPC into the running REPL, and no documented way around this as of the current CLI.**
+   - **Durable rename** — appends `{"type":"custom-title", ...}` to the session's `.jsonl`. Drives the `--resume` / `/resume` picker forever.
+   - **Live rename** — patches the `name` field of `~/.claude/sessions/<pid>.json` (the live-session registry the remote bridge reads). Drives remote dashboards and any view of currently-running sessions.
 
-   So end the response with one short, factual statement plus the slash command on its own final line, for users who want the cosmetic in-session title sync:
+   Together those two writes do everything `/rename` does. The slash command is no longer needed.
 
-   ```
-   Persistent rename done (verified in jsonl). Optional cosmetic sync for this window:
-   /rename <chosen title>
-   ```
+   Check the script's JSON output for both:
+   - `verified: true` → jsonl write OK
+   - `liveRegistry.updated: true` → registry patch OK (with `path`, `pid`, `bridgeSessionId`)
+   - `liveRegistry.updated: false` → no live registry entry found; surface the `reason` field. Common reasons: session started in `--bare` / `--no-session-persistence` mode (no registry file), or the registry layout changed in a CLI update.
 
-   Put the `/rename <chosen title>` line as the absolute last line of the response with no trailing prose — that way the user can triple-click and paste with one motion. Do NOT promise auto-execution or frame the manual step as a failure — it's a deliberate architectural boundary, and the persistent rename already worked.
+   In your reply to the user, confirm both writes plainly — e.g. *"Renamed in jsonl (resume picker) and in live registry (remote bridge). Done."* Don't tell the user to run `/rename` themselves; it's redundant and they'll think the script failed.
 
 ## Hard rules (mirrors CLAUDE.md "No fabrication")
 
