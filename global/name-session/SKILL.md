@@ -80,6 +80,18 @@ Sets a meaningful custom title on the current session's `.jsonl` so that `claude
 
    In your reply to the user, confirm both writes plainly — e.g. *"Renamed in jsonl (resume picker) and in live registry (remote bridge). Done."* Don't tell the user to run `/rename` themselves; it's redundant and they'll think the script failed.
 
+8. **Emit the copy-paste fleet-sync line.** The local script can only touch THIS session. Ariel runs parallel sessions on his Mac, remote workers, and other windows that all need the same title. So the very last line of your response MUST be a bare `/rename <title>` line — paste-ready for those other sessions.
+
+   - The line goes LAST in the response (easiest to grab with cursor-to-end-then-shift-home).
+   - The title must match what was just written character-for-character, middots and all.
+   - No code fences around it. No quotes. No commentary on the same line. Just:
+
+   ```
+   /rename 2026-05-13 · agor.me · ship sierra-style artifact pipeline
+   ```
+
+   (that's the example shape — substitute the real title)
+
 ## Hard rules (mirrors CLAUDE.md "No fabrication")
 
 - **Never invent project context.** If the session didn't touch a named project, the `where` slot is the cwd basename (e.g. `~/.claude/skills`), not a guess.
