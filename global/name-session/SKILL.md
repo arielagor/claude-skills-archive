@@ -66,11 +66,18 @@ Sets a meaningful custom title on the current session's `.jsonl` so that `claude
    ```
    Then verify by reading back the last line.
 
-7. **Live-rename the window.** The Skill tool cannot invoke `/rename` — it's a UI command only. After writing the JSONL, output this exact line for the user to run:
+7. **Communicate that the rename is already done.** The JSONL write IS the rename for every future `--resume` and `/resume` picker — `verified: true` from step 6 means it's persistent and durable. Nothing else is required for the rename to "work."
 
-   > Run: `/rename <chosen title>`
+   The native `/rename` command's only *additional* effect is updating the in-memory window/tab title of the CURRENT terminal session. That update is purely cosmetic and dies when the session exits. **Skills cannot invoke `/rename` — slash commands are intercepted by the Claude Code harness layer before any tool or model can act on them; there is no `SlashCommand` tool, no IPC into the running REPL, and no documented way around this as of the current CLI.**
 
-   Explain: the JSONL write handles `--resume` history; the `/rename` command handles the live window title. Both are needed.
+   So end the response with one short, factual statement plus the slash command on its own final line, for users who want the cosmetic in-session title sync:
+
+   ```
+   Persistent rename done (verified in jsonl). Optional cosmetic sync for this window:
+   /rename <chosen title>
+   ```
+
+   Put the `/rename <chosen title>` line as the absolute last line of the response with no trailing prose — that way the user can triple-click and paste with one motion. Do NOT promise auto-execution or frame the manual step as a failure — it's a deliberate architectural boundary, and the persistent rename already worked.
 
 ## Hard rules (mirrors CLAUDE.md "No fabrication")
 
