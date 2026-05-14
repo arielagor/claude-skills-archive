@@ -57,7 +57,20 @@ Sets a meaningful custom title on the current session's `.jsonl` so that `claude
 
    The script auto-detects the current session, appends the `custom-title` JSONL line, and reads it back to verify. It prints a JSON result with `previousTitle`, `newTitle`, and `verified: true`. If `verified` is anything else, surface the error — do not retry blindly.
 
-7. **Confirm to the user** with the new title and a one-sentence note that it'll appear in `claude --resume` from here on.
+   If the script fails due to wrong cwd (error mentions a different project folder than expected), fall back to directly appending the JSONL line via Node:
+   ```js
+   const fs = require('fs');
+   const path = '<resolved .jsonl path>';
+   const line = JSON.stringify({type:'custom-title',customTitle:'<title>',sessionId:'<uuid>'});
+   fs.appendFileSync(path, '\n' + line);
+   ```
+   Then verify by reading back the last line.
+
+7. **Live-rename the window.** The Skill tool cannot invoke `/rename` — it's a UI command only. After writing the JSONL, output this exact line for the user to run:
+
+   > Run: `/rename <chosen title>`
+
+   Explain: the JSONL write handles `--resume` history; the `/rename` command handles the live window title. Both are needed.
 
 ## Hard rules (mirrors CLAUDE.md "No fabrication")
 
