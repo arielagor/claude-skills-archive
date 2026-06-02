@@ -61,6 +61,12 @@ attachments in one line. Follow the JD's literal "how to apply" instructions
 (recipient, required links, required attachments). Prefer the user's own send unless
 they explicitly delegate it.
 
+**Embedded ATS forms (Greenhouse / Lever / Ashby) usually can't be filled or
+submitted by browser automation** — cross-origin iframe + native file-picker for the
+required résumé. The apply/submit is the user's; pre-fill only what you can verify,
+hand off a field guide + résumé path, and never blind-submit a form you can't read.
+Try the canonical top-level board URL first. See playbook §5.
+
 ## Hard rules carried from the playbook
 
 - **Ground every claim in verifiable evidence** — live products, public repos,
