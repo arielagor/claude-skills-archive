@@ -30,10 +30,12 @@ AGOR AI · INTELLIGENCE REIMAGINED
 agor.me · ariel@agor.me · +1 732 915 7808 · Los Angeles
 ```
 
-The rich HTML version (gradient rule + wordmark, for a draft's `htmlBody`) lives beside
-this file as `agor-ai-advisory-signature.html` (and `.txt` for plain). Send business email
-**from `ariel@agor.me`** (set it as the default "Send mail as" address in Gmail so new
-drafts default to it).
+Rich HTML versions live beside this file. **The STANDARD is the animated gradient**
+(`agor-ai-advisory-signature.html`, hosted GIF) — use it where the `<img>` survives: Ariel's
+Gmail Signature setting, or raw-HTML/SMTP sends. **For a draft Ariel reviews-then-sends, use
+the draft-safe `agor-ai-advisory-signature-solid.html`** instead (solid-cell gradient,
+identical look, static) because Gmail strips external images when a draft is sent from compose.
+Send business email **from `ariel@agor.me`** (set it as the default "Send mail as" in Gmail).
 
 ### Sign-off Lines (pick contextually)
 - **Casual/fun**: `Sent from a rectangle`
