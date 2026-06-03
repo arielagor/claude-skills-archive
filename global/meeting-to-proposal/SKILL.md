@@ -42,9 +42,12 @@ State the resolved client + meeting back in one line, then continue.
 
 1. **`ingest` + `extract-client-spec` (Iron Law, §1)** — the full transcript + notes
    into context. Build the ask-list quoted verbatim: asks, explicit non-asks,
-   constraints, decision-makers, aligned decisions. Then gather Ariel's real evidence:
-   GBrain (`mcp__gbrain__query`), `agor.me/portfolio`, app/store links, repos, books,
-   frameworks. Never draft from a summary of either text.
+   constraints, decision-makers, aligned decisions. **Build the Proper-Noun Ledger
+   (§1.1)** — every person/company/product/place name with its source; cross-check each
+   against email domains / the company website / GBrain; surface the still-UNVERIFIED
+   names to Ariel for a 30-second confirm before render. Then gather Ariel's real
+   evidence: GBrain (`mcp__gbrain__query`), `agor.me/portfolio`, app/store links, repos,
+   books, frameworks. Never draft from a summary of either text.
 2. **`organize-folder`** — ensure `…\potential consulting projects clients\<Ariel Agor
    & Name>\` with `meetings\`, `proposals\`, and a `README.md` dossier (template §10.1);
    file the meeting (notes / transcript / recording pointer) if not already filed.
@@ -89,3 +92,7 @@ sent**. Prefer Ariel's own send. Never auto-send.
 - Don't over-claim a domain to fill a slot — flag the ramp honestly instead.
 - Don't put "fire your team" or "replace your vendor" in writing — augmentation framing only.
 - Don't promise a % / $ lift without the client's baseline — promise measurement.
+- Don't trust a proper noun from an auto-transcript — verify every person/company/product
+  name against a non-transcript source (email domain, website, GBrain) or confirm it with
+  Ariel before it ships (§1.1). A misheard client/decision-maker name in a partner-facing
+  doc is the worst, most avoidable error.
