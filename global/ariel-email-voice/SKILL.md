@@ -181,9 +181,11 @@ Sent from a rectangle
 - Numbered lists for multi-step processes or ranked items
 - Bullet points (•) for analytical breakdowns
 - Clear section headers in long professional emails
-- Em dashes for asides or elaboration
+- For asides or elaboration, use a comma, colon, parentheses, or a new sentence
 
 ### Avoid
+- **Em-dashes (—). Never use them in emails** (Ariel's explicit rule, 2026-06-03). Recast
+  with a comma, colon, period, or parentheses — never just swap in an en-dash or hyphen.
 - Excessive pleasantries ("I hope this email finds you well...")
 - Unnecessary hedging in professional contexts
 - Generic sign-offs that don't match Ariel's style
