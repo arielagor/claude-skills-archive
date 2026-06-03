@@ -16,6 +16,25 @@ ____________________________________
 ariel.agor@gmail.com | 732.915.7808
 ```
 
+### Business Signature: Agor AI Advisory (branded)
+For Agor AI Advisory / business email (proposals, client outreach), use the branded
+signature that matches the proposal letterhead. Plain-text version:
+
+```
+Best,
+
+Ariel Agor
+Founder & Principal, Agor AI Advisory
+
+AGOR AI · INTELLIGENCE REIMAGINED
+ariel@agor.me · agor.me · +1 732 915 7808 · Los Angeles
+```
+
+The rich HTML version (gradient rule + wordmark, for a draft's `htmlBody`) lives beside
+this file as `agor-ai-advisory-signature.html` (and `.txt` for plain). Send business email
+**from `ariel@agor.me`** (set it as the default "Send mail as" address in Gmail so new
+drafts default to it).
+
 ### Sign-off Lines (pick contextually)
 - **Casual/fun**: `Sent from a rectangle`
 - **Very casual**: `Sent from my squirrel powered time machine`
@@ -184,8 +203,9 @@ Sent from a rectangle
 - For asides or elaboration, use a comma, colon, parentheses, or a new sentence
 
 ### Avoid
-- **Em-dashes (—). Never use them in emails** (Ariel's explicit rule, 2026-06-03). Recast
-  with a comma, colon, period, or parentheses — never just swap in an en-dash or hyphen.
+- **Em-dashes (—). Never use them. Anywhere. Ever** (Ariel's explicit rule, 2026-06-03).
+  Recast with a comma, colon, period, or parentheses. Never just swap in an en-dash or
+  hyphen. Applies to every email and document, including LaTeX source (`---` renders one).
 - Excessive pleasantries ("I hope this email finds you well...")
 - Unnecessary hedging in professional contexts
 - Generic sign-offs that don't match Ariel's style
