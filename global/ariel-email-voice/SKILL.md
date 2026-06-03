@@ -27,7 +27,7 @@ Ariel Agor
 Founder & Principal, Agor AI Advisory
 
 AGOR AI · INTELLIGENCE REIMAGINED
-ariel@agor.me · agor.me · +1 732 915 7808 · Los Angeles
+agor.me · ariel@agor.me · +1 732 915 7808 · Los Angeles
 ```
 
 The rich HTML version (gradient rule + wordmark, for a draft's `htmlBody`) lives beside
