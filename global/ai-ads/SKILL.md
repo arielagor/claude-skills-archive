@@ -1,6 +1,6 @@
 ---
 name: ai-ads
-description: Agor AI Ads — the authority + productized agency for advertising on AI assistants (ChatGPT, Google AI Mode/Overviews, Copilot, and more). Use when Ariel types "/ai-ads", asks to "run an AI ads audit", "refresh the AI ads landscape / KB", "draft an AI ads guide / content", "map AI ad surfaces for <brand>", "plan an AI ads campaign", or asks anything about advertising on AI assistants. Two engines: AUTHORITY (a living citation-verified knowledge base + content/SEO/GEO flywheel) and DELIVERY (an 8-stage campaign pipeline with a human-in-the-loop gate on every action that spends money). Public-information only; no NDA exposure. Never spends, publishes, or sends without Ariel's explicit go.
+description: Agor AI Ads — the answer-visibility (and ads) agency for AI assistants (ChatGPT, Google AI Mode/Overviews, Copilot, and more). Visibility-first: get the brand recommended/cited in the AI answer (organic GEO/AEO), buy the high-intent ad slot where the surface is live. Use when Ariel types "/ai-ads", asks to "run an AI visibility audit / AI ads audit", "refresh the AI ads landscape / KB", "draft an AI ads / AI visibility guide", "map AI ad surfaces for <brand>", "plan an AI ads campaign", or asks anything about getting recommended in or advertising on AI assistants. Two engines: AUTHORITY (a living citation-verified knowledge base + content/SEO/GEO flywheel) and DELIVERY (an 8-stage campaign pipeline with a human-in-the-loop gate on every action that spends money). Public-information only; no NDA exposure. Never spends, publishes, or sends without Ariel's explicit go.
 ---
 
 # /ai-ads — Agor AI Ads
@@ -29,10 +29,11 @@ The venture repo is `~/.claude/projects/ventures/ai-ads-agency/` (GitHub
 
 Invoked as `/ai-ads <subcommand> [args]`. Route:
 
-- **`audit <brand or URL>`** → run the **AI Ads Visibility Audit** (playbook §5). The first
-  paid rung, zero spend at risk. Read the KB for live surfaces, research the brand's public
-  footprint + category queries, produce the audit on Agor AI letterhead
-  (`templates/audit-report.md`). STOP before sending anything to a client.
+- **`audit <brand or URL>`** → run the **AI Visibility Audit (organic + paid)** (playbook §5).
+  The first paid rung, zero spend at risk. Lead with answer-visibility (is the brand cited /
+  recommended in the AI answer?), then the paid slots where the surface is live. Read the KB for
+  live surfaces, research the brand's public footprint + category queries, produce the audit on
+  Agor AI letterhead (`templates/audit-report.md`). STOP before sending anything to a client.
 
 - **`campaign <client>`** → run the **delivery pipeline** (playbook §4) via
   `workflow/client-delivery.workflow.js`. Eight named stages. **Hard STOP for human approval

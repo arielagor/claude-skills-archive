@@ -1,26 +1,32 @@
 ---
-name: canary
+name: sync-gbrain
 preamble-tier: 2
 version: 1.0.0
-description: |
-  Post-deploy canary monitoring. Watches the live app for console errors,
-  performance regressions, and page failures using the browse daemon. Takes
-  periodic screenshots, compares against pre-deploy baselines, and alerts
-  on anomalies. Use when: "monitor deploy", "canary", "post-deploy check",
-  "watch production", "verify deploy". (gstack)
+description: Keep gbrain current with this repo's code and refresh agent search guidance in CLAUDE.md. Wraps the gstack-gbrain-sync orchestrator with state (gstack)
+triggers:
+  - sync gbrain
+  - refresh gbrain
+  - reindex repo
+  - update gbrain
 allowed-tools:
   - Bash
   - Read
   - Write
+  - Edit
   - Glob
+  - Grep
   - AskUserQuestion
-triggers:
-  - monitor after deploy
-  - canary check
-  - watch for errors post-deploy
 ---
 <!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly -->
 <!-- Regenerate: bun run gen:skill-docs -->
+
+
+## When to invoke this skill
+
+probing, native code-surface registration, capability checks,
+and a verdict block. Re-runnable, idempotent. Use when: "sync gbrain",
+"refresh gbrain", "re-index this repo", "gbrain search isn't finding
+things".
 
 ## Preamble (run first)
 
@@ -57,7 +63,7 @@ _QUESTION_TUNING=$(~/.claude/skills/gstack/bin/gstack-config get question_tuning
 echo "QUESTION_TUNING: $_QUESTION_TUNING"
 mkdir -p ~/.gstack/analytics
 if [ "$_TEL" != "off" ]; then
-echo '{"skill":"canary","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(_repo=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null | tr -cd 'a-zA-Z0-9._-'); echo "${_repo:-unknown}")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
+echo '{"skill":"sync-gbrain","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(_repo=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null | tr -cd 'a-zA-Z0-9._-'); echo "${_repo:-unknown}")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
 fi
 for _PF in $(find ~/.gstack/analytics -maxdepth 1 -name '.pending-*' 2>/dev/null); do
   if [ -f "$_PF" ]; then
@@ -79,7 +85,7 @@ if [ -f "$_LEARN_FILE" ]; then
 else
   echo "LEARNINGS: 0"
 fi
-~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"canary","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
+~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"sync-gbrain","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
 _HAS_ROUTING="no"
 if [ -f CLAUDE.md ] && grep -q "## Skill routing" CLAUDE.md 2>/dev/null; then
   _HAS_ROUTING="yes"
@@ -648,7 +654,7 @@ Before each AskUserQuestion, choose `question_id` from `scripts/question-registr
 
 After answer, log best-effort (PostToolUse hook also captures deterministically when installed; dedup on (source, tool_use_id) handles double-writes):
 ```bash
-~/.claude/skills/gstack/bin/gstack-question-log '{"skill":"canary","question_id":"<id>","question_summary":"<short>","category":"<approval|clarification|routing|cherry-pick|feedback-loop>","door_type":"<one-way|two-way>","options_count":N,"user_choice":"<key>","recommended":"<key>","session_id":"'"$_SESSION_ID"'"}' 2>/dev/null || true
+~/.claude/skills/gstack/bin/gstack-question-log '{"skill":"sync-gbrain","question_id":"<id>","question_summary":"<short>","category":"<approval|clarification|routing|cherry-pick|feedback-loop>","door_type":"<one-way|two-way>","options_count":N,"user_choice":"<key>","recommended":"<key>","session_id":"'"$_SESSION_ID"'"}' 2>/dev/null || true
 ```
 
 For two-way questions, offer: "Tune this question? Reply `tune: never-ask`, `tune: always-ask`, or free-form."
@@ -715,275 +721,355 @@ Replace `SKILL_NAME`, `OUTCOME`, and `USED_BROWSE` before running.
 
 Skills that run plan reviews (`/plan-*-review`, `/codex review`) include the EXIT PLAN MODE GATE blocking checklist at the end of the skill, which verifies the plan file ends with `## GSTACK REVIEW REPORT` before ExitPlanMode is called. Skills that don't run plan reviews (operational skills like `/ship`, `/qa`, `/review`) typically don't operate in plan mode and have no review report to verify; this footer is a no-op for them. Writing the plan file is the one edit allowed in plan mode.
 
-## SETUP (run this check BEFORE any browse command)
+# /sync-gbrain — Keep gbrain current and teach the agent to use it
 
-```bash
-_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-B=""
-[ -n "$_ROOT" ] && [ -x "$_ROOT/.claude/skills/gstack/browse/dist/browse" ] && B="$_ROOT/.claude/skills/gstack/browse/dist/browse"
-[ -z "$B" ] && B="$HOME/.claude/skills/gstack/browse/dist/browse"
-if [ -x "$B" ]; then
-  echo "READY: $B"
-else
-  echo "NEEDS_SETUP"
-fi
-```
+You are running the canonical "keep this brain up to date" verb. /setup-gbrain
+installs gbrain once; /sync-gbrain runs every time the user wants the brain
+refreshed against this repo's current state, and refreshes the agent-side
+guidance in CLAUDE.md so the coding agent knows when to prefer `gbrain`
+search over Grep.
 
-If `NEEDS_SETUP`:
-1. Tell the user: "gstack browse needs a one-time build (~10 seconds). OK to proceed?" Then STOP and wait.
-2. Run: `cd <SKILL_DIR> && ./setup`
-3. If `bun` is not installed:
-   ```bash
-   if ! command -v bun >/dev/null 2>&1; then
-     BUN_VERSION="1.3.10"
-     BUN_INSTALL_SHA="bab8acfb046aac8c72407bdcce903957665d655d7acaa3e11c7c4616beae68dd"
-     tmpfile=$(mktemp)
-     curl -fsSL "https://bun.sh/install" -o "$tmpfile"
-     actual_sha=$(shasum -a 256 "$tmpfile" | awk '{print $1}')
-     if [ "$actual_sha" != "$BUN_INSTALL_SHA" ]; then
-       echo "ERROR: bun install script checksum mismatch" >&2
-       echo "  expected: $BUN_INSTALL_SHA" >&2
-       echo "  got:      $actual_sha" >&2
-       rm "$tmpfile"; exit 1
-     fi
-     BUN_VERSION="$BUN_VERSION" bash "$tmpfile"
-     rm "$tmpfile"
-   fi
-   ```
+**Architecture (post-codex review):** This skill uses gbrain v0.20.0+'s
+**native code surfaces** (`gbrain sources add`, `gbrain sync --strategy code`,
+`gbrain reindex-code`, `gbrain code-def/code-refs/code-callers/code-callees`).
+It does NOT use `gbrain import` (that path is for markdown directories).
+It does NOT touch `~/.gstack/` indexing (the existing `gstack-gbrain-source-wireup`
+owns that — never double-store).
 
-## Step 0: Detect platform and base branch
+## User-invocable
 
-First, detect the git hosting platform from the remote URL:
+When the user types `/sync-gbrain`, run this skill. Argument modes (parsed by
+the skill itself, not a dispatcher binary):
 
-```bash
-git remote get-url origin 2>/dev/null
-```
+- `/sync-gbrain` — incremental sync (default; mtime fast-path; ~50ms steady-state)
+- `/sync-gbrain --full` — full code reindex via `gbrain reindex-code` (~25-35 min on a big repo)
+- `/sync-gbrain --code-only` — only run the code stage; skip memory + brain-sync
+- `/sync-gbrain --dry-run` — preview what would sync; no writes anywhere
+- `/sync-gbrain --no-memory` / `--no-brain-sync` — selectively skip stages
+- `/sync-gbrain --quiet` — suppress per-stage output
+- `/sync-gbrain --refresh-cache` — force-rebuild brain-aware planning cache (v1.48; replaces /brain-refresh-context per D1 fold). Skips code + memory stages; routes to `gstack-brain-cache refresh --project <slug>`.
+- `/sync-gbrain --audit` — emit summary of gstack-owned pages per project + sensitive-content audit (v1.48 / D10 lifecycle). Read-only.
 
-- If the URL contains "github.com" → platform is **GitHub**
-- If the URL contains "gitlab" → platform is **GitLab**
-- Otherwise, check CLI availability:
-  - `gh auth status 2>/dev/null` succeeds → platform is **GitHub** (covers GitHub Enterprise)
-  - `glab auth status 2>/dev/null` succeeds → platform is **GitLab** (covers self-hosted)
-  - Neither → **unknown** (use git-native commands only)
+Pass-through args go straight to the orchestrator at
+`~/.claude/skills/gstack/bin/gstack-gbrain-sync.ts`.
 
-Determine which branch this PR/MR targets, or the repo's default branch if no
-PR/MR exists. Use the result as "the base branch" in all subsequent steps.
+**`--refresh-cache` short-circuit:** when this flag is present, the skill
+runs ONLY the cache refresh (`gstack-brain-cache refresh --project <slug>`
+for the current worktree's slug, plus a cross-project refresh of
+user-profile if `gstack/user-profile/<user-slug>` exists). Code +
+memory + brain-sync stages are skipped. Useful when the user knows the
+brain has new info gstack should pick up before the next planning skill.
 
-**If GitHub:**
-1. `gh pr view --json baseRefName -q .baseRefName` — if succeeds, use it
-2. `gh repo view --json defaultBranchRef -q .defaultBranchRef.name` — if succeeds, use it
-
-**If GitLab:**
-1. `glab mr view -F json 2>/dev/null` and extract the `target_branch` field — if succeeds, use it
-2. `glab repo view -F json 2>/dev/null` and extract the `default_branch` field — if succeeds, use it
-
-**Git-native fallback (if unknown platform, or CLI commands fail):**
-1. `git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'`
-2. If that fails: `git rev-parse --verify origin/main 2>/dev/null` → use `main`
-3. If that fails: `git rev-parse --verify origin/master 2>/dev/null` → use `master`
-
-If all fail, fall back to `main`.
-
-Print the detected base branch name. In every subsequent `git diff`, `git log`,
-`git fetch`, `git merge`, and PR/MR creation command, substitute the detected
-branch name wherever the instructions say "the base branch" or `<default>`.
+**`--audit` short-circuit:** when this flag is present, the skill runs
+`gstack-brain-cache list --project <slug> --json`, summarizes by page
+type, then scans for any cached salience entries that ended up outside
+the SALIENCE_DEFAULT_ALLOWLIST (T17 / D9 leak check). Read-only; no
+modifications to brain or cache.
 
 ---
 
-# /canary — Post-Deploy Visual Monitor
+## Step 1: State probe
 
-You are a **Release Reliability Engineer** watching production after a deploy. You've seen deploys that pass CI but break in production — a missing environment variable, a CDN cache serving stale assets, a database migration that's slower than expected on real data. Your job is to catch these in the first 10 minutes, not 10 hours.
-
-You use the browse daemon to watch the live app, take screenshots, check console errors, and compare against baselines. You are the safety net between "shipped" and "verified."
-
-## User-invocable
-When the user types `/canary`, run this skill.
-
-## Arguments
-- `/canary <url>` — monitor a URL for 10 minutes after deploy
-- `/canary <url> --duration 5m` — custom monitoring duration (1m to 30m)
-- `/canary <url> --baseline` — capture baseline screenshots (run BEFORE deploying)
-- `/canary <url> --pages /,/dashboard,/settings` — specify pages to monitor
-- `/canary <url> --quick` — single-pass health check (no continuous monitoring)
-
-## Instructions
-
-### Phase 1: Setup
+Before doing anything, check that /setup-gbrain has been run on this Mac.
 
 ```bash
-eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null || echo "SLUG=unknown")"
-mkdir -p .gstack/canary-reports
-mkdir -p .gstack/canary-reports/baselines
-mkdir -p .gstack/canary-reports/screenshots
+~/.claude/skills/gstack/bin/gstack-gbrain-detect 2>/dev/null
 ```
 
-Parse the user's arguments. Default duration is 10 minutes. Default pages: auto-discover from the app's navigation.
-
-### Phase 2: Baseline Capture (--baseline mode)
-
-If the user passed `--baseline`, capture the current state BEFORE deploying.
-
-For each page (either from `--pages` or the homepage):
+**Brain trust policy gate (v1.48 / Phase 1.5 / D4 — added by T13+T5c):**
+If `gbrain_mcp_mode == "remote-http"` from the detect output AND the per-
+endpoint policy is `unset`, the policy question MUST fire here before
+the orchestrator runs. Local engines auto-set to `personal` silently per
+the per-transport default table.
 
 ```bash
-$B goto <page-url>
-$B snapshot -i -a -o ".gstack/canary-reports/baselines/<page-name>.png"
-$B console --errors
-$B perf
-$B text
+_HASH=$(~/.claude/skills/gstack/bin/gstack-config endpoint-hash 2>/dev/null)
+_POLICY=$(~/.claude/skills/gstack/bin/gstack-config get brain_trust_policy@$_HASH 2>/dev/null || echo unset)
+echo "BRAIN_TRUST_POLICY[$_HASH]: $_POLICY"
 ```
 
-Collect for each page: screenshot path, console error count, page load time from `perf`, and a text content snapshot.
+If `_POLICY == "unset"` AND `_HASH != "local"`, AskUserQuestion per the
+Step 9.5 wording in `/setup-gbrain` (personal vs shared, with persistence
+to `brain_trust_policy@<hash>` and conditional `artifacts_sync_mode=full`
+flip for personal). Then continue.
 
-Save the baseline manifest to `.gstack/canary-reports/baseline.json`:
-
-```json
-{
-  "url": "<url>",
-  "timestamp": "<ISO>",
-  "branch": "<current branch>",
-  "pages": {
-    "/": {
-      "screenshot": "baselines/home.png",
-      "console_errors": 0,
-      "load_time_ms": 450
-    }
-  }
-}
-```
-
-Then STOP and tell the user: "Baseline captured. Deploy your changes, then run `/canary <url>` to monitor."
-
-### Phase 3: Page Discovery
-
-If no `--pages` were specified, auto-discover pages to monitor:
+If `_POLICY == "unset"` AND `_HASH == "local"`, auto-set personal:
 
 ```bash
-$B goto <url>
-$B links
-$B snapshot -i
+~/.claude/skills/gstack/bin/gstack-config set brain_trust_policy@$_HASH personal
 ```
 
-Extract the top 5 internal navigation links from the `links` output. Always include the homepage. Present the page list via AskUserQuestion:
+**Split-engine model (v1.34.0.0+).** Code stage runs locally against the
+per-machine gbrain engine (PGLite or whatever `gbrain config` points to),
+with each worktree of a repo registered as its own source. **Memory stage
+also runs locally** in local-stdio MCP mode — `gstack-memory-ingest` shells
+out to `gbrain import` against the same local engine. In remote-http MCP
+mode (Path 4), the memory stage instead persists staged markdown to
+`~/.gstack/transcripts/<run-id>/` and the artifacts pipeline pushes it to
+the brain admin's pull job (plan D11). Brain-sync (the `gstack-brain-sync`
+push to git) is the one stage that never touches local engine and runs
+regardless of mode.
 
-- **Context:** Monitoring the production site at the given URL after a deploy.
-- **Question:** Which pages should the canary monitor?
-- **RECOMMENDATION:** Choose A — these are the main navigation targets.
-- A) Monitor these pages: [list the discovered pages]
-- B) Add more pages (user specifies)
-- C) Monitor homepage only (quick check)
+Practically: local PGLite stays code-only on remote-http machines; the
+remote brain holds everything else. Local-stdio machines mix code +
+transcripts in one local engine, as they always have.
 
-### Phase 4: Pre-Deploy Snapshot (if no baseline exists)
+Also check the per-repo trust policy. If `gstack-gbrain-repo-policy get` for
+this repo returns `deny`, STOP:
 
-If no `baseline.json` exists, take a quick snapshot now as a reference point.
+> "This repo's gbrain trust policy is `deny`. Run `/setup-gbrain --repo` to
+> change it before syncing."
 
-For each page to monitor:
+---
+
+## Step 1.5: Local engine pre-flight (plan D12)
+
+Read `gbrain_local_status` from the Step 1 detect output. Branch as follows
+BEFORE invoking the orchestrator:
+
+- **`ok`**: proceed to Step 2 normally.
+- **`no-cli`**: STOP. "Local gbrain CLI not installed. Run `/setup-gbrain`
+  first."
+- **`missing-config`** AND `gbrain_mcp_mode == "remote-http"`: tell the user
+  "Your brain queries (the `mcp__gbrain__*` tools) work via remote MCP, but
+  symbol code search needs a local PGLite. Run `/setup-gbrain` and pick
+  'Yes' at the new 'local code index' prompt (Step 4.5), or run
+  `gbrain init --pglite --json --embedding-model voyage:voyage-code-3 --embedding-dimensions 1024`
+  directly (drop the voyage flags if `VOYAGE_API_KEY` isn't set). Continuing
+  without code stage."
+  Then proceed to Step 2 — the orchestrator's `runCodeImport()` and
+  `runMemoryIngest()` will return SKIP per plan D12; only `runBrainSyncPush()`
+  will run. Do NOT abort.
+- **`missing-config`** AND `gbrain_mcp_mode != "remote-http"`: STOP. "Local
+  gbrain CLI is installed but no engine config. Run `/setup-gbrain` first."
+- **`broken-config`** OR **`broken-db`**: STOP with a clear message:
+  ```
+  Local gbrain config at ~/.gbrain/config.json points at an unreachable
+  engine (status: {gbrain_local_status}). Two options:
+    1. Re-run /setup-gbrain — Step 1.5 offers Retry / Switch to PGLite /
+       Switch brain mode / Quit (plan D4).
+    2. Repair manually: mv ~/.gbrain/config.json ~/.gbrain/config.json.bak
+       && gbrain init --pglite --json --embedding-model voyage:voyage-code-3 \
+          --embedding-dimensions 1024   (drop voyage flags if VOYAGE_API_KEY unset)
+  Re-run /sync-gbrain after.
+  ```
+  Do NOT continue — the orchestrator would skip code+memory and only run
+  brain-sync, which is a degraded state the user should fix explicitly.
+
+This pre-flight short-circuits the orchestrator before it spends ~80ms
+probing the engine again. The orchestrator independently runs the same
+classifier for defense-in-depth, but Step 1.5's STOP is where the user
+gets the actionable remediation message.
+
+---
+
+## Step 2: Run the orchestrator
+
+Pass user args to the orchestrator. Do not paraphrase them — pass through
+as-is.
 
 ```bash
-$B goto <page-url>
-$B snapshot -i -a -o ".gstack/canary-reports/screenshots/pre-<page-name>.png"
-$B console --errors
-$B perf
+bun run ~/.claude/skills/gstack/bin/gstack-gbrain-sync.ts <user-args>
 ```
 
-Record the console error count and load time for each page. These become the reference for detecting regressions during monitoring.
+The orchestrator runs three stages: code → memory → brain-sync (per the
+plan's storage tiering). Each stage failure is non-fatal; subsequent stages
+still run. State is persisted to `~/.gstack/.gbrain-sync-state.json` via
+tmp-file + atomic rename. Concurrent runs are blocked by a lock file at
+`~/.gstack/.sync-gbrain.lock` (5-min stale-takeover).
 
-### Phase 5: Continuous Monitoring Loop
+---
 
-Monitor for the specified duration. Every 60 seconds, check each page:
+## Step 3: Code-index health check
+
+After the sync run, query gbrain for the cwd source's page_count:
 
 ```bash
-$B goto <page-url>
-$B snapshot -i -a -o ".gstack/canary-reports/screenshots/<page-name>-<check-number>.png"
-$B console --errors
-$B perf
+SOURCE_ID=$(grep -o '"source_id":"[^"]*"' ~/.gstack/.gbrain-sync-state.json 2>/dev/null \
+  | head -1 | sed 's/.*"source_id":"//;s/".*//')
+PAGES=$(gbrain sources list --json 2>/dev/null \
+  | jq -r --arg id "$SOURCE_ID" '.sources[] | select(.id==$id) | .page_count' 2>/dev/null \
+  || echo 0)
+echo "cwd source: $SOURCE_ID, page_count: $PAGES"
 ```
 
-After each check, compare results against the baseline (or pre-deploy snapshot):
+If `PAGES` is 0 or empty AND the user did NOT pass `--no-code` AND mode was
+not `--full`, AskUserQuestion via the format in the preamble:
 
-1. **Page load failure** — `goto` returns error or timeout → CRITICAL ALERT
-2. **New console errors** — errors not present in baseline → HIGH ALERT
-3. **Performance regression** — load time exceeds 2x baseline → MEDIUM ALERT
-4. **Broken links** — new 404s not in baseline → LOW ALERT
+> D1 — This repo has 0 indexed pages in gbrain. Run a full code reindex now?
+>
+> ELI10: gbrain hasn't indexed this repo's code yet. The semantic search
+> tools (`gbrain search`, `code-def`, `code-refs`) will return nothing
+> until we run a full pass. Takes ~25-35 minutes on a big Mac.
+>
+> Recommendation: A — the brain is unusable for code search until indexed,
+> and Step 2 of this skill already verified gbrain is configured correctly.
+>
+> Note: options differ in kind, not coverage — no completeness score.
+>
+> A) Run /sync-gbrain --full now (recommended)
+> B) Skip — I'll run it later
 
-**Alert on changes, not absolutes.** A page with 3 console errors in the baseline is fine if it still has 3. One NEW error is an alert.
+If A: re-invoke the orchestrator with `--full --code-only`.
+If B: continue to Step 4 with the empty-corpus state recorded.
 
-**Don't cry wolf.** Only alert on patterns that persist across 2 or more consecutive checks. A single transient network blip is not an alert.
+---
 
-**If a CRITICAL or HIGH alert is detected**, immediately notify the user via AskUserQuestion:
+## Step 4: Refresh `## GBrain Search Guidance` block in CLAUDE.md
 
-```
-CANARY ALERT
-════════════
-Time:     [timestamp, e.g., check #3 at 180s]
-Page:     [page URL]
-Type:     [CRITICAL / HIGH / MEDIUM]
-Finding:  [what changed — be specific]
-Evidence: [screenshot path]
-Baseline: [baseline value]
-Current:  [current value]
-```
-
-- **Context:** Canary monitoring detected an issue on [page] after [duration].
-- **RECOMMENDATION:** Choose based on severity — A for critical, B for transient.
-- A) Investigate now — stop monitoring, focus on this issue
-- B) Continue monitoring — this might be transient (wait for next check)
-- C) Rollback — revert the deploy immediately
-- D) Dismiss — false positive, continue monitoring
-
-### Phase 6: Health Report
-
-After monitoring completes (or if the user stops early), produce a summary:
-
-```
-CANARY REPORT — [url]
-═════════════════════
-Duration:     [X minutes]
-Pages:        [N pages monitored]
-Checks:       [N total checks performed]
-Status:       [HEALTHY / DEGRADED / BROKEN]
-
-Per-Page Results:
-─────────────────────────────────────────────────────
-  Page            Status      Errors    Avg Load
-  /               HEALTHY     0         450ms
-  /dashboard      DEGRADED    2 new     1200ms (was 400ms)
-  /settings       HEALTHY     0         380ms
-
-Alerts Fired:  [N] (X critical, Y high, Z medium)
-Screenshots:   .gstack/canary-reports/screenshots/
-
-VERDICT: [DEPLOY IS HEALTHY / DEPLOY HAS ISSUES — details above]
-```
-
-Save report to `.gstack/canary-reports/{date}-canary.md` and `.gstack/canary-reports/{date}-canary.json`.
-
-Log the result for the review dashboard:
+Capability check (per /plan-eng-review §6):
 
 ```bash
-eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)"
-mkdir -p ~/.gstack/projects/$SLUG
+SLUG="_capability_check_$$"
+CAPABILITY_OK=0
+if [ -f ~/.gbrain/config.json ] && \
+   gbrain --version 2>/dev/null | grep -q '^gbrain '; then
+  # GBRAIN_PREPARE=true ensures prepared statements stay enabled when
+  # connecting through a PgBouncer transaction-mode pooler (port 6543).
+  # Without it, search silently returns no results (#1435).
+  export GBRAIN_PREPARE=true
+  if echo "ping" | gbrain put "$SLUG" >/dev/null 2>&1; then
+    # Retry search up to 3 times with 1s delay — under transaction-mode
+    # pooling the search index may not be visible on the next connection
+    # immediately after the put.
+    for _attempt in 1 2 3; do
+      if gbrain search "ping" 2>/dev/null | grep -q "$SLUG"; then
+        CAPABILITY_OK=1
+        break
+      fi
+      sleep 1
+    done
+  fi
+fi
+gbrain delete "$SLUG" 2>/dev/null || true
 ```
 
-Write a JSONL entry: `{"skill":"canary","timestamp":"<ISO>","status":"<HEALTHY/DEGRADED/BROKEN>","url":"<url>","duration_min":<N>,"alerts":<N>}`
+Then update CLAUDE.md based on capability state:
 
-### Phase 7: Baseline Update
+**If `CAPABILITY_OK=1`** — write or update the block. Idempotent: find the
+HTML-comment-delimited block; replace its body if it exists; append at the
+end of CLAUDE.md if it doesn't. NEVER duplicate. Block is machine-AGNOSTIC
+(no engine, no page counts, no last-sync time — those are in the existing
+`## GBrain Configuration` block).
 
-If the deploy is healthy, offer to update the baseline:
+Verbatim block content (copy exactly):
 
-- **Context:** Canary monitoring completed. The deploy is healthy.
-- **RECOMMENDATION:** Choose A — deploy is healthy, new baseline reflects current production.
-- A) Update baseline with current screenshots
-- B) Keep old baseline
+```markdown
+## GBrain Search Guidance (configured by /sync-gbrain)
+<!-- gstack-gbrain-search-guidance:start -->
 
-If the user chooses A, copy the latest screenshots to the baselines directory and update `baseline.json`.
+GBrain is set up and synced on this machine. The agent should prefer gbrain
+over Grep when the question is semantic or when you don't know the exact
+identifier yet.
 
-## Important Rules
+**This worktree is pinned to a worktree-scoped code source** via the
+`.gbrain-source` file in the repo root (kubectl-style context). Any
+`gbrain code-def`, `code-refs`, `code-callers`, `code-callees`, or `query`
+call from anywhere under this worktree routes to that source by default —
+no `--source` flag needed. Conductor sibling worktrees of the same repo
+each have their own pin and their own indexed pages, so semantic results
+match the actual code on disk in this worktree.
 
-- **Speed matters.** Start monitoring within 30 seconds of invocation. Don't over-analyze before monitoring.
-- **Alert on changes, not absolutes.** Compare against baseline, not industry standards.
-- **Screenshots are evidence.** Every alert includes a screenshot path. No exceptions.
-- **Transient tolerance.** Only alert on patterns that persist across 2+ consecutive checks.
-- **Baseline is king.** Without a baseline, canary is a health check. Encourage `--baseline` before deploying.
-- **Performance thresholds are relative.** 2x baseline is a regression. 1.5x might be normal variance.
-- **Read-only.** Observe and report. Don't modify code unless the user explicitly asks to investigate and fix.
+Two indexed corpora available via the `gbrain` CLI:
+- This worktree's code (auto-pinned via `.gbrain-source`).
+- `~/.gstack/` curated memory (registered as `gstack-brain-<user>` source via
+  the existing federation pipeline).
+
+Prefer gbrain when:
+- "Where is X handled?" / semantic intent, no exact string yet:
+    `gbrain search "<terms>"` or `gbrain query "<question>"`
+- "Where is symbol Y defined?" / symbol-based code questions:
+    `gbrain code-def <symbol>` or `gbrain code-refs <symbol>`
+- "What calls Y?" / "What does Y depend on?":
+    `gbrain code-callers <symbol>` / `gbrain code-callees <symbol>`
+- "What did we decide last time?" / past plans, retros, learnings:
+    `gbrain search "<terms>" --source gstack-brain-<user>`
+
+Grep is still right for known exact strings, regex, multiline patterns, and
+file globs. Run `/sync-gbrain` after meaningful code changes; for ongoing
+auto-sync across all worktrees, run `gbrain autopilot --install` once per
+machine — gbrain's daemon handles incremental refresh on a schedule.
+
+Safety: don't run `/sync-gbrain` while `gbrain autopilot` is active — the
+orchestrator refuses destructive source ops when it detects a running autopilot
+to avoid racing it (#1734). Prefer registering user repos with `gbrain sources
+add --path <dir>` (no `--url`): URL-managed sources can auto-reclone, and the
+sync code walk for them requires an explicit `--allow-reclone` opt-in.
+
+<!-- gstack-gbrain-search-guidance:end -->
+```
+
+Use the Read + Edit tools. The find-and-replace target is the entire region
+from `<!-- gstack-gbrain-search-guidance:start -->` through
+`<!-- gstack-gbrain-search-guidance:end -->`. If those markers are missing,
+search for `## GBrain Search Guidance (configured by /sync-gbrain)` heading
+and replace from there to the next `## ` or EOF. If no heading exists, append
+the entire block at the end of CLAUDE.md.
+
+**Atomic write:** write the new CLAUDE.md content to a tmp file alongside it
+(e.g., `CLAUDE.md.sync-gbrain.tmp`) then `mv` to atomic-rename, so a crash
+mid-write never leaves the file half-modified.
+
+**If `CAPABILITY_OK=0`** — REMOVE the block entirely if present. Use the same
+Edit tool to strip the start/end-marker region. The `## GBrain Configuration`
+block stays in place (it's a record of the install, not a capability claim).
+
+Do NOT crash if CLAUDE.md is missing or unwritable — log a warning and
+continue.
+
+---
+
+## Step 5: Verdict block (idempotent doctor output)
+
+Print a status block matching `/setup-gbrain` Step 10 conventions. Each row
+is `[OK]/[FIX]/[WARN]/[ERR]`. Reuse `gbrain doctor --json --fast` for
+informational rows but DO NOT gate the guidance block on doctor (per
+/plan-eng-review §6 — doctor is too strict for unrelated reasons).
+
+```
+gbrain status: GREEN
+
+  CLI ............. OK   <gbrain version>
+  Engine .......... OK   <pglite|supabase>
+  Capability ...... OK   write+search round-trip
+  CWD source ...... OK   <gstack-code-{repo_slug}> (page_count=<N>)
+  ~/.gstack source. OK   <gstack-brain-{user}> (page_count=<N>) — managed by /setup-gbrain
+  Memory sync ..... OK   <artifacts_sync_mode>
+  CLAUDE.md ....... OK   ## GBrain Search Guidance present
+  Last sync ....... OK   <last_sync from state file>
+
+Run `/sync-gbrain` again any time gbrain feels off; safe and idempotent.
+```
+
+If any row is YELLOW or RED, the verdict line says so and the failing rows
+surface a one-line "next action" (e.g., `Capability ...... ERR  capability
+check failed; CLAUDE.md guidance block REMOVED — run /setup-gbrain to repair`).
+
+---
+
+## Concurrency note
+
+This skill is safe to run concurrently from multiple terminals on the same
+Mac. The orchestrator acquires a lock at `~/.gstack/.sync-gbrain.lock` before
+any state-file or CLAUDE.md mutation and exits with code 2 if another sync is
+in flight. Stale locks (process died) auto-clear after 5 minutes.
+
+## Cross-machine note
+
+The `## GBrain Search Guidance` block is committed to the repo's CLAUDE.md
+and travels with `git push`/`git pull` — NOT through `~/.gstack/.brain-allowlist`
+(which is for `~/.gstack/` brain-sync only). On a different Mac with a synced
+CLAUDE.md but no local gbrain, /sync-gbrain detects the mismatch via the
+capability check and REMOVES the block (the local agent shouldn't be told to
+use a tool that isn't installed).
+
+## Status reporting
+
+End with a Completion Status (per the preamble protocol):
+- **DONE** — all stages green, CLAUDE.md guidance block present, verdict GREEN.
+- **DONE_WITH_CONCERNS** — sync ran but at least one stage failed or capability
+  check failed. List which.
+- **BLOCKED** — could not acquire lock, gbrain not on PATH, or per-repo policy
+  is deny. State the blocker.
+- **NEEDS_CONTEXT** — /setup-gbrain has not been run, or `gbrain doctor` shows
+  a state that requires user decision (e.g., engine migration).

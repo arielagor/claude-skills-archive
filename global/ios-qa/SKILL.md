@@ -1,26 +1,40 @@
 ---
-name: canary
-preamble-tier: 2
+name: ios-qa
+preamble-tier: 3
 version: 1.0.0
-description: |
-  Post-deploy canary monitoring. Watches the live app for console errors,
-  performance regressions, and page failures using the browse daemon. Takes
-  periodic screenshots, compares against pre-deploy baselines, and alerts
-  on anomalies. Use when: "monitor deploy", "canary", "post-deploy check",
-  "watch production", "verify deploy". (gstack)
+description: Live-device iOS QA for SwiftUI apps. (gstack)
 allowed-tools:
   - Bash
   - Read
   - Write
+  - Edit
+  - Grep
   - Glob
   - AskUserQuestion
 triggers:
-  - monitor after deploy
-  - canary check
-  - watch for errors post-deploy
+  - ios qa
+  - test the iphone app
+  - test my ios app
+  - find bugs on the device
+  - qa the ios app
 ---
 <!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly -->
 <!-- Regenerate: bun run gen:skill-docs -->
+
+
+## When to invoke this skill
+
+Connects to a real iPhone via USB
+CoreDevice IPv6 tunnel, reads Swift source to understand every screen, then
+runs a vision-driven agent loop: screenshot → analyze → decide → act →
+verify → repeat. All interaction happens via HTTP to an embedded
+StateServer in the app under test. Optionally exposes the device over
+Tailscale so remote agents (OpenClaw, Codex, any HTTP-capable agent) can
+run iOS QA from anywhere without touching the hardware.
+Use when asked to "ios qa", "test my iPhone app", "find bugs on the device",
+or "qa the iOS app".
+
+Voice triggers (speech-to-text aliases): "iOS quality check", "test the iPhone app", "run iOS QA".
 
 ## Preamble (run first)
 
@@ -57,7 +71,7 @@ _QUESTION_TUNING=$(~/.claude/skills/gstack/bin/gstack-config get question_tuning
 echo "QUESTION_TUNING: $_QUESTION_TUNING"
 mkdir -p ~/.gstack/analytics
 if [ "$_TEL" != "off" ]; then
-echo '{"skill":"canary","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(_repo=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null | tr -cd 'a-zA-Z0-9._-'); echo "${_repo:-unknown}")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
+echo '{"skill":"ios-qa","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(_repo=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null | tr -cd 'a-zA-Z0-9._-'); echo "${_repo:-unknown}")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
 fi
 for _PF in $(find ~/.gstack/analytics -maxdepth 1 -name '.pending-*' 2>/dev/null); do
   if [ -f "$_PF" ]; then
@@ -79,7 +93,7 @@ if [ -f "$_LEARN_FILE" ]; then
 else
   echo "LEARNINGS: 0"
 fi
-~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"canary","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
+~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"ios-qa","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
 _HAS_ROUTING="no"
 if [ -f CLAUDE.md ] && grep -q "## Skill routing" CLAUDE.md 2>/dev/null; then
   _HAS_ROUTING="yes"
@@ -648,7 +662,7 @@ Before each AskUserQuestion, choose `question_id` from `scripts/question-registr
 
 After answer, log best-effort (PostToolUse hook also captures deterministically when installed; dedup on (source, tool_use_id) handles double-writes):
 ```bash
-~/.claude/skills/gstack/bin/gstack-question-log '{"skill":"canary","question_id":"<id>","question_summary":"<short>","category":"<approval|clarification|routing|cherry-pick|feedback-loop>","door_type":"<one-way|two-way>","options_count":N,"user_choice":"<key>","recommended":"<key>","session_id":"'"$_SESSION_ID"'"}' 2>/dev/null || true
+~/.claude/skills/gstack/bin/gstack-question-log '{"skill":"ios-qa","question_id":"<id>","question_summary":"<short>","category":"<approval|clarification|routing|cherry-pick|feedback-loop>","door_type":"<one-way|two-way>","options_count":N,"user_choice":"<key>","recommended":"<key>","session_id":"'"$_SESSION_ID"'"}' 2>/dev/null || true
 ```
 
 For two-way questions, offer: "Tune this question? Reply `tune: never-ask`, `tune: always-ask`, or free-form."
@@ -661,6 +675,24 @@ Write (only after confirmation for free-form):
 ```
 
 Exit code 2 = rejected as not user-originated; do not retry. On success: "Set `<id>` → `<preference>`. Active immediately."
+
+## Repo Ownership — See Something, Say Something
+
+`REPO_MODE` controls how to handle issues outside your branch:
+- **`solo`** — You own everything. Investigate and offer to fix proactively.
+- **`collaborative`** / **`unknown`** — Flag via AskUserQuestion, don't fix (may be someone else's).
+
+Always flag anything that looks wrong — one sentence, what you noticed and its impact.
+
+## Search Before Building
+
+Before building anything unfamiliar, **search first.** See `~/.claude/skills/gstack/ETHOS.md`.
+- **Layer 1** (tried and true) — don't reinvent. **Layer 2** (new and popular) — scrutinize. **Layer 3** (first principles) — prize above all.
+
+**Eureka:** When first-principles reasoning contradicts conventional wisdom, name it and log:
+```bash
+jq -n --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg skill "SKILL_NAME" --arg branch "$(git branch --show-current 2>/dev/null)" --arg insight "ONE_LINE_SUMMARY" '{ts:$ts,skill:$skill,branch:$branch,insight:$insight}' >> ~/.gstack/analytics/eureka.jsonl 2>/dev/null || true
+```
 
 ## Completion Status Protocol
 
@@ -715,275 +747,188 @@ Replace `SKILL_NAME`, `OUTCOME`, and `USED_BROWSE` before running.
 
 Skills that run plan reviews (`/plan-*-review`, `/codex review`) include the EXIT PLAN MODE GATE blocking checklist at the end of the skill, which verifies the plan file ends with `## GSTACK REVIEW REPORT` before ExitPlanMode is called. Skills that don't run plan reviews (operational skills like `/ship`, `/qa`, `/review`) typically don't operate in plan mode and have no review report to verify; this footer is a no-op for them. Writing the plan file is the one edit allowed in plan mode.
 
-## SETUP (run this check BEFORE any browse command)
+# Live-device iOS QA
+
+This skill drives a real iPhone via USB. The agent reads your Swift source,
+generates typed state accessors, deploys a debug bridge, and runs a closed
+find→fix→verify loop. No simulator, no XCTest, no WebDriverAgent.
+
+## Architecture
+
+```
+       ┌──────────────────────┐   USB CoreDevice (IPv6)   ┌──────────────────┐
+       │ gstack-ios-qa daemon │ ────────────────────────▶ │ iOS app          │
+       │ (Mac, bun/TS)        │   bearer + X-Session-Id   │ StateServer      │
+       │                      │                           │ (loopback only)  │
+       │ - boot token rotate  │                           │ - /tap /swipe    │
+       │ - session minting    │                           │ - /type /state   │
+       │ - audit + redact     │                           │ - /snapshot      │
+       └──────────────────────┘                           └──────────────────┘
+                ▲
+                │ Tailscale (optional, --tailnet)
+                │
+       ┌──────────────────────┐
+       │ Remote agent         │
+       │ (OpenClaw, etc.)     │
+       └──────────────────────┘
+```
+
+The iOS app's `StateServer` binds loopback only (`::1` + `127.0.0.1`). Tailnet
+ingress is exclusively the Mac daemon's job. The daemon validates Tailscale
+identities via the local `tailscaled` socket and mints short-lived session
+tokens (default 1h) for remote agents.
+
+## Prerequisites
+
+- macOS (the daemon uses `devicectl` from Xcode).
+- iPhone connected via USB, paired and trusted.
+- Xcode + Swift toolchain installed (`swift --version` reports >= 5.9).
+- App source available on disk, with at least one `@Observable` class.
+- For remote-control mode: Tailscale installed and the user logged in.
+
+## Phase 0: Session warm-start (optional)
+
+If `~/.gstack/ios-qa-session.json` exists and the device is still connected,
+skip Phase 1-2 and jump to Phase 3. The session cache holds the rotated token,
+UDID, tunnel address, and accessor hash. Invalidate the cache when:
+
+- The user passes `--cold` to force a full bootstrap.
+- The accessor hash mismatch is detected on first state query.
+- The daemon reports the cached UDID is no longer connected.
 
 ```bash
-_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-B=""
-[ -n "$_ROOT" ] && [ -x "$_ROOT/.claude/skills/gstack/browse/dist/browse" ] && B="$_ROOT/.claude/skills/gstack/browse/dist/browse"
-[ -z "$B" ] && B="$HOME/.claude/skills/gstack/browse/dist/browse"
-if [ -x "$B" ]; then
-  echo "READY: $B"
-else
-  echo "NEEDS_SETUP"
+SESSION="$HOME/.gstack/ios-qa-session.json"
+if [ -f "$SESSION" ] && [ "$COLD" != "1" ]; then
+  CACHED_UDID=$(python3 -c "import json,os; d=json.load(open(os.path.expanduser('$SESSION'))); print(d['udid'])")
+  CACHED_PORT=$(python3 -c "import json,os; d=json.load(open(os.path.expanduser('$SESSION'))); print(d['daemon_port'])")
+  if curl -sf "http://127.0.0.1:$CACHED_PORT/healthz" > /dev/null; then
+    echo "Warm start: daemon alive, device $CACHED_UDID connected"
+  fi
 fi
 ```
 
-If `NEEDS_SETUP`:
-1. Tell the user: "gstack browse needs a one-time build (~10 seconds). OK to proceed?" Then STOP and wait.
-2. Run: `cd <SKILL_DIR> && ./setup`
-3. If `bun` is not installed:
-   ```bash
-   if ! command -v bun >/dev/null 2>&1; then
-     BUN_VERSION="1.3.10"
-     BUN_INSTALL_SHA="bab8acfb046aac8c72407bdcce903957665d655d7acaa3e11c7c4616beae68dd"
-     tmpfile=$(mktemp)
-     curl -fsSL "https://bun.sh/install" -o "$tmpfile"
-     actual_sha=$(shasum -a 256 "$tmpfile" | awk '{print $1}')
-     if [ "$actual_sha" != "$BUN_INSTALL_SHA" ]; then
-       echo "ERROR: bun install script checksum mismatch" >&2
-       echo "  expected: $BUN_INSTALL_SHA" >&2
-       echo "  got:      $actual_sha" >&2
-       rm "$tmpfile"; exit 1
-     fi
-     BUN_VERSION="$BUN_VERSION" bash "$tmpfile"
-     rm "$tmpfile"
-   fi
+## Phase 1: Read source, plan codegen
+
+1. Walk the app source (passed as `--source <dir>`) and identify all `@Observable`
+   classes. Note any property marked with the `@Snapshotable` wrapper — those
+   are the snapshot-eligible fields.
+2. Run `swift run --package-path $GSTACK_HOME/ios-qa/scripts/gen-accessors-tool gen-accessors --input <source-dir>`.
+   First invocation builds the swift-syntax dependency tree (cold: 2-5 min).
+   Subsequent runs are content-hash-cached and finish in ~50ms.
+3. Show the user the accessor list and ask whether to install the DebugBridge
+   SPM dependency into their `Package.swift` (one AskUserQuestion).
+
+## Phase 2: Bootstrap the device bridge
+
+1. Add the `DebugBridge` SPM dependency to the app's `Package.swift`. The package
+   ships three Debug-config-only library products:
+   - `DebugBridgeCore` (Swift, cross-platform) — StateServer + bridge protocols.
+   - `DebugBridgeTouch` (Objective-C, iOS-only) — KIF-derived in-process touch
+     synthesis with iOS 18+ `_UIHitTestContext` SwiftUI hit-testing.
+   - `DebugBridgeUI` (Swift, iOS-only) — Screenshot / Elements / Mutation
+     bridge implementations.
+   The app target depends on `DebugBridgeUI` with `.when(configuration: .debug)`
+   (transitively pulls in Core + Touch). Release builds refuse to link these
+   targets.
+2. Wire the bridges from the `@main` App init, gated on `#if DEBUG`:
+   ```swift
+   #if DEBUG
+   import DebugBridgeCore
+   StateServer.shared.start()
+   #if canImport(UIKit)
+   import DebugBridgeUI
+   DebugBridgeUIWiring.installAll()
+   #endif
+   #endif
    ```
-
-## Step 0: Detect platform and base branch
-
-First, detect the git hosting platform from the remote URL:
-
-```bash
-git remote get-url origin 2>/dev/null
-```
-
-- If the URL contains "github.com" → platform is **GitHub**
-- If the URL contains "gitlab" → platform is **GitLab**
-- Otherwise, check CLI availability:
-  - `gh auth status 2>/dev/null` succeeds → platform is **GitHub** (covers GitHub Enterprise)
-  - `glab auth status 2>/dev/null` succeeds → platform is **GitLab** (covers self-hosted)
-  - Neither → **unknown** (use git-native commands only)
-
-Determine which branch this PR/MR targets, or the repo's default branch if no
-PR/MR exists. Use the result as "the base branch" in all subsequent steps.
-
-**If GitHub:**
-1. `gh pr view --json baseRefName -q .baseRefName` — if succeeds, use it
-2. `gh repo view --json defaultBranchRef -q .defaultBranchRef.name` — if succeeds, use it
-
-**If GitLab:**
-1. `glab mr view -F json 2>/dev/null` and extract the `target_branch` field — if succeeds, use it
-2. `glab repo view -F json 2>/dev/null` and extract the `default_branch` field — if succeeds, use it
-
-**Git-native fallback (if unknown platform, or CLI commands fail):**
-1. `git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'`
-2. If that fails: `git rev-parse --verify origin/main 2>/dev/null` → use `main`
-3. If that fails: `git rev-parse --verify origin/master 2>/dev/null` → use `master`
-
-If all fail, fall back to `main`.
-
-Print the detected base branch name. In every subsequent `git diff`, `git log`,
-`git fetch`, `git merge`, and PR/MR creation command, substitute the detected
-branch name wherever the instructions say "the base branch" or `<default>`.
-
----
-
-# /canary — Post-Deploy Visual Monitor
-
-You are a **Release Reliability Engineer** watching production after a deploy. You've seen deploys that pass CI but break in production — a missing environment variable, a CDN cache serving stale assets, a database migration that's slower than expected on real data. Your job is to catch these in the first 10 minutes, not 10 hours.
-
-You use the browse daemon to watch the live app, take screenshots, check console errors, and compare against baselines. You are the safety net between "shipped" and "verified."
-
-## User-invocable
-When the user types `/canary`, run this skill.
-
-## Arguments
-- `/canary <url>` — monitor a URL for 10 minutes after deploy
-- `/canary <url> --duration 5m` — custom monitoring duration (1m to 30m)
-- `/canary <url> --baseline` — capture baseline screenshots (run BEFORE deploying)
-- `/canary <url> --pages /,/dashboard,/settings` — specify pages to monitor
-- `/canary <url> --quick` — single-pass health check (no continuous monitoring)
-
-## Instructions
-
-### Phase 1: Setup
-
-```bash
-eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null || echo "SLUG=unknown")"
-mkdir -p .gstack/canary-reports
-mkdir -p .gstack/canary-reports/baselines
-mkdir -p .gstack/canary-reports/screenshots
-```
-
-Parse the user's arguments. Default duration is 10 minutes. Default pages: auto-discover from the app's navigation.
-
-### Phase 2: Baseline Capture (--baseline mode)
-
-If the user passed `--baseline`, capture the current state BEFORE deploying.
-
-For each page (either from `--pages` or the homepage):
-
-```bash
-$B goto <page-url>
-$B snapshot -i -a -o ".gstack/canary-reports/baselines/<page-name>.png"
-$B console --errors
-$B perf
-$B text
-```
-
-Collect for each page: screenshot path, console error count, page load time from `perf`, and a text content snapshot.
-
-Save the baseline manifest to `.gstack/canary-reports/baseline.json`:
-
-```json
-{
-  "url": "<url>",
-  "timestamp": "<ISO>",
-  "branch": "<current branch>",
-  "pages": {
-    "/": {
-      "screenshot": "baselines/home.png",
-      "console_errors": 0,
-      "load_time_ms": 450
-    }
-  }
-}
-```
-
-Then STOP and tell the user: "Baseline captured. Deploy your changes, then run `/canary <url>` to monitor."
-
-### Phase 3: Page Discovery
-
-If no `--pages` were specified, auto-discover pages to monitor:
-
-```bash
-$B goto <url>
-$B links
-$B snapshot -i
-```
-
-Extract the top 5 internal navigation links from the `links` output. Always include the homepage. Present the page list via AskUserQuestion:
-
-- **Context:** Monitoring the production site at the given URL after a deploy.
-- **Question:** Which pages should the canary monitor?
-- **RECOMMENDATION:** Choose A — these are the main navigation targets.
-- A) Monitor these pages: [list the discovered pages]
-- B) Add more pages (user specifies)
-- C) Monitor homepage only (quick check)
-
-### Phase 4: Pre-Deploy Snapshot (if no baseline exists)
-
-If no `baseline.json` exists, take a quick snapshot now as a reference point.
-
-For each page to monitor:
-
-```bash
-$B goto <page-url>
-$B snapshot -i -a -o ".gstack/canary-reports/screenshots/pre-<page-name>.png"
-$B console --errors
-$B perf
-```
-
-Record the console error count and load time for each page. These become the reference for detecting regressions during monitoring.
-
-### Phase 5: Continuous Monitoring Loop
-
-Monitor for the specified duration. Every 60 seconds, check each page:
-
-```bash
-$B goto <page-url>
-$B snapshot -i -a -o ".gstack/canary-reports/screenshots/<page-name>-<check-number>.png"
-$B console --errors
-$B perf
-```
-
-After each check, compare results against the baseline (or pre-deploy snapshot):
-
-1. **Page load failure** — `goto` returns error or timeout → CRITICAL ALERT
-2. **New console errors** — errors not present in baseline → HIGH ALERT
-3. **Performance regression** — load time exceeds 2x baseline → MEDIUM ALERT
-4. **Broken links** — new 404s not in baseline → LOW ALERT
-
-**Alert on changes, not absolutes.** A page with 3 console errors in the baseline is fine if it still has 3. One NEW error is an alert.
-
-**Don't cry wolf.** Only alert on patterns that persist across 2 or more consecutive checks. A single transient network blip is not an alert.
-
-**If a CRITICAL or HIGH alert is detected**, immediately notify the user via AskUserQuestion:
-
-```
-CANARY ALERT
-════════════
-Time:     [timestamp, e.g., check #3 at 180s]
-Page:     [page URL]
-Type:     [CRITICAL / HIGH / MEDIUM]
-Finding:  [what changed — be specific]
-Evidence: [screenshot path]
-Baseline: [baseline value]
-Current:  [current value]
-```
-
-- **Context:** Canary monitoring detected an issue on [page] after [duration].
-- **RECOMMENDATION:** Choose based on severity — A for critical, B for transient.
-- A) Investigate now — stop monitoring, focus on this issue
-- B) Continue monitoring — this might be transient (wait for next check)
-- C) Rollback — revert the deploy immediately
-- D) Dismiss — false positive, continue monitoring
-
-### Phase 6: Health Report
-
-After monitoring completes (or if the user stops early), produce a summary:
-
-```
-CANARY REPORT — [url]
-═════════════════════
-Duration:     [X minutes]
-Pages:        [N pages monitored]
-Checks:       [N total checks performed]
-Status:       [HEALTHY / DEGRADED / BROKEN]
-
-Per-Page Results:
-─────────────────────────────────────────────────────
-  Page            Status      Errors    Avg Load
-  /               HEALTHY     0         450ms
-  /dashboard      DEGRADED    2 new     1200ms (was 400ms)
-  /settings       HEALTHY     0         380ms
-
-Alerts Fired:  [N] (X critical, Y high, Z medium)
-Screenshots:   .gstack/canary-reports/screenshots/
-
-VERDICT: [DEPLOY IS HEALTHY / DEPLOY HAS ISSUES — details above]
-```
-
-Save report to `.gstack/canary-reports/{date}-canary.md` and `.gstack/canary-reports/{date}-canary.json`.
-
-Log the result for the review dashboard:
-
-```bash
-eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)"
-mkdir -p ~/.gstack/projects/$SLUG
-```
-
-Write a JSONL entry: `{"skill":"canary","timestamp":"<ISO>","status":"<HEALTHY/DEGRADED/BROKEN>","url":"<url>","duration_min":<N>,"alerts":<N>}`
-
-### Phase 7: Baseline Update
-
-If the deploy is healthy, offer to update the baseline:
-
-- **Context:** Canary monitoring completed. The deploy is healthy.
-- **RECOMMENDATION:** Choose A — deploy is healthy, new baseline reflects current production.
-- A) Update baseline with current screenshots
-- B) Keep old baseline
-
-If the user chooses A, copy the latest screenshots to the baselines directory and update `baseline.json`.
-
-## Important Rules
-
-- **Speed matters.** Start monitoring within 30 seconds of invocation. Don't over-analyze before monitoring.
-- **Alert on changes, not absolutes.** Compare against baseline, not industry standards.
-- **Screenshots are evidence.** Every alert includes a screenshot path. No exceptions.
-- **Transient tolerance.** Only alert on patterns that persist across 2+ consecutive checks.
-- **Baseline is king.** Without a baseline, canary is a health check. Encourage `--baseline` before deploying.
-- **Performance thresholds are relative.** 2x baseline is a regression. 1.5x might be normal variance.
-- **Read-only.** Observe and report. Don't modify code unless the user explicitly asks to investigate and fix.
+3. Build + deploy to the device with `xcodebuild -scheme <SchemeName>
+   -destination 'platform=iOS,id=<UDID>' build install`.
+4. Launch via `devicectl device process launch --device <UDID> --console <bundle-id>`.
+   Capture the boot token printed to `os_log` on first run.
+5. Spawn the Mac-side daemon (on-demand) — `gstack-ios-qa-daemon`. Daemon
+   acquires an exclusive flock on `~/.gstack/ios-qa-daemon.pid`. If another
+   daemon is alive, the second invocation discovers its port and connects.
+6. Daemon immediately calls `POST /auth/rotate` on the iOS StateServer with a
+   fresh in-memory-only token. The boot token becomes useless ~5s later.
+   Anything scraping `os_log` past this point sees a dead credential.
+
+## Phase 3: Vision-driven agent loop
+
+Each iteration:
+
+1. `GET /screenshot` (via daemon) → save PNG.
+2. `GET /elements` → accessibility tree.
+3. `GET /state/snapshot` (only `@Snapshotable` fields) → current state.
+4. Decide next action based on what's on the screen vs the test goal.
+5. `POST /session/acquire` to grab the device lock.
+6. Execute `POST /tap`, `/swipe`, `/type`, or `POST /state/<key>` write.
+7. Re-screenshot; compare; record finding if buggy.
+8. `POST /session/release` once the iteration is done.
+
+Each authenticated mutating request through the tailnet listener (if remote
+mode is active) writes an audit row to
+`~/.gstack/security/ios-qa-audit.jsonl`.
+
+## Modes
+
+**Local-USB mode (default).** Daemon binds loopback only; no Tailscale
+required. The spawning skill gets full-surface access. Best for solo
+development.
+
+**Tailnet mode (`--tailnet`).** Daemon additionally binds the Tailscale
+interface (never `0.0.0.0`). Requires `tailscaled` to be running locally and
+the daemon to be able to read `/var/run/tailscale.sock`. Fails closed if the
+socket is missing, permission-denied, or returns an unparseable WhoIs
+response. Remote agents hit `POST /auth/mint` over tailnet, daemon
+canonicalizes identity via WhoIs, checks the allowlist file, mints a
+session token. See `ios-qa/docs/tailscale-acl-example.md`.
+
+**Capability tiers (tailnet mode).** Minted tokens default to `interact`
+(taps, swipes, types). Higher tiers require explicit owner mint:
+
+- **observe:** `/screenshot`, `/elements`, `GET /state/*`, `/healthz`,
+  `/session/heartbeat`.
+- **interact:** observe + `/tap`, `/swipe`, `/type`.
+- **mutate:** interact + `POST /state/<key>`.
+- **restore:** mutate + `POST /state/restore`.
+
+Owner mints via `gstack-ios-qa-mint --remote <identity> --capability <tier>`
+on the Mac. Self-service mint over tailnet only succeeds for already-allowlisted
+identities.
+
+**Recording mode (`--recording`).** DebugOverlay renders a small diagonal
+"AGENT DEMO" watermark in a corner so screencasts are unambiguous about the
+device being agent-driven.
+
+## Demo mode
+
+If the user says "demo", "demo mode", "show me", or "I want to see it
+working", run in **DEMO MODE**. This changes how the agent interacts with
+the app:
+
+**DEMO MODE OVERRIDES ALL OTHER RULES.** When demo mode is active, the
+agent MUST drive every action through visible UI (`/tap`, `/swipe`, `/type`)
+and NEVER use `POST /state/*` writes to skip steps. Viewers see the agent
+type every key, tap every button. The on-device DebugOverlay attribution
+chip shows "Driven by Claude Code (demo)" or the remote agent identity.
+
+In demo mode, the screencap rate is bumped to 4fps so the recording feels
+live.
+
+## Failure modes + recovery
+
+| Symptom | Likely cause | Action |
+|---|---|---|
+| `curl: connection refused` to daemon | daemon crashed | Re-run `/ios-qa`; spawn-race lock will fail closed |
+| `403 identity_not_allowed` from `/auth/mint` | identity missing from allowlist | Run `gstack-ios-qa-mint --remote <identity>` on the Mac |
+| `409 schema_mismatch` on `/state/restore` | snapshot from older app build | Discard the snapshot; re-capture |
+| `503 device_disconnected` from proxy | USB tunnel dropped | Reconnect device; daemon auto-reconnects within 30s |
+| `429 rate_limited` from `/auth/mint` | >10 mints/min from one identity | Wait 60s; check audit log for anomalies |
+| `413 body_too_large` on `/state/restore` | snapshot >1MB | Increase `--max-body` or trim snapshot |
+
+## Cleanup
+
+Use `/ios-clean` to remove the DebugBridge SPM dependency and all `#if DEBUG`
+wiring before a Release build. This is a convenience flow; the structural
+Release-build guard (Package.swift `.when(configuration: .debug)` + CI
+`swift build -c release` check) is the safety-critical path.
