@@ -35,6 +35,23 @@ Invoked as `/ai-ads <subcommand> [args]`. Route:
   live surfaces, research the brand's public footprint + category queries, produce the audit on
   Agor AI letterhead (`templates/audit-report.md`). STOP before sending anything to a client.
 
+- **`audit-web` / `funnel`** → the **self-serve AI Visibility Audit** product (`web/`). The
+  buyer-facing funnel: intake → free teaser → Stripe checkout → full audit + branded PDF by email.
+  The Next app only enqueues/serves; the Max-plan worker (`cd web && npm run worker`) generates via
+  `claude -p`. To run locally: `cd web && npm run build && npm run start`, then the worker in a
+  second shell. See `DEPLOY.md`. The buyer's card is the only money in the flow; no ad spend.
+
+- **`index <category>`** → build/manage the **AI Visibility Index** (per-category brand leaderboard).
+  `node bin/index-build.mjs <category>` builds a DRAFT (never public). Publishing is a HARD human
+  gate: `node bin/index-publish.mjs <category> "<name>"`. `--list` shows published vs drafts. The
+  monthly cron (`workflow/index-refresh.mjs`) only writes drafts. Categories: b2b-saas | dtc |
+  local-professional | agency.
+
+- **`track`** → the **rank-tracker**. `node bin/track-add.mjs "<brand>" "<query>" "<surface>"` to
+  watch a cell; `node bin/track-snapshot.mjs` to snapshot + diff + QUEUE alerts; `node
+  bin/track-dashboard.mjs` (or `/tracker`) to review. **Alerts are never auto-sent** (no transport
+  exists); sending is a separate human action.
+
 - **`campaign <client>`** → run the **delivery pipeline** (playbook §4) via
   `workflow/client-delivery.workflow.js`. Eight named stages. **Hard STOP for human approval
   before `launch` and before any budget-moving optimize action.** Never spends autonomously.
