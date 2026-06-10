@@ -161,22 +161,30 @@ Build a JSON object with these exact fields:
 ```json
 {
   "ts": "<ISO 8601 UTC>",
+  "trigger": "explicit" | "proactive",
   "session_synth": "<one-line collapsed version of Step 1>",
   "plan": [{"tool": "Skill", "name": "orient", "rationale": "..."}],
   "approved": true,
   "executed": ["orient", "ideate"],
   "outcomes": ["ok", "ok"],
+  "deferred": [{"name": "social-announcer", "condition": "GifLoop 1.2.0 App Store approval"}],
   "abandoned_at": null
 }
 ```
 
-Append it as one JSONL line via `scripts\log-recommendation.ps1`:
+`trigger` is `"explicit"` when the user invoked /assistant or a trigger phrase themselves, `"proactive"` when Claude suggested it at a workflow boundary. `deferred` is `[]` when nothing was deferred.
 
-```bash
-echo '<json-string-here>' | powershell -ExecutionPolicy Bypass -File C:/Users/ariel/.claude/skills/assistant/scripts/log-recommendation.ps1
+Append it as one JSONL line via `scripts\log-recommendation.ps1`. Write the JSON to a temp file first; do not pipe it through shell quoting (embedded quotes in session_synth break `echo '<json>'`):
+
+```powershell
+Set-Content -Path $env:TEMP\assistant-log-entry.json -Value '<json here via Write tool, not inline>' 
+powershell -ExecutionPolicy Bypass -File C:/Users/ariel/.claude/skills/assistant/scripts/log-recommendation.ps1 -JsonFile $env:TEMP\assistant-log-entry.json
+Remove-Item $env:TEMP\assistant-log-entry.json
 ```
 
-Log on every run, including cancelled and abandoned. The log file is `C:\Users\ariel\.claude\projects\C--Users-ariel\memory\assistant-log.jsonl`. The log is append-only; never read from it during a run, only write.
+In practice: use the Write tool to create the temp JSON file (avoids all quoting), then run the script with `-JsonFile`, then delete the temp file.
+
+Log on every run, including cancelled and abandoned. The log file is `C:\Users\ariel\.claude\projects\C--Users-ariel\memory\assistant-log.jsonl`. The log is append-only; never read from it during a normal run, only write. The single exception is tune mode (below).
 
 ## Edge cases
 
