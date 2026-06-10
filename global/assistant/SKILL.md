@@ -55,6 +55,7 @@ If a follow-up chain is not obvious, do not push `/assistant` for its own sake. 
 - **Default model = Opus.** Any subagent the chain spawns must be passed `model: "opus"` explicitly. Never default to Sonnet/Haiku.
 - **Cap chain length at 7.** If more than 7 obvious steps exist, append `(then run /assistant again)` to the tail.
 - **No parallel chain execution.** Skills run sequentially; one finishes before the next starts. State changes from step N often affect step N+1.
+- **Deferred steps don't silently resurface.** If a step was previously deferred on an external condition (App Store approval pending, waiting on a reply), do not re-recommend it without first checking whether the condition cleared, and say which condition you checked.
 
 ## Step 1 — Synthesize session context
 
@@ -150,6 +151,8 @@ Loop through approved steps in order. For each:
 **After each step:** one-sentence outcome. "Done. /foo wrote X." or "Failed: <reason>."
 
 **On step failure:** stop the chain. Do not auto-continue. Summarize what failed, what's left unrun, and ask the user how to proceed (retry, skip, cancel rest).
+
+**Deferrals:** when a step is dropped because an external condition isn't met yet ("App Store approval pending", "after Ariel sends the drafts"), record it as a deferral instead of silently dropping it: capture the step name and the blocking condition. After the chain finishes, if any deferral has a concrete date or checkable condition, offer ONE `/schedule` one-shot that runs the deferred sub-chain when the condition should have cleared. Never auto-create the scheduled task; offer it and let the user decide.
 
 ## Step 7 — Log
 
