@@ -77,7 +77,7 @@ Three sources, in priority order:
 
 1. **The user-invocable skills list** is already in the system prompt of every conversation. Use it directly. No need to scan disk.
 2. **Subagent types** are listed in the Agent tool description in the system prompt. Use it directly.
-3. **Deeper skill frontmatter** (only if a recommendation is borderline and the system-prompt one-liner isn't enough): scan `C:\Users\ariel\.claude\skills\<name>\SKILL.md` and `C:\Users\ariel\.claude\plugins\cache\**\skills\<name>\SKILL.md` via Glob+Read on the specific candidates. Don't bulk-scan; read the 2-3 you're unsure about.
+3. **Deeper skill frontmatter** (only if a recommendation is borderline and the system-prompt one-liner isn't enough): read `C:\Users\ariel\.claude\skills\<name>\SKILL.md` first; it is the canonical copy. Fall back to `C:\Users\ariel\.claude\plugins\cache\**\skills\<name>\SKILL.md` only for plugin-only skills with no local copy (the cache can hold stale duplicates of local skills). Don't bulk-scan; read the 2-3 you're unsure about.
 
 ## Step 3 — Build the chain
 
@@ -185,6 +185,22 @@ Remove-Item $env:TEMP\assistant-log-entry.json
 In practice: use the Write tool to create the temp JSON file (avoids all quoting), then run the script with `-JsonFile`, then delete the temp file.
 
 Log on every run, including cancelled and abandoned. The log file is `C:\Users\ariel\.claude\projects\C--Users-ariel\memory\assistant-log.jsonl`. The log is append-only; never read from it during a normal run, only write. The single exception is tune mode (below).
+
+## Tune mode — `/assistant tune`
+
+The log exists so the heuristics can learn from reality. When invoked as `/assistant tune` (or "tune the assistant", "mine the assistant log"), skip Steps 1-7 entirely and instead:
+
+1. Read `C:\Users\ariel\.claude\projects\C--Users-ariel\memory\assistant-log.jsonl` (this is the one sanctioned read of the log).
+2. Surface, with counts:
+   - Chains observed 3+ times that are not in `references/chain-heuristics.md`.
+   - Steps repeatedly skipped or deferred by the user (candidates for demotion or removal from a canonical chain).
+   - Steps recommended 3+ times but never approved (the heuristic is miscalibrated; stop proposing them).
+   - Recommended skills that no longer exist in the available-skills list (heuristics referencing deleted skills).
+   - Explicit vs proactive trigger split, and whether proactive runs get approved at a materially lower rate.
+3. Propose concrete edits to `chain-heuristics.md` and `risky-skills.md` as a diff-style summary.
+4. After ONE approval, apply the edits and update the "Last tuned" line in chain-heuristics.md with the date and run count.
+
+Run this roughly monthly, or whenever the log has grown by 30+ entries since "Last tuned". Tune mode never executes any skill chain and never writes to the log.
 
 ## Edge cases
 
