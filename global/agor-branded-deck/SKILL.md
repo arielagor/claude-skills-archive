@@ -57,6 +57,18 @@ Palette (HTML hex, from `02-architecture-proposal-v3.tex`):
 ```
 Title slide: a `[plain]` frame with `\begin{tikzpicture}[remember picture,overlay]`, fill the page `agorblack`, then place the logo+wordmark (top), the big white title, a centered `brand-gradient.png` accent rule, the subtitle, and the founder line as `\node`s positioned by `yshift` off `current page.center`/`.north`/`.south`. A full working file is at `~/.claude/projects/ventures/ai-ads-agency/docs/business/deck/agor-ai-ads-deck.tex` — copy and adapt it.
 
+**Closing slide signature (standard as of 2026-06-10):** every deck's final/closing slide
+carries Ariel's handwritten signature as a subtle mark. Asset:
+`~/.claude/brand/ariel-signature-transparent.png` (copy into the build dir like the other
+assets). On the closing `[plain]` frame (dark `agorblack` fill), place it bottom-right,
+small and quiet, via the overlay tikzpicture:
+```latex
+\node[anchor=south east, xshift=-26pt, yshift=22pt, opacity=0.9] at (current page.south east)
+  {\includegraphics[width=2.6cm]{ariel-signature-transparent.png}};
+```
+On dark fills the blue stroke (#1560F0-ish) reads well; do not recolor it. Keep it OFF
+content slides (closing slide only) so it stays a signature, not a watermark pattern.
+
 ### 3. Render (twice)
 ```bash
 cd <deck-dir>
