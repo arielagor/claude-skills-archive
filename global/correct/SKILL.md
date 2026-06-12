@@ -57,6 +57,16 @@ Do NOT fire for trivial typo fixes or one-off transient errors. Capture durable,
 
 5. **Confirm** to Ariel in one line: what was captured and where, e.g. "Captured: `feedback_<slug>` (memory + MEMORY.md; GBrain filed/queued)."
 
+## Starvation tripwire (the earned-demand trigger to automate this)
+
+`/correct` is deliberately MANUAL — a council ruled (2026-06-12, unanimous) that an auto-firing PostToolUse capture hook is a standing machine-wide watcher with an unsolved detection heuristic that would pollute the learning log with non-corrections and train the founder to ignore it. An empty log is an honest gap you can measure; a polluted log is corrosion you can't detect.
+
+The cost of manual capture is that the log can quietly starve. So the trigger to revisit auto-capture is **objective, not vibes**:
+
+> **If, over a rolling 30 days, zero corrections were captured via `/correct` AND the session transcripts show at least one clear founder correction that went uncaptured, the manual path has failed and a narrow, non-blocking nudge (not an auto-writer) has earned its demand.**
+
+This is checked at **`/session-retro`** (which already reads the audit logs and transcripts — no new daemon, no added containment tax). Retro should: count `feedback_*` memories created in the window, scan the window's transcripts for uncaptured corrections, and if the threshold trips, propose the narrow nudge. Until then, manual `/correct` stands.
+
 ## Deferred (queued for a watched session)
 
 The original P-07 also proposed adding a PRESENT-BUT-INEFFECTIVE category to `session-retro.mjs` (so the retro emits "already implemented, investigate compliance" instead of re-proposing a landed fix). That edit touches a script ~40 scheduled tasks depend on at session start, so per the council it is queued: make the change additive-only, back up the script, and diff `node session-retro.mjs --days 1 --json` output before/after on the same input to prove no existing path changed. Until then, `/correct` ships skill-only.
