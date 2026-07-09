@@ -345,11 +345,13 @@ For detailed formulas (NPV, LTV, CAC, sensitivity analysis), see [references/roi
 ## Validation & QA
 
 ### Before Launch
-- [ ] Events fire in GA4 DebugView
-- [ ] Properties have expected values
+- [ ] Events fire in the property's actual live tool (Plausible's real-time dashboard for most
+      properties; GA4 DebugView only on agor.me)
+- [ ] Properties/props have expected values
 - [ ] No duplicate events
-- [ ] Conversions marked correctly
-- [ ] UTM parameters captured on landing
+- [ ] Conversions/goals marked correctly
+- [ ] UTM parameters captured on landing, and wrapped in a Dub.co link if the source needs
+      click-level tracking too
 
 ### Ongoing
 - **Weekly:** Check for sudden drops in key events (>20% change = investigate)
@@ -358,21 +360,33 @@ For detailed formulas (NPV, LTV, CAC, sensitivity analysis), see [references/roi
 
 ---
 
-## Tools
+## Tools (this vault's real inventory, not a generic analytics stack)
 
-| Category | Tools |
-|----------|-------|
-| **Event Tracking** | Mixpanel, Amplitude, PostHog (open-source) |
-| **Session Recording** | FullStory, LogRocket, Hotjar |
-| **A/B Testing** | Optimizely, VWO |
-| **Web Analytics** | GA4, Google Search Console |
-| **Tag Management** | Google Tag Manager |
+| Category | Tool | Status | Use it for |
+|----------|------|--------|------------|
+| **Web analytics** | Plausible | **Live** | Pageview/goal/referrer analytics; the default for every property. Confirmed wired on modelstack.digital with real custom events (`Checkout Click`, `Email Signup`, scroll-depth) |
+| **Web analytics (exception)** | GA4 | **Live, agor.me only** | Traffic and event analytics on agor.me specifically (property 540566537); not the default, don't assume it's wired elsewhere |
+| **Revenue / commerce data** | Stripe MCP read tools (`mcp__stripe__stripe_api_read`, `fetch_stripe_resources`, `search_stripe_resources`, `get_stripe_account_info`, `stripe_api_details`, `stripe_api_search`) | **Live** | Real sales, refund, and product-level revenue on the shared account (`acct_1T09QrAOqOwPWk86`). Always disambiguate by product/signal phrase (`PORTFOLIO_PROPERTIES.md`) before attributing a charge to a property; write tools exist but route to Ariel, never call them autonomously from this skill |
+| **Cross-channel marketing data** | Supermetrics Marketing Analytics MCP (`mcp__claude_ai_Supermetrics_Marketing_Analytics__*`) | **Needs-auth** | Would back cross-channel ad/marketing metrics once connected. Currently unauthenticated: any task that would use it must first call `authenticate` / `complete_authentication`, or explicitly flag the gap and fall back to Plausible + Stripe instead of assuming the data is available |
+| **Link tracking / click data** | Dub.co (dashboard `app.dub.co/agor`, API base `api.dub.co`) | **Live** | Click-level tracking on any UTM-tagged or shared link; the vault's default link shortener, preferred over the Bitly MCP connector per `data/REMAP.md` Row 6 |
+| **Search / indexation** | Google Search Console | **Live** | Impressions, CTR, average position, coverage. No Ahrefs/Semrush/Moz-class SEO SaaS exists; never fabricate a Domain Authority or backlink count |
+| **Session recording / heatmaps** | None | **Absent** | No Hotjar/FullStory/LogRocket-class tool exists; flag any UX/drop-off question that would need session replay as a gap, don't imply Plausible or GA4 substitutes for it |
+| **A/B testing** | None dedicated | **Absent** | See the `ab-test-setup` skill for how this vault measures experiments without Optimizely/VWO |
+
+Before using Supermetrics for anything, check whether it has actually been authenticated this
+session; if not, either call `authenticate`/`complete_authentication` first or state the gap
+plainly rather than presenting Supermetrics-shaped output that didn't come from a real connection.
 
 ---
 
 ## Related Skills
 
-- **ab-test-setup** — A/B test measurement and setup
-- **seo-and-aeo-strategy** — Measuring SEO/AEO performance
-- **conversion-rate-optimization** — Optimizing conversion after funnel analysis
-- **executive-dashboard-generator** — Building dashboards from analytics data
+- **ab-test-setup** - A/B test measurement and setup
+- **seo-and-aeo-strategy** - Measuring SEO/AEO performance
+- **conversion-rate-optimization** - Optimizing conversion after funnel analysis
+- **executive-dashboard-generator** - Building dashboards from analytics data
+- **sales-and-revenue-operations** - Reconciling realized revenue (Stripe) against the consulting
+  pipeline-of-record; use that skill's stage vocabulary when a funnel crosses from marketing
+  analytics into pipeline tracking
+- **crm-integration** - GBrain as the record layer for any contact-level data a funnel analysis
+  surfaces (e.g. who bounced from a proposal)
