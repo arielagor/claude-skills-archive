@@ -104,8 +104,8 @@ The value metric is what you charge for; it should scale with the value customer
 ### Van Westendorp Price Sensitivity Meter
 
 Ask 100–300 respondents four questions:
-1. Too expensive — would not buy
-2. Too cheap — would question quality
+1. Too expensive, would not buy
+2. Too cheap, would question quality
 3. Expensive but would consider
 4. Bargain / great value
 
