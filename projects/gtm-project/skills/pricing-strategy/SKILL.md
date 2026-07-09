@@ -84,7 +84,7 @@ a fixed-fee diagnostic that credits toward the value-priced engagement ($15K to 
 
 ## Value Metrics
 
-The value metric is what you charge for — it should scale with the value customers receive.
+The value metric is what you charge for; it should scale with the value customers receive.
 
 | Metric | Best For | Examples |
 |--------|----------|---------|
