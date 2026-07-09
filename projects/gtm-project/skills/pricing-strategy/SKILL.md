@@ -291,8 +291,9 @@ Apply the recurring-revenue benchmarks below **only** to the two real subscripti
 ## Checklists
 
 **Launching pricing**:
-- [ ] Pick value metric; design 3 tiers with anchor prices (3–4× between tiers)
-- [ ] Package features (60% / 85% / 100%); offer 14-day trial; set up billing
+- [ ] Pick the archetype (one-time / freemium unlock / productized wedge); set charm prices that match the ladder
+- [ ] For a store: build the bundle ladder with a clear anchor; wire the real Stripe Payment Link and update the full product map (modelstack hard rule)
+- [ ] For an app: set the free-tier limit and the single unlock or credit-pack price; no free trial needed
 
 **Optimizing pricing**:
 - [ ] Track conversion rates by tier; survey customers on pricing perception
