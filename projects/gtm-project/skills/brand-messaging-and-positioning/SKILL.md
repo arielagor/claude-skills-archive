@@ -65,7 +65,7 @@ Develop comprehensive brand messaging, positioning, and identity systems using e
 **Use when:**
 - "We need clearer positioning and messaging"
 - "Create a value proposition / messaging hierarchy"
-- "People don't 'get it' — our message isn't resonating"
+- "People don't 'get it', our message isn't resonating"
 - "Develop brand guidelines and visual identity"
 - "Write a StoryBrand script / one-liner / elevator pitch"
 - "Build a Positioning & Messaging Pack"
@@ -115,7 +115,7 @@ Develop comprehensive brand messaging, positioning, and identity systems using e
 
 ## Peep Laja's Message Layers
 
-Based on thousands of B2B message tests — each layer must be addressed in order:
+Based on thousands of B2B message tests, each layer must be addressed in order:
 
 | Layer | Question | What to Do | Example |
 |-------|----------|------------|---------|
@@ -151,7 +151,7 @@ Based on thousands of B2B message tests — each layer must be addressed in orde
 ```
 
 **How to use:**
-1. Start with Customer Profile — deeply understand jobs, pains, gains
+1. Start with Customer Profile, deeply understand jobs, pains, gains
 2. Map your offering to show how you address each
 3. Identify where pain relievers and gain creators align most strongly
 4. This intersection IS your value proposition
@@ -241,11 +241,11 @@ Note how the "against" alternative (a consultant, or building it yourself) is na
 "The world has changed in a way that creates both opportunity and risk. Let me show you how to navigate this new world."
 
 **The 5 Elements:**
-1. **Name a Big, Relevant Change** — Something prospects sense but haven't articulated
-2. **Show Winners and Losers** — Urgency to act
-3. **Tease the Promised Land** — What success looks like for those who adapt
-4. **Introduce Features as "Magic Gifts"** — Capabilities that help reach promised land
-5. **Name the Enemy** — An old mindset that became a road to ruin
+1. **Name a Big, Relevant Change**, Something prospects sense but haven't articulated
+2. **Show Winners and Losers**, Urgency to act
+3. **Tease the Promised Land**, What success looks like for those who adapt
+4. **Introduce Features as "Magic Gifts"**, Capabilities that help reach promised land
+5. **Name the Enemy**, An old mindset that became a road to ruin
 
 ## The 5 Ps Brand Pillar Framework
 
@@ -375,13 +375,13 @@ Ask these questions about any marketing asset:
 
 ## Universal Principles
 
-1. **Customer-first** — Great messaging starts with deep customer understanding
-2. **Clarity before cleverness** — Being understood > being creative
-3. **Consistency compounds** — Every touchpoint reinforcing the same message builds trust
-4. **Differentiation is essential** — If competitors can say it, it's not positioning
-5. **Prove your claims** — Evidence builds trust; unsubstantiated claims erode it
-6. **Simplify ruthlessly** — Complex messaging gets ignored; simple gets remembered
-7. **Test and iterate** — Messaging is a hypothesis until validated with real customers
+1. **Customer-first**, Great messaging starts with deep customer understanding
+2. **Clarity before cleverness**, Being understood > being creative
+3. **Consistency compounds**, Every touchpoint reinforcing the same message builds trust
+4. **Differentiation is essential**, If competitors can say it, it's not positioning
+5. **Prove your claims**, Evidence builds trust; unsubstantiated claims erode it
+6. **Simplify ruthlessly**, Complex messaging gets ignored; simple gets remembered
+7. **Test and iterate**, Messaging is a hypothesis until validated with real customers
 
 ## Reference Files
 
@@ -409,7 +409,7 @@ Ask these questions about any marketing asset:
 |--------|---------|
 | **Marty Neumeier** | "A brand is not what you say it is. It's what THEY say it is." |
 | **April Dunford** | "Positioning is a fundamental precursor to messaging. You can't write your homepage until you understand the value for whom." |
-| **Andy Raskin** | "Differentiation is based on prospects seeing you make sense of their world—your empathy—and they trust you more." |
+| **Andy Raskin** | "Differentiation is based on prospects seeing you make sense of their world, your empathy, and they trust you more." |
 | **Simon Sinek** | "People don't buy what you do, they buy why you do it." |
 | **Peep Laja** | "If you leave it to the visitor to figure out how one company is different, you're going to lose." |
 | **Donald Miller** | "The customer is the hero, not your brand." |
