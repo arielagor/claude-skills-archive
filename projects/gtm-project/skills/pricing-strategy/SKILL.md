@@ -47,23 +47,26 @@ Identify the property and its archetype from the ladder above, then gather: the 
 
 **Core principle**: 1% improvement in pricing = 11% improvement in profit (McKinsey). Price to value, not cost.
 
-**Value-based pricing**: Price between the next best alternative and perceived value. Cost is a floor, not a basis.
+**Value-based pricing (modelstack worked example)**: modelstack's own copy states the value anchor out loud, "Consultants charge $2K to $10K... sometimes you just need the template." The template is priced against that alternative, not against its near-zero marginal cost to serve.
 
 ```
-Perceived value of your solution: $1,000
-Your price:                        $500  ← capture value here
-Next best alternative:             $300  ← your floor
-Your cost to serve:                 $50
+Perceived value (an M&A model built by an analyst or consultant): $2,000 to $10,000
+Next best alternative (hire it out, or build from scratch):        $2,000+   <- the anchor
+modelstack price (M&A Financial Model & Valuation):                $197      <- capture a fraction, still the top of the range
+Cost to serve (a signed download link, fully automated):           ~$0       <- a floor, never the basis
 ```
 
-**Value calculation template**:
-```
-Time savings: [hours/week × hourly rate × 52]
-Revenue impact: [additional deals × deal value × 12]
-Cost avoidance: [errors prevented × cost per error × 12]
-Total annual value: $____
+The apps use the same logic at consumer scale: a ~$4.99 gifloop or Coquí Chorus Pro unlock is priced against the annoyance of a web tool or generic white noise, not against per-export compute.
 
-Suggested price: $[10% of value] – $[20% of value] / year
+**Value calculation template (for the consulting and Agor AI Ads wedges)**:
+```
+Time saved by the automation:   [hours/week x loaded hourly rate x 52]
+Revenue unlocked or recovered:  [deals or answer-visibility gained x value]
+Cost or error avoided:          [manual-process cost removed per year]
+Total annual value:             $____
+
+Wedge price: $1,000 (agor.me AI Operations Audit) or $299 (Agor AI Ads Visibility Audit),
+a fixed-fee diagnostic that credits toward the value-priced engagement ($15K to $250K, or the Pilot then Managed ladder).
 ```
 
 ---

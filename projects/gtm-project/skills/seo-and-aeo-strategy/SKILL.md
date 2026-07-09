@@ -281,14 +281,17 @@ How often YOUR WEBSITE is the source. **Target:** Cited in 30%+ of relevant quer
 ### 4. Referral Demand
 Traffic originating in AI but arriving later (brand search after AI mention). Track via post-purchase survey: "How did you first hear about us?"
 
-### Monitoring Tools
+### Monitoring Method (no paid tool in this stack)
 
-| Tool | Coverage | Best For |
-|------|----------|----------|
-| **Otterly AI** | ChatGPT, Perplexity, AI Overviews | Share of AI voice |
-| **Peec AI** | ChatGPT, Gemini, Perplexity, Claude | Multi-platform monitoring |
-| **ZipTie** | AI Overviews, ChatGPT, Perplexity | Brand mention + sentiment |
-| **HubSpot AEO Grader** | AI visibility audit | Free audit |
+There is no Otterly / Peec / ZipTie / Profound-class AI-visibility SaaS in Ariel's stack, and no automated share-of-voice or citation-tracking tool. Measure the four metrics above with a **manual monthly prompt-test loop** instead, and record the results as a dated artifact so month-over-month movement is visible.
+
+| Method | How | Covers |
+|--------|-----|--------|
+| **Manual prompt testing** | Run each priority query yourself across ChatGPT, Perplexity, Gemini, and Google AI Overviews (`WebSearch` for the SERP/AI-Overview view; claude-in-chrome MCP or a plain browser for the chat assistants). Log whether the property is mentioned, whether it is cited, and which sources win. | Visibility, Citations, Share of Voice |
+| **Google Search Console** | Query/impression/click trends for the same topics; a brand-search lift after an AI mention is the referral-demand proxy. | Referral demand |
+| **Dated log file** | Save each month's run to `content\research\YYYY-MM-DD_ai-visibility-<property>.md` and diff against the prior month. | Trend over time |
+
+If Ariel ever wants automated multi-surface tracking, the `/ai-ads` venture already ships a rank-tracker (`bin/track-*.mjs`) built for client cells; that is client infrastructure and stays there. For his own properties, the manual loop above is the intended path. Do not stand up a competing tracker in this vault.
 
 ### Interpreting Results
 
