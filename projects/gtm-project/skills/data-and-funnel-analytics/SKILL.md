@@ -27,7 +27,7 @@ This skill is self-contained for its frontmatter scope: use its local instructio
 
 End-to-end analytics: set up tracking, interpret data, analyze funnels, measure product engagement, validate conversion paths, and calculate ROI.
 
-**Principle:** Track for decisions, not data — every event should inform an action.
+**Principle:** Track for decisions, not data, every event should inform an action.
 
 ---
 
@@ -254,10 +254,10 @@ anything directly.
 
 ### Analysis Patterns
 
-- **Bottleneck identification** — Steps with highest drop-off rates
-- **Segment comparison** — Conversion across user groups
-- **Temporal analysis** — Conversion over time
-- **A/B testing** — Compare funnel variations
+- **Bottleneck identification**, Steps with highest drop-off rates
+- **Segment comparison**, Conversion across user groups
+- **Temporal analysis**, Conversion over time
+- **A/B testing**, Compare funnel variations
 
 See `examples/` for Python implementations with Plotly visualizations.
 
@@ -282,11 +282,11 @@ Score existing funnels against Russell Brunson's framework: **Hook → Story →
 
 | Score | Verdict |
 |-------|---------|
-| 85–100 | Conversion Machine — Ready to scale |
-| 70–84 | Strong Funnel — Fix weak points, then scale |
-| 55–69 | Leaky Funnel — Fix before scaling traffic |
-| 40–54 | Broken Funnel — Rebuild key components |
-| 0–39 | Non-Functional — Start over |
+| 85–100 | Conversion Machine, Ready to scale |
+| 70–84 | Strong Funnel, Fix weak points, then scale |
+| 55–69 | Leaky Funnel, Fix before scaling traffic |
+| 40–54 | Broken Funnel, Rebuild key components |
+| 0–39 | Non-Functional, Start over |
 
 ### Traffic Temperature
 
@@ -363,7 +363,7 @@ For detailed formulas (NPV, LTV, CAC, sensitivity analysis), see [references/roi
 ### Ongoing
 - **Weekly:** Check for sudden drops in key events (>20% change = investigate)
 - **Monthly:** Audit for new pages/features without tracking
-- **Quarterly:** Full tracking plan review — remove stale events, add missing ones
+- **Quarterly:** Full tracking plan review, remove stale events, add missing ones
 
 ---
 
