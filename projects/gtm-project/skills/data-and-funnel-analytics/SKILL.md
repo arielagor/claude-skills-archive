@@ -302,6 +302,13 @@ For complete scoring criteria and examples, see [references/full-guide.md](refer
 
 ## ROI Analysis
 
+Pull actual revenue, refund, and product-level figures from the Stripe MCP read tools
+(`mcp__stripe__stripe_api_read`, `search_stripe_resources`, `get_stripe_account_info`) against the
+shared account (`acct_1T09QrAOqOwPWk86`) rather than assuming a number; for the consulting
+pipeline specifically (Veruna Minerals, Oncore Digital), realized revenue is invoiced off-platform
+and won't appear in Stripe at all, pull it from the pipeline-of-record file referenced in
+`sales-and-revenue-operations` instead.
+
 ### Core Metrics
 
 **ROI:** `(Net Profit / Total Investment) × 100%`
