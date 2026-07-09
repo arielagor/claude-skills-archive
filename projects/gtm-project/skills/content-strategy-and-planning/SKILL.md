@@ -5,9 +5,20 @@ description: "Unified skill for content strategy and marketing content strategy:
 
 # Content Strategy & Planning
 
+## Scope boundary (read first)
+
+This skill owns **single-property content strategy and calendar mechanics** for one of Ariel's properties at a time (modelstack.digital, agor.me, scored.tools): its pillars, its editorial calendar, its briefs, its ROI view. It works on the property `/portfolio-pm` or Ariel has already pointed at.
+
+**Cross-property prioritization is not this skill's job.** Deciding which property gets content effort this week, comparing content-pipeline status across the portfolio, or building a portfolio-wide content roadmap belongs to `/portfolio-pm` (`~/.claude/skills/portfolio-pm/`), which already tracks all revenue projects and ranks them. Do not rebuild cross-property pipeline-status tracking here. If a request is "what should I write across everything" or "which property needs content most," route to `/portfolio-pm`, then come back here to execute for the chosen property.
+
 ## Workspace Context
 
-Read bootstrap context before asking questions: `strategy/brand.md` for brand, audience, offer, channels, tools, constraints, and metrics; `about/me.md` for personal voice; `content/ideas.md` and `content/calendar.md` for content planning. Use legacy product-marketing context files only as fallback. Save generated drafts to `content/<platform>/drafts/YYYY-MM-DD_short-topic-slug.md`, and route durable learnings back to `strategy/brand.md`, `about/me.md`, or `content/ideas.md`.
+Read the brief first. Before any property-specific work, read the matching `briefs\<property>.md` (`modelstack`, `agor-consulting`, `scored-tools`) and say so in an early "Workspace context" line, per the vault's operating rules. Also read `strategy\brand.md` for cross-property brand voice, `about\me.md` for personal voice, `data\REMAP.md` for the tool-substitution stack, and the two content-planning files this skill reads and writes:
+
+- **`content\ideas.md`** is the single-property idea and pillar backlog (topics, angles, keyword notes, refresh candidates).
+- **`content\calendar.md`** is the editorial calendar (what publishes when, on which channel, current status).
+
+If a brief does not exist yet, draft it from conversation context before proceeding, then read it on every later invocation. Save generated drafts to `content\<platform>\drafts\YYYY-MM-DD_short-topic-slug.md`; route durable learnings back to the property brief, `strategy\brand.md`, `about\me.md`, or `content\ideas.md`. Every outward action stays draft-gated: this skill plans and drafts, it never publishes, sends, or schedules a live post.
 
 ## Operating Contract
 
@@ -61,7 +72,7 @@ Every piece of content must be **searchable**, **shareable**, or **both**. Prior
 
 ### Step 3: Content Pillars
 
-3-5 core topics your brand owns. Each pillar spawns related content.
+3-5 core topics your brand owns. Each pillar spawns related content. **Record the pillars, their subtopic clusters, and the resulting article ideas in `content\ideas.md`** (the single-property idea backlog), so the calendar can pull from a standing queue instead of inventing topics each time.
 
 ```
 Pillar Topic (Hub)
@@ -145,7 +156,9 @@ Build trust before scaling traffic:
 
 ## Part 3: Editorial Operations
 
-### Editorial Calendar Template
+The editorial calendar lives in **`content\calendar.md`** and the topic backlog in **`content\ideas.md`**. The calendar pulls scheduled items from the backlog; when a piece is drafted it goes to `content\<platform>\drafts\`, and the calendar row's status updates. The template below is the structure `content\calendar.md` should hold. This skill maintains the calendar as a plan, it does not schedule or publish anything live.
+
+### Editorial Calendar Template (structure of `content\calendar.md`)
 
 ```markdown
 ## Monthly Content Calendar
@@ -187,7 +200,7 @@ Build trust before scaling traffic:
 
 ## Part 4: GEO (AI Search) Optimization
 
-Content discoverability shifting from websites to AI chat interfaces. Optimize for LLM retrieval.
+Content discoverability shifting from websites to AI chat interfaces. Optimize for LLM retrieval. This is the planning-level view for Ariel's own content. For the deep technical AEO/GEO playbook (schema, crawler config, citation measurement) on his own properties, hand off to the `seo-and-aeo-strategy` skill. Client-facing AI-visibility delivery belongs to `/ai-ads`, not here.
 
 ### AIO Principles
 
@@ -215,13 +228,15 @@ Content discoverability shifting from websites to AI chat interfaces. Optimize f
 
 ### Content Attribution Framework
 
-| Metric | Definition | Tool |
-|--------|------------|------|
-| **Traffic** | Page views, unique visitors | GA4 |
-| **Engagement** | Time on page, scroll depth | Hotjar, GA4 |
-| **Leads** | MQLs, SQLs from content | HubSpot, Marketo |
-| **Pipeline** | Revenue influenced by content | CRM |
-| **Revenue** | Closed-won from content | CRM |
+Mapped to Ariel's stack (see `data\REMAP.md`), not a generic SaaS stack:
+
+| Metric | Definition | Where the data lives here |
+|--------|------------|---------------------------|
+| **Traffic** | Page views, unique visitors | **Plausible** (default, live on modelstack.digital). agor.me also has GA4 wired (property 540566537); scored.tools analytics are unconfirmed, flag before assuming. |
+| **Engagement** | Time on page, scroll depth | Plausible custom events / scroll-depth (modelstack fires these). **No Hotjar-class session replay or heatmap exists here**, so anything needing a session recording is a gap to flag, not to imply. |
+| **Leads** | Inbound from content | **GBrain MCP** is the CRM of record (`get_page` / `query` / `get_backlinks` / `add_timeline_entry`). For agor.me, a booking via the chat/voice widget is the lead event. No HubSpot/Marketo here. |
+| **Pipeline** | Consulting deals influenced by content | GBrain + the file-based revenue scorecard (`~\.claude\revenue-scorecard\`). Consulting closes off-platform, so pipeline is tracked by hand, not in a CRM SaaS. |
+| **Revenue** | Closed-won / sales from content | **Stripe MCP read tools** for actual sales on the shared account (`acct_1T09QrAOqOwPWk86`), disambiguated by product signal phrase; consulting revenue is manually invoiced and logged. Never assume a number, read it. |
 
 ### Leading Indicators
 
