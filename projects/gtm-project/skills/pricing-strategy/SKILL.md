@@ -220,17 +220,21 @@ Base plan: $99/mo
 
 ---
 
-## Pricing by Segment
+## Pricing by Motion (portfolio-mapped)
 
-| Segment | Price Point | Sales Motion | Decision Maker | Sales Cycle |
-|---------|-------------|--------------|----------------|-------------|
-| SMB | $29–99/mo | Self-serve | End user/team lead | Minutes–days |
-| Mid-Market | $99–999/mo | Self-serve + light touch | Dept head | Days–weeks |
-| Enterprise | $1,000+/mo | High-touch sales | VP/C-level | Weeks–months |
+| Motion | Real price band | How it sells | Example |
+|---|---|---|---|
+| Self-serve one-time | $0.99 to $999 | Payment Link or App Store IAP, no human | modelstack templates, app Pro unlocks, MVAT Mirror credit packs |
+| Productized wedge | $299 to $1,000 | Partly self-serve Stripe checkout (Agor AI Ads) or a booked call (agor.me audit) | Agor AI Ads Visibility Audit $299; agor.me AI Operations Audit $1,000 |
+| High-touch bespoke | $15K to $250K+ | Human-closed, off-platform, manually invoiced | agor.me transformation engagements |
+
+The audit wedge is the bridge: it is priced to be an easy self-serve or single-call yes, and it credits toward the high-touch engagement, moving a buyer up the ladder without a cold $15K ask.
 
 ---
 
 ## Key Metrics
+
+Apply the recurring-revenue benchmarks below **only** to the two real subscriptions (MVAT Focus web Pro at $4.99/mo or $39.99/yr, and the pre-launch Agor Agents). For one-time products (modelstack, app Pro unlocks, MVAT Mirror credit packs) the equivalent health signals are units sold, refund rate (modelstack promises a 7-day no-questions refund), and average order value. For consulting, pipeline and deal-stage tracking lives in the file-based revenue scorecard (`~/.claude/revenue-scorecard/`), not a CRM SaaS (`data/REMAP.md` Row 1).
 
 | Metric | Healthy Benchmark |
 |--------|------------------|

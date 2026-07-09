@@ -10,6 +10,12 @@ description: |
 
 Read bootstrap context before asking questions: `strategy/brand.md` for brand, audience, offer, channels, tools, constraints, and metrics; `about/me.md` for personal voice; `content/ideas.md` and `content/calendar.md` for content planning. Use legacy product-marketing context files only as fallback. Save generated drafts to `content/<platform>/drafts/YYYY-MM-DD_short-topic-slug.md`, and route durable learnings back to `strategy/brand.md`, `about/me.md`, or `content/ideas.md`.
 
+For the pipeline and forecast sections specifically, also read `briefs/agor-consulting.md` (the
+offer ladder: the $1,000 AI Operations Audit entry point, $15K-$250K engagements, and the Agor AI
+Ads $299 audit wedge) and `briefs/_portfolio.md`'s "LIVE - consulting" table before proposing any
+pipeline change. Ariel is currently in the founder-led sales stage of this playbook (see
+"Founder-Led Sales" below): no reps, no CRM SaaS, deal tracking in a file, not a platform.
+
 ## Operating Contract
 
 This skill is self-contained for its frontmatter scope: use its local instructions, references, scripts, and assets as the playbook; ask only for missing task-specific inputs; hand off to adjacent skills instead of expanding scope; and return an actionable artifact, decision, plan, draft, or diagnostic.
@@ -144,61 +150,111 @@ Opening (2 min) → Discovery Recap (3 min) → Solution Walkthrough (15-20 min)
 
 ## Revenue Operations
 
-### Lead Lifecycle Stages
+No SaaS CRM or marketing-automation platform sits behind any of this. The tooling is: a
+file-based revenue scorecard as the pipeline-of-record, GBrain (`mcp__gbrain__*`) as the contact
+and relationship layer (see the `crm-integration` skill for the write patterns), and the Stripe
+MCP read tools for realized revenue once a deal actually closes. Everything below is written
+against that real stack, not a generic MQL/SQL funnel with marketing, sales, and CS teams handing
+off to each other, there is one operator (Ariel) doing founder-led sales end to end.
 
-| Stage | Owner | Entry Criteria |
-|-------|-------|----------------|
-| Subscriber | Marketing | Opts in to content |
-| Lead | Marketing | Basic info provided |
-| MQL | Marketing | Fit + engagement threshold |
-| SQL | Sales | Accepted, qualified via call |
-| Opportunity | Sales AE | BANT confirmed |
-| Customer | CS | Closed-won |
+### Lead Lifecycle Stages (this vault's real stage vocabulary)
 
-**MQL = Fit Score (who they are) + Engagement Score (what they do). Neither alone qualifies.**
+The pipeline-of-record (`~/.claude/projects/job-applications/potential consulting projects
+clients/README.md`, parsed weekly by `~/.claude/revenue-scorecard/revenue-scorecard.mjs` into a
+Monday scorecard email) uses this exact stage vocabulary, one stage per row:
 
-**MQL-to-SQL SLA:** Contact within 4 hours; qualify or reject within 48 hours.
+| Stage | Entry Criteria |
+|-------|----------------|
+| `lead` | Identified as ICP-fit, not yet contacted |
+| `outreach-staged` | Draft written, waiting on Ariel's explicit send approval (nothing in this vault sends itself, per the dry-run policy) |
+| `outreach-sent` | First touch sent |
+| `in-conversation` | Reply received, dialogue underway |
+| `call-booked` | A call or meeting is on the calendar |
+| `proposal-sent` | A scoped proposal or SOW is in the prospect's hands |
+| `won` (terminal) | Signed / engagement started |
+| `lost` / `parked` (terminal) | Disqualified, went quiet, or explicitly deferred |
+
+There is no separate MQL/SQL split and no lifecycle handoff between teams: Ariel owns every stage.
+If a task references "MQL" or "SQL," translate it into this vocabulary rather than inventing a
+parallel stage system.
+
+### Real, current pipeline (worked examples, not invented ones)
+
+| Contact / Company | Opportunity | Stage | Value | Source |
+|---|---|---|---|---|
+| Paul Schneider, Oncore Digital | "The Yield Desk," agentic CTV/DOOH yield management (35K retail screens) | `proposal-sent` | $6K discovery -> $18K pilot -> $4-6K/mo | Direct relationship, Ariel-sourced |
+| Jon Cooper, Veruna Minerals | Operational intelligence layer above Zengate/Palmra; Phase 0 two-week diagnostic | `in-conversation` | $35-60K Phase 0 target, phased build to follow | Direct relationship, Ariel-sourced |
+| Rotating prospect list | $299 AI Visibility Audit, the Agor AI Ads on-ramp that ladders into Pilot/Managed (see `briefs/agor-consulting.md`) | `outreach-sent` (varies per prospect) | $299 entry fee, credited toward Pilot | Twice-weekly prospect-research scan, scored against ICP gates (intent/funding/fit/reachability, threshold >= 60) |
+
+Use these three as the default worked examples for any pipeline, forecast, or velocity question
+in this skill, instead of a fictional "Acme Corp" deal. Pull current stage and value from the
+scorecard file itself before answering, values above will drift as the pipeline moves.
 
 ### Lead Scoring
 
-**Explicit (fit):** Company size, industry, title, tech stack
+**Explicit (fit):** For the consulting pipeline, this vault already runs an ICP-fit gate inside
+the twice-weekly automated prospect-research scan referenced in `briefs/agor-consulting.md`:
+funding signals, hiring signals, and a fit score against the AI-transformation ICP, with a >= 60
+threshold before a prospect enters `outreach-staged`.
 
-**Implicit (engagement):** Pricing page visits, demo requests, email clicks, product usage
+**Implicit (engagement):** Reply received, call booked, proposal requested. Because there is no
+product-usage telemetry on a consulting engagement, "engagement" here means conversational
+progress through the stage vocabulary above, not app usage.
 
-**Negative:** Competitor domains, student emails, unsubscribes
+**Negative:** Prospects who bounce (unverified email pattern-guessed and rejected by the mail
+server), explicit "not interested," or a stage that goes stale for multiple weeks with no reply,
+demote toward `parked`, don't leave them sitting in `in-conversation` indefinitely.
 
-### Lead Routing Methods
+### Lead Routing
 
-| Method | Best For |
-|--------|----------|
-| Round-robin | Equal territories |
-| Territory-based | Regional/vertical teams |
-| Account-based | Named accounts / ABM |
-| Skill-based | Complex deals, multi-product |
+This vault is pre-hire (see "Founder-Led Sales" above: wait for ~$1M ARR and repeatable process
+before hiring). Round-robin, territory, and skill-based routing between reps do not apply yet,
+there is one rep. "Routing" here means: does a new lead clear the ICP-fit gate, and if so, which
+stage of the vocabulary above does it enter. Revisit the team-based routing methods in
+`references/routing-rules.md` once the Hiring framework above actually triggers a first hire; until
+then, treat that reference file's speed-to-lead benchmarks as the actionable part and its
+rep-routing sections as forward-looking, not current state.
 
-**Speed-to-lead:** Contact within 5 minutes = 21x more likely to qualify. After 30 minutes, conversion drops 10x.
-
-For routing decision trees and automation playbooks: see `references/routing-rules.md`, `references/automation-playbooks.md`
+**Speed-to-lead still applies to a solo operator:** contact within 5 minutes = 21x more likely to
+qualify; after 30 minutes, conversion drops 10x. For a founder-led motion this mostly means:
+reply-check cadence and same-day scorecard updates, not an automated routing engine.
 
 ### Pipeline Stage Hygiene
 
-- Enforce required fields per stage to block advancement with bad data
-- Flag stale deals (2x average time in stage) automatically
-- Alert on stage skips (Qualified → Proposal without Discovery)
-- Require reason codes on close date pushes
+- Every send, reply, call, proposal, win, or loss updates the Stage and Last-touch columns in the
+  scorecard file the same day it happens; this is a hard rule already stated in that file's own
+  "Update discipline" section, not a new one invented here
+- Flag stale deals: a row sitting in the same non-terminal stage for an unusually long stretch
+  (use the specific deal's own history as the baseline, there isn't yet enough volume in this
+  pipeline for a statistically meaningful "2x average time in stage" threshold)
+- A stage skip (e.g. `outreach-sent` straight to `proposal-sent` with no `in-conversation` or
+  `call-booked` in between) is a signal to double check the row is accurate, not necessarily an
+  error. A fast-moving referral can legitimately skip stages
+- Never advance a stage, mark something `won`, or log a reply that didn't happen. This mirrors the
+  triage rule in `briefs/_portfolio.md`: don't fabricate outcomes
 
 ### RevOps Metrics
 
-| Metric | Target |
-|--------|--------|
-| Lead-to-MQL rate | 5-15% |
-| MQL-to-SQL rate | 30-50% |
-| SQL-to-Opportunity | 50-70% |
-| Win rate | 20-30% |
-| Speed-to-lead | <5 minutes |
-| LTV:CAC ratio | 3:1 to 5:1 |
+At this pipeline's current volume (single digits of active opportunities), industry-benchmark
+conversion rates are directional context, not a target to grade Ariel's real numbers against yet:
 
-For scoring models and lifecycle definitions: see `references/scoring-models.md`, `references/lifecycle-definitions.md`
+| Metric | Industry benchmark | Where to get Ariel's real number |
+|--------|--------------------|-----------------------------------|
+| Speed-to-lead | <5 minutes | Scorecard file's Last-touch column vs. lead entry date |
+| Win rate | 20-30% | Count `won` vs. `lost`/`parked` rows in the scorecard once there's enough closed volume to be meaningful |
+| Deal cycle length | Varies by deal size | Date range between `lead` and `won`/`lost` per row |
+| Realized revenue | N/A | **Stripe MCP read tools** (`mcp__stripe__stripe_api_read`, `search_stripe_resources`, `get_stripe_account_info`) against the shared account (`acct_1T09QrAOqOwPWk86`), disambiguated by product/signal phrase per `PORTFOLIO_PROPERTIES.md`. Only the $299 AI Visibility audit and any self-serve `agor-agents` charges actually run through Stripe; the Oncore and Veruna engagements close off-platform and get invoiced manually |
+
+Don't invent a win rate, LTV:CAC, or pipeline-coverage number for this pipeline from thin air; if
+asked for one and the scorecard doesn't have enough closed history yet, say so and offer the
+industry benchmark as context instead.
+
+For a deeper cut on scoring and lifecycle framing that still generalizes (useful if this playbook
+is ever applied to a hired rep or a higher-volume motion), see `references/scoring-models.md`,
+`references/lifecycle-definitions.md`. For routing and automation patterns rebuilt around this
+vault's actual tools (GBrain, the scorecard, scheduled tasks, and draft-gated sends, not
+HubSpot/Salesforce/Zapier), see `references/routing-rules.md` and
+`references/automation-playbooks.md`.
 
 ---
 
