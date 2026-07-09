@@ -229,8 +229,8 @@ Note how the "against" alternative (a consultant, or building it yourself) is na
 **Structure:**
 "We help [CHARACTER] who struggle with [PROBLEM] to [SOLUTION] so they can [RESULT]."
 
-**Example:**
-"We help busy parents who struggle to cook healthy meals get fresh ingredients delivered weekly so they can feed their family nutritious food without the stress."
+**Example (real portfolio, agor.me):**
+"We help operators who sense AI is changing their business but can't yet run the new surface themselves put autonomous AI systems into production so they scale operations without rebuilding their team."
 
 ## Andy Raskin's Strategic Narrative
 
@@ -336,6 +336,8 @@ After each statement, ask "so what?" If you can't explain why customers should c
 
 **The "Only" Test (Marty Neumeier):**
 > Our [offering] is the only [category] that [benefit].
+
+Real portfolio pass: "MVAT Mirror is the only personality profiler that reads your actual communication data on-device instead of asking you questions." "gifloop is the only iOS GIF maker with its own custom encoder rather than a wrapper around a web tool." If the sentence stays true after swapping in a competitor's name, it is not yet positioning.
 
 **The Clarity Test:**
 Can someone understand what you do within 5 seconds of reading your homepage?
