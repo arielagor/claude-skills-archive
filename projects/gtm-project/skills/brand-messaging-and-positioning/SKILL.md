@@ -49,7 +49,7 @@ This skill is self-contained for its frontmatter scope: use its local instructio
 
 Develop comprehensive brand messaging, positioning, and identity systems using established frameworks from leading strategists.
 
-> "A brand is not what you say it is. It's what THEY say it is." — Marty Neumeier
+> "A brand is not what you say it is. It's what THEY say it is." (Marty Neumeier)
 
 ## Scope
 
