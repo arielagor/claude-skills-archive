@@ -7,7 +7,7 @@ description: Generate unique personalized first lines for hundreds of prospects 
 
 ## Workspace Context
 
-**Project:** agor.me consulting outreach (see `briefs/agor-consulting.md`). Prospect research uses GBrain MCP (`mcp__gbrain__query` for semantic search, `get_backlinks` for past conversations, `traverse_graph` for relationship context) and WebSearch for company news. Email drafts via Gmail MCP (`mcp__claude_ai_Gmail__create_draft` only, never send from this skill). All personalized copy draft-gated for Ariel's explicit review before dispatch. See `data/REMAP.md` row 1.
+**Project:** agor.me consulting outreach (see `briefs/agor-consulting.md`). Prospect research uses GBrain MCP (mcp__gbrain__query for semantic search, get_backlinks for past conversations, traverse_graph for relationship context) and WebSearch for company news. Email drafts via Gmail MCP (mcp__claude_ai_Gmail__create_draft only, never send from this skill). All personalized copy draft-gated for Ariel's explicit review before dispatch. See `data/REMAP.md` row 1.
 
 ## Operating Contract
 

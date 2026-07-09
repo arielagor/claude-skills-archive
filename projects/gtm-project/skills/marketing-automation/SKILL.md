@@ -1,6 +1,6 @@
 ---
 name: marketing-automation
-description: Use this skill when setting up marketing automation in HubSpot, Marketo, email sequences, lead scoring, and workflows.
+description: Use this skill when designing marketing automation for Ariel's own properties - lead scoring models, email sequence design, lifecycle-stage workflows, and the actual mechanism (Windows Task Scheduler crons, claude -p headless runs, and the gated-outward-agent OFF -> DRAFT -> LIVE arming pattern) for anything that acts outward on a schedule or webhook.
 ---
 
 # Marketing Automation Expert
@@ -15,21 +15,28 @@ This skill is self-contained for its frontmatter scope: use its local instructio
 
 
 
-Marketing automation strategy and implementation across HubSpot, Marketo, ActiveCampaign, and similar platforms.
+Marketing automation strategy for Ariel's own properties: lead scoring, email sequence design, and
+lifecycle workflows, built as code plus cron rather than a SaaS workflow builder. This vault has no
+HubSpot, Marketo, ActiveCampaign, Pardot, Mailchimp, Zapier, Make, or n8n account - every
+automation here runs as a scheduled script under Ariel's own control. See `data/REMAP.md` Row 5
+for the full substitution rationale.
 
 ---
 
-## Platform Selection
+## Automation Stack
 
-| Platform | Best For | Complexity | Cost |
-|----------|----------|------------|------|
-| HubSpot | SMB to Enterprise, all-in-one | Medium | $$$–$$$$ |
-| Marketo | Enterprise B2B | High | $$$$ |
-| ActiveCampaign | SMB, strong automation | Low–Medium | $–$$ |
-| Pardot | Salesforce-native B2B | Medium–High | $$$$ |
-| Mailchimp | Small business, email-first | Low | $–$$ |
+This vault has no drag-and-drop workflow builder. Automations are code plus cron, built from
+three layers:
 
-**Selection criteria**: CRM integration, email volume, workflow complexity, reporting depth, budget, team technical skill.
+| Layer | What it is | Use for |
+|-------|-----------|---------|
+| **Windows Task Scheduler cron** | A scheduled task, always **S4U logon type, never Interactive** | Anything that runs on a timer (daily digest, weekly nurture send, lifecycle check). `Interactive` tasks flash a visible console window on Ariel's desktop while he works; `S4U` runs silently in background session 0 on the same schedule. Build or audit via the `schedule` skill or `hide-cron-windows.ps1`. |
+| **`claude -p` headless (Max plan)** | A subprocess call to Claude Code, non-interactive | Any step needing judgment: scoring a lead from free-text context, drafting a sequence email, classifying an inbound reply. **Strip `ANTHROPIC_API_KEY` from the spawn env** before calling - if it is present the call silently bills the paid API instead of the Max plan Ariel already pays for. |
+| **`gated-outward-agent` skill pattern** | OFF -> DRAFT -> LIVE arming, escalate-not-block safety gate | Anything the cron or the `claude -p` step would send, post, or act on outward (an email, a customer-visible record update, a webhook reply). Build the whole pipeline in OFF, prove it in DRAFT (real artifacts, zero outward action), and arm LIVE only on Ariel's explicit go, whitelist-scoped. See `~/.claude/skills/gated-outward-agent/SKILL.md`. |
+
+**Selection test for a new automation**: does it run on a timer (Task Scheduler)? Does a step need
+reasoning (`claude -p`)? Does any step act outward (`gated-outward-agent`)? Most real automations
+in this vault need all three layered together, not a platform choice off a vendor list.
 
 ---
 

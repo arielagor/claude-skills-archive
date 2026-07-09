@@ -7,7 +7,7 @@ description: Research, expand, and cluster keywords for content strategy. Use wh
 
 ## Workspace Context
 
-**Project:** modelstack.digital, agor.me, iOS apps, scored.tools (see `briefs/`). Read the relevant brief before suggesting keywords. Research uses Google Search Console (live, via Ariel's account), Google Autocomplete, WebSearch tool, and manual free SERP analysis. No paid SEO SaaS (Ahrefs, Semrush, Moz, Screaming Frog) — see `data/REMAP.md` row 2. All drafts to `content/<platform>/drafts/YYYY-MM-DD_short-topic-slug.md`.
+**Project:** modelstack.digital, agor.me, iOS apps, scored.tools (see `briefs/`). Read the relevant brief before suggesting keywords. Research uses Google Search Console (live, via Ariel's account), Google Autocomplete, WebSearch tool, and manual free SERP analysis. No paid SEO SaaS (Ahrefs, Semrush, Moz, Screaming Frog): see `data/REMAP.md` row 2. All drafts to `content/<platform>/drafts/YYYY-MM-DD_short-topic-slug.md`.
 
 ## Operating Contract
 
