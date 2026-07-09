@@ -344,20 +344,29 @@ For complete SEO checklist, see [references/seo-checklist.md](references/seo-che
 
 ---
 
-## Tools
+## Tools (Ariel's free stack)
+
+This vault runs on free, first-party tooling only. There is **no Semrush, Ahrefs, Moz, Screaming Frog, or DataForSEO** in the stack (see `data\REMAP.md` row 2). Use the following, and degrade gracefully where a paid capability has no substitute.
 
 | Tool | Use |
 |------|-----|
-| Google Search Console | Monitor indexing, fix issues, track queries |
-| Google PageSpeed Insights | Performance + Core Web Vitals |
-| Rich Results Test | Validate structured data |
-| Lighthouse | Full SEO audit |
-| Screaming Frog | Crawl analysis |
-| Semrush / Ahrefs | AI Overview tracking, backlinks, content gaps |
+| Google Search Console | Indexation, coverage, query/impression/click data, ranking movement, submit sitemaps, fix crawl errors. The primary ranking-and-indexation source. |
+| Google PageSpeed Insights | Performance + Core Web Vitals (field + lab) |
+| Rich Results Test | Validate structured data / rich-result eligibility |
+| Schema.org Validator | Validate any schema type |
+| WebSearch | Competitor SERP research, People-Also-Ask mining, AI-Overview view, keyword/topic discovery |
+| WebFetch + browser | Manual crawl of a small site (title/meta/heading/schema/robots checks) in place of a crawler; claude-in-chrome MCP for the AI chat assistants |
+| Manual SERP checks | Incognito queries and `site:` operators in place of a paid rank tracker |
+| `scripts/seo_audit.py` | No-API audit: meta tags, robots.txt, sitemap, load time, schema, AI-bot access. This is the one script that runs with no key. |
 
-See [references/tools-and-apis.md](references/tools-and-apis.md) for API reference.
+### Capability gaps (state the gap, never fabricate a number)
 
-**Scripts available** in `scripts/`: SEO audit, keyword research, SERP analysis, backlink analysis, competitor gap analysis, autocomplete ideas. See script files for usage.
+- **No Domain Authority / Domain Rating / Ahrefs Rank.** These are proprietary third-party scores; nothing in this stack computes them. If a task asks for a DA/DR filter or number, say so and substitute qualitative judgment plus the GSC **Links** report (top linking sites, referring-domain count) as the closest free signal.
+- **No backlink index.** There is no Ahrefs/Moz backlink database here. Use the GSC Links report for links Google already knows about; a full external backlink profile is not obtainable and should be flagged as such.
+- **No session-replay / heatmap** (Hotjar-class) and **no keyword-volume/difficulty database.** Keep keyword and funnel judgment qualitative, informed by WebSearch, autocomplete, and GSC's own query data.
+- **The DataForSEO scripts** (`keyword_research.py`, `serp_analysis.py`, `backlinks.py`, `domain_overview.py`, `competitor_gap.py`, `related_keywords.py`, `autocomplete_ideas.py`) require a paid `DATAFORSEO_LOGIN` / `DATAFORSEO_PASSWORD` that Ariel does **not** hold. Treat them as inert reference code, not the working path. Use the free tools above instead.
+
+See [references/tools-and-apis.md](references/tools-and-apis.md) for the full free-vs-unavailable breakdown.
 
 ---
 
