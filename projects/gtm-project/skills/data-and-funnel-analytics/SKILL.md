@@ -128,15 +128,21 @@ Convention: `utm_source={channel}&utm_medium={cpc|email|organic|social}&utm_camp
 
 ## Analytics Interpretation
 
-### GA4 Benchmarks
+### Benchmarks (directionally tool-agnostic; GA4-native metric names apply on agor.me only)
+
+These benchmark bands are useful regardless of which tool sourced the number, but "Engagement
+Rate" specifically is a GA4 term with no direct Plausible equivalent; on a Plausible-only property
+use Bounce Rate and Visit Duration (Plausible's own native metrics) instead of reaching for an
+Engagement Rate that tool doesn't report. Scroll Depth requires a custom goal/event (modelstack.digital
+already has one wired; don't assume it exists elsewhere without checking).
 
 | Metric | Good | Warning | Poor | Action When Poor |
 |--------|------|---------|------|------------------|
-| Avg Time on Page | >3 min | 1–3 min | <1 min | Improve content depth |
+| Avg Time on Page / Visit Duration | >3 min | 1–3 min | <1 min | Improve content depth |
 | Bounce Rate | <40% | 40–70% | >70% | Add internal links, improve intro |
-| Engagement Rate | >60% | 30–60% | <30% | Review content quality |
-| Scroll Depth | >75% | 50–75% | <50% | Add visual breaks |
-| Pages/Session | >2.5 | 1.5–2.5 | <1.5 | Improve internal linking |
+| Engagement Rate (GA4 only, agor.me) | >60% | 30–60% | <30% | Review content quality |
+| Scroll Depth (requires a custom goal) | >75% | 50–75% | <50% | Add visual breaks |
+| Pages/Session / Views per Visit | >2.5 | 1.5–2.5 | <1.5 | Improve internal linking |
 
 ### Google Search Console Benchmarks
 
@@ -228,13 +234,23 @@ Good = flattening curve. Bad = steep drop-off.
 4. Visualize bottlenecks
 5. Generate optimization recommendations
 
-### Common Funnel Types
+### Common Funnel Types (illustrative shapes; the real funnel lives in the property's brief)
 
-| Funnel | Steps |
-|--------|-------|
-| **E-commerce** | Promotion → Search → Product View → Add to Cart → Purchase |
-| **SaaS Signup** | Landing Page → Sign Up → Email Verify → Onboarding Complete |
-| **Content** | Article View → Comment → Share → Subscribe |
+None of the four properties in this vault actually share a funnel shape, so treat the table below
+as generic vocabulary, not a template to apply uniformly. Read the property's own
+`briefs/<property>.md` for its real, confirmed funnel before analyzing a drop-off or proposing a
+fix:
+
+| Funnel | Generic steps | This vault's real equivalent |
+|--------|-------|---|
+| **E-commerce** | Promotion → Search → Product View → Add to Cart → Purchase | modelstack.digital's real funnel (per `briefs/modelstack.md`): product/bundle page → `Checkout Click` (Plausible event) → Stripe Payment Link → `checkout.session.completed` webhook → HMAC-signed download email. Support and refunds are manual, never assume a self-serve flow completed |
+| **SaaS Signup** | Landing Page → Sign Up → Email Verify → Onboarding Complete | agor.me's real funnel (per `briefs/agor-consulting.md`) isn't a signup at all: chat/voice widget conversation → booking function-call → Google Calendar event → automatic pre-call research brief. There is no Stripe checkout in this funnel; never model agor.me as a self-serve SaaS signup |
+| **Content** | Article View → Comment → Share → Subscribe | The daily blog + Substack loop on both modelstack.digital and agor.me; no comment feature exists on either, "share" is cross-posting via `social-announcer`, not a reader action |
+| **App Store IAP** | Not in the generic list | The four iOS apps (`briefs/ios-apps.md`) monetize entirely through Apple StoreKit; there is no web funnel, no Plausible/GA4 event chain leading to purchase, and refunds route through Apple, never Stripe |
+
+For scored.tools (`briefs/scored-tools.md`), there is no payment funnel yet at all (pre-revenue,
+affiliate model planned); don't construct a purchase funnel for a property that doesn't sell
+anything directly.
 
 ### Analysis Patterns
 
