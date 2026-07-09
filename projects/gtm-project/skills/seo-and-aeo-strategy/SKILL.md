@@ -5,9 +5,19 @@ description: SEO, AEO (Answer Engine Optimization), and GEO strategy for search 
 
 # SEO & AEO Strategy
 
+## Scope boundary (read first)
+
+This skill covers SEO / AEO / AI-visibility work for **Ariel's OWN properties**: modelstack.digital, agor.me, scored.tools (and any other line in `PORTFOLIO_PROPERTIES.md`). It optimizes his own sites to rank and to be cited.
+
+**All client-facing AI-visibility delivery belongs to `/ai-ads`** (`~/.claude/skills/ai-ads/`), not here. That skill already owns the citation-verified authority knowledge base, the 8-stage campaign pipeline, the AI Visibility Index, and the rank-tracker, all with a human gate on every action that spends money. Do not rebuild any of that infrastructure in this vault. If a task is about getting a **client's** brand cited or advertised in an AI assistant, stop and route to `/ai-ads`.
+
+Reference `/ai-ads` only where it genuinely overlaps: the same public GEO research findings the `/ai-ads` authority KB maintains for clients also apply to optimizing Ariel's own properties, so it is a legitimate source to read from, never a place to duplicate work into.
+
 ## Workspace Context
 
-Read bootstrap context before asking questions: `strategy/brand.md` for brand, audience, offer, channels, tools, constraints, and metrics; `about/me.md` for personal voice; `content/ideas.md` and `content/calendar.md` for content planning. Use legacy product-marketing context files only as fallback. Save generated drafts to `content/<platform>/drafts/YYYY-MM-DD_short-topic-slug.md`, and route durable learnings back to `strategy/brand.md`, `about/me.md`, or `content/ideas.md`.
+Read the brief first. Before any property-specific work, read the matching `briefs\<property>.md` (`modelstack`, `agor-consulting`, `scored-tools`) and say so in an early "Workspace context" line of your output, per the vault's operating rules. Also read `data\REMAP.md` for the tool-substitution stack this skill runs on (no paid SEO SaaS exists here), `strategy\brand.md` for cross-property brand voice, `about\me.md` for personal voice, and `content\ideas.md` + `content\calendar.md` for content planning. If a brief does not exist yet, draft it from conversation context before proceeding, then read it on every later invocation.
+
+Save generated drafts to `content\<platform>\drafts\YYYY-MM-DD_short-topic-slug.md`. Route durable learnings back to the property brief, `strategy\brand.md`, `about\me.md`, or `content\ideas.md`. Every outward action stays draft-gated: a robots.txt change, a schema deployment, an outreach email, or a sitemap submission is proposed as an artifact and waits for Ariel's explicit go, never executed by this skill.
 
 ## Operating Contract
 

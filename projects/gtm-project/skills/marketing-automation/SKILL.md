@@ -113,15 +113,25 @@ Exit conditions: demo requested, sales conversation started, unsubscribed.
 
 ## Automation Workflows
 
+Each workflow below is marketing logic (trigger -> steps -> outcome). The mechanism that runs it
+is always one or more of the three Automation Stack layers above, and every step that would act
+outward is gated per the pattern in `gated-outward-agent` - never a live send by default.
+
 ### Lead Routing Workflow
 
-1. Data enrichment (Clearbit/ZoomInfo) — wait 30 seconds
-2. Lead scoring + grading
-3. Check for existing account → route to account owner if yes
-4. Territory assignment (geography → company size → industry)
-5. Create follow-up task with SLA: A=15 min | B=2 hrs | C=24 hrs
-6. Notify rep via email + Slack
-7. Add to appropriate nurture track
+1. Data enrichment: GBrain MCP lookup (`query`, `get_page`, `get_backlinks`) for any existing
+   relationship, company, or prior-conversation context - not a paid enrichment SaaS
+2. Lead scoring + grading (see Lead Scoring Model above)
+3. Check GBrain for an existing person/company record -> update it if found, `put_page` a new
+   one if not
+4. Segment assignment (geography -> company size -> industry, or the property-specific
+   equivalent)
+5. Create a follow-up entry with an SLA (A=15 min | B=2 hrs | C=24 hrs) as a GBrain timeline
+   entry or a dated line in the revenue scorecard (`~/.claude/revenue-scorecard/`) - there is no
+   sales team to route to, so the "task" is Ariel's own follow-up queue
+6. Draft the notification as a Gmail draft (`mcp__claude_ai_Gmail__create_draft`) addressed to
+   Ariel - never auto-sent; no Slack integration exists in this stack
+7. Add to the appropriate nurture track in the content calendar
 
 ### Lifecycle Stage Automation
 

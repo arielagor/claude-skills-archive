@@ -1,490 +1,280 @@
 ---
 name: "crm-integration"
-description: "CRM integration patterns for Close CRM, HubSpot, and Salesforce. Use when: Close CRM, HubSpot, Salesforce, CRM API, lead sync, deal sync, activity logging, CRM webhook, pipeline automation, contact enrichment."
+description: "GBrain-as-CRM patterns for this vault: contact and company records, hybrid search, interaction history, relationship mapping, and pipeline-stage tagging via GBrain MCP tools, plus the file-based revenue scorecard for deal-stage tracking. Use when: CRM, contact record, lead sync, deal tracking, pipeline stage, activity logging, account mapping, relationship history, GBrain."
 ---
 
 <objective>
-Integrate with CRM platforms for sales automation workflows:
+There is no SaaS CRM in this stack. GBrain (Postgres + pgvector, exposed via the `mcp__gbrain__*`
+MCP tools) is the CRM of record for every property in `PORTFOLIO_PROPERTIES.md`. Deal-stage
+tracking for the active consulting pipeline lives in a separate file-based revenue scorecard,
+because GBrain has no native pipeline-stage field. This skill covers four deliverables:
 
-1. **Close CRM** - Daily driver for SMB sales (simplest API, best value)
-2. **HubSpot** - Marketing + Sales alignment with rich ecosystem
-3. **Salesforce** - Enterprise requirements and complex workflows
-4. **Cross-CRM Sync** - Bidirectional sync with conflict resolution
+1. **Contact and company records** - `put_page` / `get_page` against the `people/` and
+   `companies/` directories (see `~/.claude/projects/brain/RESOLVER.md`)
+2. **Interaction history** - `get_backlinks` to pull every page that references a contact,
+   `add_timeline_entry` to log a touchpoint
+3. **Relationship and account mapping** - `traverse_graph` to walk the link graph outward from a
+   person or company
+4. **Pipeline-stage tracking** - `add_tag` mirroring the revenue scorecard's stage vocabulary,
+   `add_link` for role/relationship links, plus the file-based scorecard itself for the actual
+   deal-value and next-step columns GBrain has no field for
 
-Key deliverables:
-- API client setup with proper authentication
-- CRUD operations for leads, contacts, deals, activities
-- Webhook handlers for real-time sync
-- Pipeline automation and reporting
+Never generate a HubSpot, Salesforce, Close, or Pipedrive API client, OAuth setup, or webhook
+handler. None of these exist in this stack (`data/connections.md` lists all three as ABSENT). If
+a request specifically names one of them, say so plainly and redirect to the GBrain patterns
+below, per `data/REMAP.md` Row 1.
 </objective>
 
 ## Workspace Context
 
-Read bootstrap context before asking questions: `strategy/brand.md` for brand, audience, offer, channels, tools, constraints, and metrics; `about/me.md` for personal voice; `content/ideas.md` and `content/calendar.md` for content planning. Use legacy product-marketing context files only as fallback. Save generated drafts to `content/<platform>/drafts/YYYY-MM-DD_short-topic-slug.md`, and route durable learnings back to `strategy/brand.md`, `about/me.md`, or `content/ideas.md`.
+Read `data/REMAP.md` (Row 1) and `data/connections.md` (the GBrain row) before any CRM-flavored
+task; both are the source of truth for what actually exists. Most CRM work in this vault touches
+the consulting pipeline, so also read `briefs/agor-consulting.md` for the current offer ladder and
+`briefs/_portfolio.md`'s "LIVE - consulting" table for the two active named engagements. State in
+an early "Workspace context" line that this was done. Save any generated drafts to
+`content/<platform>/drafts/YYYY-MM-DD_short-topic-slug.md`; route durable learnings about a
+contact, company, or deal into GBrain itself via `put_page`, not into a vault content file.
 
 ## Operating Contract
 
-This skill is self-contained for its frontmatter scope: use its local instructions, references, scripts, and assets as the playbook; ask only for missing task-specific inputs; hand off to adjacent skills instead of expanding scope; and return an actionable artifact, decision, plan, draft, or diagnostic.
-
-<quick_start>
-**Close CRM (API Key Auth):**
-```python
-import httpx
-
-class CloseClient:
-    BASE_URL = "https://api.close.com/api/v1"
-
-    def __init__(self, api_key: str):
-        self.client = httpx.Client(
-            base_url=self.BASE_URL,
-            auth=(api_key, ""),  # Basic auth, password empty
-            timeout=30.0,
-        )
-
-    def create_lead(self, data: dict) -> dict:
-        response = self.client.post("/lead/", json=data)
-        response.raise_for_status()
-        return response.json()
-
-    def search_leads(self, query: str) -> list:
-        response = self.client.post("/data/search/", json={
-            "query": {"type": "query_string", "value": query},
-            "results_limit": 100
-        })
-        return response.json()["data"]
-
-# Usage
-close = CloseClient(os.environ["CLOSE_API_KEY"])
-leads = close.search_leads("company:Coperniq")
-```
-
-**HubSpot (Python SDK):**
-```python
-from hubspot import HubSpot
-from hubspot.crm.contacts import SimplePublicObjectInputForCreate
-
-client = HubSpot(access_token=os.environ["HUBSPOT_ACCESS_TOKEN"])
-
-# Create contact
-contact = client.crm.contacts.basic_api.create(
-    SimplePublicObjectInputForCreate(properties={
-        "email": "user@example.com",
-        "firstname": "Jane",
-        "lastname": "Smith"
-    })
-)
-print(f"Created: {contact.id}")
-```
-
-**Salesforce (JWT Bearer):**
-```python
-import jwt
-from datetime import datetime, timedelta
-
-class SalesforceClient:
-    def __init__(self, client_id: str, username: str, private_key: str):
-        self.auth_url = "https://login.salesforce.com"
-        self._authenticate(client_id, username, private_key)
-
-    def _authenticate(self, client_id, username, private_key):
-        payload = {
-            "iss": client_id,
-            "sub": username,
-            "aud": self.auth_url,
-            "exp": int((datetime.utcnow() + timedelta(minutes=3)).timestamp())
-        }
-        assertion = jwt.encode(payload, private_key, algorithm="RS256")
-
-        response = httpx.post(f"{self.auth_url}/services/oauth2/token", data={
-            "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
-            "assertion": assertion
-        })
-        self.access_token = response.json()["access_token"]
-        self.instance_url = response.json()["instance_url"]
-```
-</quick_start>
+This skill is self-contained for its frontmatter scope: use its local instructions and reference
+file as the playbook; ask only for missing task-specific inputs; hand off to adjacent skills
+instead of expanding scope; and return an actionable artifact, decision, plan, or diagnostic.
 
 <success_criteria>
-A CRM integration is successful when:
-- API authentication works without errors
-- CRUD operations complete for all entity types
-- Rate limits are respected (Close: 100 req/10s, HubSpot: varies by tier)
-- Webhooks fire and process correctly
-- Data syncs bidirectionally without duplicates
+A CRM task in this vault is successful when:
+- A person or company has exactly one page at a stable slug (`people/<first-last>` or
+  `companies/<company-name>`), never a duplicate created because the slug wasn't checked first
+- Every touchpoint (call, email sent, proposal sent, reply received) is logged as a timeline entry
+  the same day it happens, matching the update discipline already in force for the file-based
+  scorecard
+- `get_backlinks` on a contact returns the full interaction history: mentions, linked meetings,
+  linked deals
+- The stage tag on a GBrain page and the stage column in the revenue scorecard file agree; nobody
+  should ever have to guess which one is stale
+- No CRM SaaS API client, key, or OAuth flow appears anywhere in generated code
 </success_criteria>
 
-<crm_comparison>
-## Platform Comparison
-
-| Feature | Close | HubSpot | Salesforce |
-|---------|-------|---------|------------|
-| **Auth** | API Key | OAuth 2.0 / Private App | JWT Bearer |
-| **Rate Limit** | 100 req/10s | 100-200 req/10s by tier | 100k req/day |
-| **Best For** | SMB sales, simplicity | Marketing + Sales | Enterprise |
-| **Starting Price** | $49/user/mo | Free (limited) | $25/user/mo |
-| **API Access** | All plans | Starter+ ($45+) | All plans |
-| **Webhooks** | All plans | Pro+ ($800+) | All plans |
-
-## Entity Mapping
-
-| Concept | Close | HubSpot | Salesforce |
-|---------|-------|---------|------------|
-| Company | `lead` | `company` | `Account` |
-| Person | `contact` | `contact` | `Contact` / `Lead` |
-| Deal | `opportunity` | `deal` | `Opportunity` |
-| Activity | `activity` | `engagement` | `Task` / `Event` |
-| Custom Field | `custom.cf_xxx` | `properties` | `Field__c` |
-
-## Pipeline Stage Mapping
-
-| Stage | Close | HubSpot | Salesforce |
-|-------|-------|---------|------------|
-| New | `Lead` | `appointmentscheduled` | `Prospecting` |
-| Qualified | `Contacted` | `qualifiedtobuy` | `Qualification` |
-| Demo | `Opportunity` | `presentationscheduled` | `Needs Analysis` |
-| Proposal | `Proposal` | `decisionmakerboughtin` | `Proposal/Price Quote` |
-| Won | `Won` | `closedwon` | `Closed Won` |
-| Lost | `Lost` | `closedlost` | `Closed Lost` |
-</crm_comparison>
-
-<close_patterns>
-## Close CRM (Daily Driver)
-
-### Query Language (for Smart Views)
-```python
-# Leads with no activity in 30 days
-'sort:date_updated asc date_updated < "30 days ago"'
-
-# High-value opportunities
-'opportunities.value >= 50000 opportunities.status_type:active'
-
-# Custom field filtering
-'custom.cf_industry = "MEP Contractor"'
-
-# Multiple trade types (your ICP)
-'custom.cf_trades:HVAC OR custom.cf_trades:Electrical'
+<quick_start>
+**Look up a contact or company (always do this before creating a new page):**
 ```
+mcp__gbrain__get_page({ slug: "people/jon-cooper", fuzzy: true })
+mcp__gbrain__get_page({ slug: "companies/veruna-minerals", fuzzy: true })
+```
+`fuzzy: true` catches near-miss slugs (a stray middle initial, a company suffix) so a lookup
+doesn't silently create a duplicate person page later.
 
-### Core Operations
-```python
-# Create lead with contacts
-lead = close.create_lead({
-    "name": "ABC Mechanical",
-    "url": "https://abcmech.com",
-    "contacts": [{
-        "name": "John Smith",
-        "title": "Owner",
-        "emails": [{"email": "john@abcmech.com", "type": "office"}],
-        "phones": [{"phone": "555-1234", "type": "office"}]
-    }],
-    "custom.cf_tier": "Gold",
-    "custom.cf_source": "sales-agent"
-})
+**Create or update a person record:**
+```
+mcp__gbrain__put_page({
+  slug: "people/jon-cooper",
+  content: `---
+name: "Jon Cooper"
+type: "person"
+description: "Contact at Veruna Minerals; operational intelligence layer engagement, Phase 0 in conversation"
+company: "Veruna Minerals"
+role: "primary contact"
+---
 
-# Create opportunity
-opp = close._request("POST", "/opportunity/", json={
-    "lead_id": lead["id"],
-    "value": 50000,
-    "confidence": 50,
-    "status_id": "stat_xxx"  # Pipeline stage
-})
-
-# Log activity
-close._request("POST", "/activity/note/", json={
-    "lead_id": lead["id"],
-    "note": "Initial discovery call - interested in demo"
+## Context
+Discussing an operational intelligence layer above Zengate/Palmra for Veruna Minerals.
+Phase 0 is a two-week diagnostic, target $35-60K, phased build to follow.
+`
 })
 ```
 
-### Rate Limit Headers (RFC-compliant)
+**Create or update a company record:**
 ```
-X-RateLimit-Limit: 100
-X-RateLimit-Remaining: 95
-X-RateLimit-Reset: 1704067200
-```
-
-> See `reference/close-deep-dive.md` for query language, Smart Views, sequences, and reporting.
-</close_patterns>
-
-<hubspot_patterns>
-## HubSpot Integration
-
-### Python SDK Pattern
-```python
-from hubspot import HubSpot
-from hubspot.crm.deals import SimplePublicObjectInputForCreate
-from hubspot.crm.contacts import PublicObjectSearchRequest
-
-client = HubSpot(access_token=os.environ["HUBSPOT_ACCESS_TOKEN"])
-
-# Create deal with association
-deal = client.crm.deals.basic_api.create(
-    SimplePublicObjectInputForCreate(properties={
-        "dealname": "Enterprise Deal",
-        "amount": "50000",
-        "dealstage": "appointmentscheduled",
-        "pipeline": "default"
-    })
-)
-
-# Search contacts by email domain
-search = PublicObjectSearchRequest(
-    filter_groups=[{
-        "filters": [{
-            "propertyName": "email",
-            "operator": "CONTAINS",
-            "value": "@example.com"
-        }]
-    }],
-    properties=["email", "firstname", "lastname"],
-    limit=50
-)
-results = client.crm.contacts.search_api.do_search(search)
+mcp__gbrain__put_page({
+  slug: "companies/veruna-minerals",
+  content: `---
+name: "Veruna Minerals"
+type: "company"
+description: "Mining operator; target for an operational intelligence layer engagement"
+---
+`
+})
 ```
 
-### Association Types
-| From | To | Type ID |
-|------|-----|---------|
-| Contact | Company | 1 |
-| Contact | Deal | 4 |
-| Company | Deal | 6 |
-| Deal | Contact | 3 |
-
-> See `reference/hubspot-patterns.md` for batch operations, custom properties, and workflows.
-</hubspot_patterns>
-
-<salesforce_patterns>
-## Salesforce Integration
-
-### SOQL Query Patterns
-```sql
--- Parent-child relationship (Contacts of Account)
-SELECT Id, Name, (SELECT LastName, Email FROM Contacts)
-FROM Account WHERE Industry = 'Technology'
-
--- Child-parent relationship
-SELECT Id, FirstName, Account.Name, Account.Industry
-FROM Contact WHERE Account.Industry = 'Technology'
-
--- Semi-join (Accounts with open Opportunities)
-SELECT Id, Name FROM Account
-WHERE Id IN (SELECT AccountId FROM Opportunity WHERE IsClosed = false)
+**Log a touchpoint (the GBrain equivalent of an activity):**
+```
+mcp__gbrain__add_timeline_entry({
+  slug: "people/jon-cooper",
+  date: "2026-07-09",
+  summary: "Follow-up sent: financial memo + call slots",
+  detail: "SMTP-verified send; watching for reply by mid-week before an SMS fallback",
+  source: "email"
+})
 ```
 
-### REST API v59.0
-```python
-def create_opportunity(self, data: dict) -> dict:
-    """Required: Name, StageName, CloseDate."""
-    response = self.client.post(
-        f"{self.instance_url}/services/data/v59.0/sobjects/Opportunity/",
-        headers={"Authorization": f"Bearer {self.access_token}"},
-        json=data
-    )
-    return response.json()
+**Pull interaction history for a contact:**
+```
+mcp__gbrain__get_backlinks({ slug: "people/jon-cooper" })
+```
+Returns every page (meeting notes, project pages, other people pages) that links to this contact,
+which is the closest equivalent to a CRM's activity feed.
 
-# Composite API (batch up to 200 records)
-def composite_create(self, records: list) -> dict:
-    return self.client.post(
-        f"{self.instance_url}/services/data/v59.0/composite/sobjects",
-        json={"allOrNone": False, "records": records}
-    )
+**Map an account's relationships:**
+```
+mcp__gbrain__traverse_graph({ slug: "companies/veruna-minerals", depth: 2 })
+```
+Walks outward from the company page across `works_at`, `mention`, and other link types to surface
+everyone and everything connected to the account, not just the one contact you already know.
+
+**Tag a pipeline stage:**
+```
+mcp__gbrain__add_tag({ slug: "people/jon-cooper", tag: "stage:in-conversation" })
+```
+See the stage vocabulary below; when a deal advances, remove the stale stage tag and add the new
+one so `list_pages({ tag: "stage:proposal-sent" })` stays an accurate live view.
+
+**Link a person to a company or a deal:**
+```
+mcp__gbrain__add_link({
+  from: "people/jon-cooper",
+  to: "companies/veruna-minerals",
+  link_type: "works_at",
+  context: "Primary contact for the Phase 0 engagement"
+})
 ```
 
-> See `reference/salesforce-patterns.md` for JWT setup, Platform Events, and bulk API.
-</salesforce_patterns>
+**Hybrid semantic search across the whole brain:**
+```
+mcp__gbrain__query({ query: "Veruna Minerals operational ontology engagement", limit: 10 })
+```
+Use `query` for fuzzy, meaning-based recall ("who have I talked to about agentic yield
+management") and `search` for exact keyword lookups (a specific deal name or company).
+</quick_start>
 
-<webhook_patterns>
-## Webhook Handlers
+<entity_mapping>
+## Concept mapping (GBrain has no fixed CRM schema, so map by convention, not by field)
 
-### Close Webhook (FastAPI)
-```python
-from fastapi import FastAPI, Request, HTTPException
-import hmac, hashlib
+| CRM concept | GBrain construct | Notes |
+|---|---|---|
+| Company / Account | `companies/<company-name>` page | One page per company, per `RESOLVER.md` |
+| Person / Contact | `people/<first-last>` page | One page per human, per `RESOLVER.md` |
+| Deal / Opportunity | A row in the **file-based revenue scorecard** (see below), optionally cross-linked to a `deals/<deal-slug>` or `projects/<engagement-slug>` GBrain page for narrative context | GBrain's `RESOLVER.md` routes financial transactions with terms to `deals/`; ongoing engagement work with a repo/spec to `projects/` |
+| Activity / Touchpoint | `add_timeline_entry` on the relevant person or company page | Log the same day it happens |
+| Custom field (tier, source, industry) | Frontmatter key on the page, or an `add_tag` value for anything enumerable | e.g. `tag: "source:prospect-cron"` |
+| Pipeline stage | `add_tag` mirroring the revenue scorecard vocabulary | See stage vocabulary below; keep both in sync manually, there is no automatic two-way sync |
+| Relationship (works at, invested in, referred by) | `add_link` with a `link_type` | Active types in use: `mention`, `emailed_with`, `texted_with`, `works_at`, `semantic` |
 
-app = FastAPI()
+## Deal-stage tracking: the revenue scorecard
 
-@app.post("/webhooks/close")
-async def close_webhook(request: Request):
-    body = await request.body()
-    signature = request.headers.get("Close-Sig")
+GBrain has no native pipeline-stage or deal-value field, so deal tracking for the active
+consulting pipeline lives in a separate file-based CRM-of-record:
+`~/.claude/projects/job-applications/potential consulting projects clients/README.md`, parsed
+weekly by `~/.claude/revenue-scorecard/revenue-scorecard.mjs` (Monday 7:30 AM Windows Task
+Scheduler run) into an emailed scorecard. Its markdown tables are the actual pipeline of record;
+treat any GBrain stage tag as a mirror of that file, not a replacement for it.
 
-    expected = hmac.new(
-        CLOSE_WEBHOOK_SECRET.encode(), body, hashlib.sha256
-    ).hexdigest()
-
-    if not hmac.compare_digest(signature, expected):
-        raise HTTPException(401, "Invalid signature")
-
-    data = await request.json()
-    event_type = data["event"]["event_type"]
-
-    handlers = {
-        "lead.created": handle_lead_created,
-        "opportunity.status_changed": handle_opp_stage_change,
-    }
-
-    if handler := handlers.get(event_type):
-        await handler(data["event"]["data"])
-
-    return {"status": "ok"}
+**Exact stage vocabulary (one per row):**
+```
+lead -> outreach-staged -> outreach-sent -> in-conversation -> call-booked -> proposal-sent -> won
+terminal: lost / parked
 ```
 
-### Close Webhook Events
-```
-lead.created, lead.updated, lead.deleted, lead.status_changed
-contact.created, contact.updated
-opportunity.created, opportunity.status_changed
-activity.note.created, activity.call.created, activity.email.created
-unsubscribed_email.created
-```
-</webhook_patterns>
+**Real, current pipeline (as of the last update to that file), used here as the worked examples
+for this skill rather than invented deals:**
 
-<sync_architecture>
-## Cross-CRM Sync
+| Contact / Company | Opportunity | Stage | Value |
+|---|---|---|---|
+| Paul Schneider, Oncore Digital | "The Yield Desk" (agentic CTV/DOOH yield management) | `proposal-sent` | $6K discovery -> $18K pilot -> $4-6K/mo |
+| Jon Cooper, Veruna Minerals | Operational intelligence layer, Phase 0 diagnostic | `in-conversation` | $35-60K Phase 0 target, phased build to follow |
+| (rotating prospect list) | $299 AI Visibility audit -> consulting ladder wedge | `outreach-sent` | $299 entry, ladders to Pilot/Managed per `briefs/agor-consulting.md`'s Agor AI Ads offer ladder |
 
-### Architecture
-```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│   Close     │────▶│  Sync Layer  │◀────│  HubSpot    │
-│  (Primary)  │◀────│  (Postgres)  │────▶│  (Marketing)│
-└─────────────┘     └──────────────┘     └─────────────┘
-```
+When a CRM task touches one of these (or a new prospect), update the scorecard file's Stage and
+Last touch columns the same day, and mirror the stage as a GBrain tag if the contact already has
+a page. Never fabricate a stage change, a sent status, or a reply that didn't happen; the scorecard
+file's own update discipline says the same thing.
 
-### Sync Record Schema
-```sql
-CREATE TABLE crm_sync_records (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    entity_type VARCHAR(50) NOT NULL,
-    close_id VARCHAR(100) UNIQUE,
-    hubspot_id VARCHAR(100) UNIQUE,
-    salesforce_id VARCHAR(100) UNIQUE,
-    email VARCHAR(255),
-    company_name VARCHAR(255),
-    last_synced_at TIMESTAMPTZ,
-    sync_source VARCHAR(50),
-    sync_hash VARCHAR(64)
-);
-
-CREATE INDEX idx_sync_email ON crm_sync_records(email);
-```
-
-### Conflict Resolution
-```python
-from enum import Enum
-
-class ConflictStrategy(Enum):
-    CLOSE_WINS = "close"      # Close is source of truth
-    LAST_WRITE_WINS = "lww"   # Most recent update wins
-
-def resolve_conflict(close_record, hubspot_record, strategy):
-    if strategy == ConflictStrategy.CLOSE_WINS:
-        merged = close_record.copy()
-        for key, value in hubspot_record.items():
-            if key not in merged or not merged[key]:
-                merged[key] = value
-        return merged
-```
-
-> See `reference/sync-patterns.md` for deduplication, migration scripts, and bulk sync.
-</sync_architecture>
-
-<file_locations>
-## Reference Files
-
-**CRM-Specific:**
-- `reference/close-deep-dive.md` - Query language, Smart Views, sequences, reporting
-- `reference/hubspot-patterns.md` - SDK patterns, batch operations, workflows
-- `reference/salesforce-patterns.md` - JWT auth, SOQL, Platform Events, bulk API
-
-**Operations:**
-- `reference/sync-patterns.md` - Cross-CRM sync, deduplication, migration
-- `reference/automation.md` - Webhook setup, sequences, workflows
-
-**Templates:**
-- `templates/close-client.py` - Full Close API client
-- `templates/hubspot-client.py` - HubSpot SDK wrapper
-- `templates/sync-service.py` - Cross-CRM sync service
-</file_locations>
+For query syntax, tagging taxonomy, and more `traverse_graph` patterns, see
+`reference/gbrain-deep-dive.md`.
+</entity_mapping>
 
 <routing>
 ## Request Routing
 
-**User wants CRM integration:**
-→ Ask which CRM (Close recommended for simplicity)
-→ Provide auth setup + basic CRUD
+**User wants "CRM integration" without naming a platform:**
+-> Explain GBrain is the CRM of record here. Walk through `get_page`/`put_page` for the record,
+`add_timeline_entry` for the activity, `add_tag`/`add_link` for stage and relationship.
 
-**User wants Close CRM:**
-→ Provide API key setup, query language
-→ Reference: `reference/close-deep-dive.md`
+**User names HubSpot, Salesforce, Close, or Pipedrive specifically:**
+-> State plainly that none of these exist in this stack (`data/connections.md`: ABSENT). Do not
+write an API client "just in case." Redirect to the GBrain patterns above. If there's a genuine
+new requirement a SaaS CRM would solve that GBrain and the scorecard cannot, flag that gap to Ariel
+rather than silently building the SaaS integration.
 
-**User wants HubSpot:**
-→ Provide SDK setup, search patterns
-→ Reference: `reference/hubspot-patterns.md`
+**User wants deal-stage or pipeline tracking:**
+-> Point to the revenue scorecard file as the source of truth, and to `add_tag` for the GBrain
+mirror. Reference `sales-and-revenue-operations` for forecast/velocity questions, which is the
+skill that owns pipeline-wide analysis rather than single-record CRUD.
 
-**User wants Salesforce:**
-→ Provide JWT auth, SOQL patterns
-→ Reference: `reference/salesforce-patterns.md`
+**User wants a contact's interaction history:**
+-> `get_backlinks` first; if that's thin, `query` for a broader semantic sweep across emails,
+notes, and meeting pages that might mention the person without a formal link.
 
-**User wants sync between CRMs:**
-→ Provide sync architecture, conflict resolution
-→ Reference: `reference/sync-patterns.md`
+**User wants account or relationship mapping:**
+-> `traverse_graph` from the company page, depth 2 as a default, deeper only if the account looks
+sparse and a wider net seems warranted.
 
-**User wants webhooks:**
-→ Provide handler pattern for specified CRM
-→ Include signature verification
+**User wants to log an activity/touchpoint:**
+-> `add_timeline_entry`, same day, with a `source` field (email, call, meeting) so later queries
+can filter by channel.
 </routing>
 
+<file_locations>
+## Reference Files
+
+- `reference/gbrain-deep-dive.md` - query and search patterns, the pipeline-stage tagging
+  taxonomy in full, `traverse_graph` depth guidance, and the 15-directory `RESOLVER.md` filing
+  schema recap
+</file_locations>
+
 <env_setup>
-## Environment Variables
+## What's actually running, for context (no keys needed at the skill-invocation level)
 
-```bash
-# Close CRM
-export CLOSE_API_KEY="api_xxx"
-export CLOSE_WEBHOOK_SECRET="whsec_xxx"
+- GBrain MCP server: `bunx gbrain serve`, already registered; tools appear as `mcp__gbrain__*`
+- Backing store: Postgres 16 + pgvector, Docker container `gbrain-pg`, port 5433, config at
+  `~/.gbrain/config.json`
+- Revenue scorecard: `~/.claude/revenue-scorecard/revenue-scorecard.mjs`, reads the CRM-of-record
+  markdown at `~/.claude/projects/job-applications/potential consulting projects clients/README.md`,
+  sends via Gmail SMTP (credentials already provisioned in `~/.claude/cron-health/.env`, not this
+  skill's concern to manage)
 
-# HubSpot
-export HUBSPOT_ACCESS_TOKEN="pat-xxx"
-
-# Salesforce
-export SF_CLIENT_ID="xxx"
-export SF_USERNAME="user@company.com"
-export SF_PRIVATE_KEY_PATH="./salesforce.key"
-export SF_INSTANCE_URL="https://yourorg.my.salesforce.com"
-```
-
-```
-# Dependencies: httpx pyjwt hubspot-api-client python-dotenv
-```
+Nothing in this skill's own scope needs an API key. If a task seems to need one (a CRM webhook
+secret, an OAuth client ID), that is a strong signal the task is describing a SaaS CRM that
+doesn't exist here, not a missing setup step.
 </env_setup>
 
 <example_session>
 ## Example Session
 
-**User:** "I need to push enriched leads from my sales-agent to Close CRM"
+**User:** "Log that I had a discovery call with Jon Cooper at Veruna Minerals today, and it looks
+like the engagement is progressing."
 
 **Claude:**
-1. Here's the pattern for pushing enriched data to Close:
-```python
-async def push_to_close(close_client, enriched_data: dict) -> str:
-    lead_data = {
-        "name": enriched_data["company_name"],
-        "url": enriched_data.get("website"),
-        "custom.cf_tier": enriched_data["tier"],
-        "custom.cf_source": "sales-agent",
-        "contacts": [{
-            "name": c["name"],
-            "title": c.get("title"),
-            "emails": [{"email": c["email"]}] if c.get("email") else []
-        } for c in enriched_data.get("contacts", [])]
-    }
-
-    result = close_client.create_lead(lead_data)
-    return result["id"]
+1. Check for an existing page first: `mcp__gbrain__get_page({ slug: "people/jon-cooper", fuzzy: true })`.
+2. If found, log the touchpoint:
 ```
-
-2. Make sure you have these custom fields in Close:
-   - `cf_tier` (choices: Gold, Silver, Bronze)
-   - `cf_source` (choices: sales-agent, inbound, referral)
-
-3. Rate limit: 100 requests per 10 seconds. Add `asyncio.sleep(0.1)` between requests for bulk imports.
+mcp__gbrain__add_timeline_entry({
+  slug: "people/jon-cooper",
+  date: "2026-07-09",
+  summary: "Discovery call held",
+  detail: "Engagement appears to be progressing toward the Phase 0 scope",
+  source: "call"
+})
+```
+3. If the stage genuinely advanced (e.g. from `in-conversation` toward `call-booked` or
+   `proposal-sent`), remove the stale tag and add the new one:
+```
+mcp__gbrain__add_tag({ slug: "people/jon-cooper", tag: "stage:call-booked" })
+```
+4. Flag, don't silently do: the file-based scorecard at
+   `~/.claude/projects/job-applications/potential consulting projects clients/README.md` also
+   needs its Stage and Last touch columns updated for this same row, the same day, since that
+   file (not GBrain) is what the Monday scorecard cron actually parses.
+5. No outward send (a follow-up email, a proposal) happens from this skill; that's a draft for
+   Ariel to send, per the vault-wide dry-run policy.
 </example_session>
+</output>
