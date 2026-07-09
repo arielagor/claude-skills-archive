@@ -259,6 +259,14 @@ Note how the "against" alternative (a consultant, or building it yourself) is na
 
 ## Brand Identity & Visual Standards
 
+**Portfolio reality: there is no single visual system.** Each property has its own kit, and `strategy/brand.md` is the source of truth. Pull the target property's kit from its brief before applying any visual standard, and never impose one property's palette on another:
+- **modelstack.digital**: DM Serif Display (headings) and DM Sans (body), mint accent (`#3ECF8E`) on near-black (`#0C0C0E`), dark theme.
+- **Agor AI branded documents and decks**: Georgia and Arial, magenta-to-violet-to-blue gradient, the "AGOR AI · INTELLIGENCE REIMAGINED" wordmark.
+- **agor.me blog covers**: three rotating cover styles (editorial photo-illustration, cyber-blueprint schematic, surrealist object photography) under one biological-intelligence-meets-computational-substrate through-line.
+- The iOS apps and scored.tools each carry their own App Store / site identity; confirm from the property before assuming.
+
+The shared constant across all of them is the house style (no em-dashes, receipts-and-sources, no fluff) and Ariel's voice, not a color or a typeface.
+
 ### Brand Kit Components
 
 **Logo & Identity:**
