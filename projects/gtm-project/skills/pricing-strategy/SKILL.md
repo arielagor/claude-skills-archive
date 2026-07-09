@@ -267,7 +267,7 @@ Apply the recurring-revenue benchmarks below **only** to the two real subscripti
 ## Common Pricing Mistakes
 
 - Pricing on cost, not value
-- Too many tiers (analysis paralysis — stick to 3)
+- Too many tiers (analysis paralysis, stick to 3)
 - Feature gates customers don't care about
 - Gating core functionality (lock what makes your product worth using)
 - Complex value metric (users shouldn't need a calculator for their bill)
