@@ -158,12 +158,12 @@ agor.me consulting ladder:    Audit $1,000  ->  focused project $15K  ->  transf
 
 ### Feature Gating
 
-**What to gate:**
-- Scale limits: users, projects, API calls, storage
-- Sophistication: advanced analytics, automations, integrations
-- Control: SSO/SAML, admin roles, audit logs, custom branding
+**What to gate (real portfolio examples):**
+- Scale or volume limits: MVAT Focus caps free sessions at 25 minutes (Pro unlocks up to 120); gifloop meters free exports with a reinstall-proof counter; MVAT Mirror meters analysis with consumable credit packs ($1.99 Starter, $4.99 Full History).
+- Sophistication: MVAT Focus Pro adds cloud sync, themes, and sounds; Coquí Chorus Pro unlocks all species, the mixer, and presets.
+- Access to the full set: modelstack sells each template as one complete download (no gating), so its lever is bundling, not feature-gating.
 
-**Never gate**: core functionality, security features, data export.
+**Never gate**: core functionality (a free Pomodoro must still time a session), the on-device privacy guarantee (MVAT Mirror never trades that for a tier), or a customer's own data and export.
 
 ---
 
@@ -176,15 +176,17 @@ agor.me consulting ladder:    Audit $1,000  ->  focused project $15K  ->  transf
 | **Risk** | Free riders, support cost | Shorter window to prove value |
 | **Use when** | Network effects, viral growth | Complex product needing onboarding |
 
+**Which the portfolio actually uses:** the four iOS apps are all **freemium** (a free tier plus a one-time unlock or credit pack), not free-trial; conversion is a charm-priced IAP at the moment of value (an export, a longer session, a full personality read). The consulting side inverts this: the $299 and $1,000 audits are **paid** wedges, a low-risk productized entry that de-risks a $15K to $250K engagement and converts far better than a free consult would. modelstack has neither, it sells the finished template outright and uses a 7-day no-questions refund promise as the risk-reversal.
+
 ---
 
 ## Pricing Psychology
 
-- **Anchor effect**: Show highest tier first to anchor perception
-- **Charm pricing**: $49 vs. $50 (perceived as significantly cheaper)
-- **Decoy pricing**: Add a "bad" middle option to push customers to "best"
-- **Annual vs. monthly**: Offer 15–20% discount for annual (improves LTV and reduces churn). Offer at signup, after 2–3 months, and during renewal
-- **Per user transparency**: Show total cost at common team sizes (e.g., "5 users = $X/mo")
+- **Anchor effect**: modelstack's $999 Complete Collection ("worth $2,267") anchors every cheaper option; show it first.
+- **Charm pricing**: the portfolio lives on charm prices, $0.99, $1.99, $4.99, $39.99, $197, $299. Keep them.
+- **Decoy pricing**: category bundles ($119 to $449) sit between single templates and the $999 Complete Collection so the mid bundle reads as the obvious buy.
+- **Annual vs. monthly**: MVAT Focus offers $39.99/yr against $4.99/mo (about a third off, roughly four months free); surface it at signup and at renewal.
+- **Fixed-fee wedge as de-risker**: the $299 and $1,000 audits remove the "what will this cost me" anxiety that blocks a cold $15K+ consulting ask.
 
 ---
 
