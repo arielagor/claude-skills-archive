@@ -192,13 +192,13 @@ agor.me consulting ladder:    Audit $1,000  ->  focused project $15K  ->  transf
 
 ## Pricing Experiments
 
-**What to A/B test**: Price points, tier packaging, billing frequency, free trial length, anchor tier.
+**What to A/B test**: price points, bundle composition, unlock price, the audit wedge fee, which tier is badged "most popular."
 
-**Sample sizes**: ~1,000 visitors/variant to detect 10% change; ~5,000 for 5% change.
+**Reality check on tooling (`data/REMAP.md`)**: there is no rich pricing-experiment platform in this stack. Plausible (live on modelstack) tracks checkout-click and email-signup events; the Stripe MCP read tools are the source of truth for actual conversions and revenue on the shared account. At modelstack's traffic a clean 5% A/B read is unlikely, so treat price tests as sequential and qualitative (change one thing, watch Plausible and Stripe for a few weeks), not a powered experiment. Never fabricate a sample size or a lift number.
 
-**Metrics to track**: Conversion (trial → paid), ARPU, CAC, LTV, payback period.
+**Metrics to track**: for one-time products, units sold, refund rate, average order value; for the two subscriptions (MVAT Focus web Pro, Agor Agents), trial-to-paid, churn, and expansion.
 
-**Price increases**: Raise every 12–18 months as you add value. Communicate 30+ days in advance. Grandfather existing customers for 12 months or offer annual lock-in at current price.
+**Price increases**: modelstack can raise as new templates and bundles add value; give existing buyers of a bundle the prior price. There are no recurring modelstack customers to grandfather, since purchases are one-time.
 
 ---
 
@@ -255,6 +255,8 @@ Base plan: $99/mo
 **Never discount when**: customer hasn't articulated value, no competitive pressure, early in negotiation, or deal doesn't meet minimum size.
 
 **Alternatives to discounting**: extended payment terms, additional services/training, extended trial, success milestone unlocks, multi-year lock-in.
+
+**Portfolio note**: modelstack's bundles ARE its volume discount (buy the category, save 20 to 40% vs single templates; the $999 Complete Collection against $2,267 individually). Beyond bundles, avoid ad-hoc discount codes on one-time templates, they erode the "prices are exact and checkable" house rule; prefer adding a template to a bundle over cutting a single price. On the consulting side the audit fee crediting toward the engagement is the built-in discount, so a further cut is rarely needed.
 
 ---
 
