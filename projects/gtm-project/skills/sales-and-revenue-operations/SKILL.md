@@ -293,6 +293,8 @@ For detailed comp frameworks: see `references/guest-insights.md`
 
 ## Related Skills
 
-- `outbound-email-strategy` — Cold outreach
-- `pricing-strategy` — Pricing decisions
-- `go-to-market-strategy` — Full launch planning
+- `crm-integration` - GBrain record-keeping, timeline logging, and pipeline-stage tagging for any
+  contact or company this skill's pipeline work touches
+- `outbound-email-strategy` - Cold outreach
+- `pricing-strategy` - Pricing decisions
+- `go-to-market-strategy` - Full launch planning
