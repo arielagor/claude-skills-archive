@@ -5,15 +5,47 @@ description: Comprehensive brand messaging, positioning, and value proposition d
 
 # Brand Messaging and Positioning
 
-## Workspace Context
+## When this fires
 
-Read bootstrap context before asking questions: `strategy/brand.md` for brand, audience, offer, channels, tools, constraints, and metrics; `about/me.md` for personal voice; `content/ideas.md` and `content/calendar.md` for content planning. Use legacy product-marketing context files only as fallback. Save generated drafts to `content/<platform>/drafts/YYYY-MM-DD_short-topic-slug.md`, and route durable learnings back to `strategy/brand.md`, `about/me.md`, or `content/ideas.md`.
+Positioning, messaging, value-prop, one-liner, or brand-identity work for a property in `PORTFOLIO_PROPERTIES.md`. The single most important thing to internalize before using any framework here: **this is a multi-brand portfolio run by one operator, not one company with one positioning.** Ariel operates a template store, a boutique AI consultancy, an answer-visibility ad agency, four distinct consumer iOS apps, and a review site. Each has its own category, ICP, and "against" alternative. Run the frameworks below **per property**, never once for "the brand."
+
+## Workspace context to read first
+
+- `strategy/brand.md` for the SHARED layer: who Ariel is, the portfolio one-liner, the shared positioning themes, and the house style that unifies everything.
+- `briefs/<property>.md` for the DISTINCT layer, especially each brief's "Positioning (one-liner)" section: `briefs/modelstack.md`, `briefs/agor-consulting.md` (agor.me consulting plus the Agor AI Ads section), `briefs/ios-apps.md` (gifloop, MVAT Focus, MVAT Mirror, Coquí Chorus, each with its own one-liner), `briefs/scored-tools.md`.
+- `about/me.md` for the one thing that IS constant across every property: Ariel's voice and house style.
+
+## Multi-brand reality: one voice, distinct positionings
+
+What is **shared** across every property (from `strategy/brand.md` and `about/me.md`), and must never vary:
+- **Voice and house style**: direct, dense, no hedging, no em-dashes ever, receipts-and-sources (name the real entity, cite the real source, no "a SaaS company" stand-ins), no marketing fluff (prices and claims exact and checkable).
+- **Portfolio themes**: AI-native operator (lead with what shipped, name gaps honestly), ship real working products (positioning traceable to something that actually runs), public-information-only with a human on anything that spends or sends, augmentation not replacement.
+
+What is **distinct** per property, and must be derived from that property's brief, never flattened into a single umbrella message:
+- Category, ICP, the competitive alternative it positions against, its differentiation, its price archetype, and its visual system.
+
+**The real per-property one-liners** (verbatim anchors; do not paraphrase into one blended tagline):
+
+| Property | Category | Positioning one-liner (its brief's own words) |
+|---|---|---|
+| modelstack.digital | Digital template store | Professional-grade finance, M&A, IB, VC, SOP, and AI-workflow templates, built by operators, for instant download, starting at $29. |
+| agor.me (Agor AI Advisory) | Boutique AI consultancy | "Intelligence Reimagined": autonomous AI systems that scale a business, streamline operations, and unlock new possibilities, delivered as a boutique consulting engagement. |
+| Agor AI Ads | Answer-visibility ad agency | The answer-visibility (and ads) agency for AI assistants: get recommended in the AI answer first, then buy the high-intent ad slot, with a human approving every dollar. |
+| gifloop | Consumer iOS utility | A native iOS GIF maker built with its own custom encoder, not a wrapper around a web tool. |
+| MVAT Focus | Consumer productivity app | A Pomodoro focus timer with cloud sync and custom themes for Pro users, on iOS/Android. |
+| MVAT Mirror | Consumer profiling app | Personality profiling from your actual communication data, not a questionnaire, processed on-device by default. |
+| Coquí Chorus (co-kee) | Consumer soundscape app | A bioacoustic tree-frog soundscape app with a full species mixer, unlocked via a one-time Pro purchase. |
+| scored.tools | Review and discovery site | An AI tool review and comparison site with a transparent, data-driven scoring methodology, on an automated daily cadence. |
+
+**How to run the frameworks in multi-brand mode:**
+1. Identify the one property (or the one app) in scope and read its brief.
+2. Run Dunford's Five Components, the Moore statement, and Laja's layers against THAT property's real competitive alternative (for modelstack: a $2K to $10K consultant or a from-scratch build; for MVAT Mirror: a questionnaire-based personality quiz; for agor.me: an in-house build or a legacy agency). Never write a positioning that could apply to two of these at once, that means it is too generic.
+3. Keep the voice constant (Ariel's) while the positioning stays property-specific.
+4. Only when a task is genuinely portfolio-level (the agor.me `/portfolio` page, an investor narrative, an "about the operator" bio) do you use the single portfolio one-liner from `strategy/brand.md` and present the properties as a coherent set under "one operator, AI as the build partner, not the pitch," rather than as one product.
 
 ## Operating Contract
 
-This skill is self-contained for its frontmatter scope: use its local instructions, references, scripts, and assets as the playbook; ask only for missing task-specific inputs; hand off to adjacent skills instead of expanding scope; and return an actionable artifact, decision, plan, draft, or diagnostic.
-
-
+This skill is self-contained for its frontmatter scope: use its local instructions, references, and the briefs as the playbook; ask only for missing task-specific inputs; hand off to adjacent skills instead of expanding scope; and return an actionable artifact, decision, plan, draft, or diagnostic. Drafts save to `content/<platform>/drafts/YYYY-MM-DD_short-topic-slug.md`; nothing here publishes or sends.
 
 Develop comprehensive brand messaging, positioning, and identity systems using established frameworks from leading strategists.
 

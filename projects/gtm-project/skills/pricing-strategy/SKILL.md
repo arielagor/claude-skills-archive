@@ -282,7 +282,7 @@ Apply the recurring-revenue benchmarks below **only** to the two real subscripti
 1. **Quantify value** delivered since last price (new features, outcomes, benchmarks)
 2. **Grandfather existing customers** for 3–6 months (or 12 months for best customers)
 3. **Communicate early** (60-day notice minimum)
-4. **Frame as investment** not cost increase — tie to ROI
+4. **Frame as investment** not cost increase, tie to ROI
 5. **Offer annual lock-in** before increase date to capture cash
 6. **Monitor churn** closely for 90 days post-increase
 
