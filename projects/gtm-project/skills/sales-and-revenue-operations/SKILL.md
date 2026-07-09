@@ -28,11 +28,11 @@ Full-stack sales playbook: founder-led sales, team building, enterprise deals, R
 
 ## Quick Start
 
-1. **Assess stage** — Founder-led, first reps, or scaling?
-2. **Define motion** — Inbound, outbound, PLG, or hybrid?
-3. **Build ICP** — Who are you selling to?
-4. **Design process** — Discovery → Demo → Close
-5. **Instrument RevOps** — Lead lifecycle, scoring, routing
+1. **Assess stage**, Founder-led, first reps, or scaling?
+2. **Define motion**, Inbound, outbound, PLG, or hybrid?
+3. **Build ICP**, Who are you selling to?
+4. **Design process**, Discovery → Demo → Close
+5. **Instrument RevOps**, Lead lifecycle, scoring, routing
 
 ---
 
@@ -82,13 +82,13 @@ For full persona canvases, buying center maps, interview questions, and fit scor
 ## Founder-Led Sales
 
 **Core principles:**
-- The founder IS the product — your credibility closes deals early competitors can't
+- The founder IS the product, your credibility closes deals early competitors can't
 - Your biggest competitor is indecision (40-60% of B2B purchases end in no decision)
-- Sell before you build — Figma mockups can secure first customers
-- Close the laptop — focus on diagnosis, not demos
+- Sell before you build, Figma mockups can secure first customers
+- Close the laptop, focus on diagnosis, not demos
 - Book next meeting on the current one to maintain momentum
 
-**When to hire:** Wait until ~$1M ARR and a repeatable process. Hire in pairs — you need an A/B test.
+**When to hire:** Wait until ~$1M ARR and a repeatable process. Hire in pairs, you need an A/B test.
 
 **Hiring framework:**
 
@@ -109,12 +109,12 @@ For full persona canvases, buying center maps, interview questions, and fit scor
 1. **Judge** level of indecision
 2. **Offer** a firm recommendation
 3. **Limit** exploration by building trust
-4. **Take risk off the table** — de-risk the deal
+4. **Take risk off the table**, de-risk the deal
 
 **Key tactics:**
-- Identify and arm the champion — they sell internally for you
+- Identify and arm the champion, they sell internally for you
 - Address FOMU (Fear Of Making a Mistake), not just FOMO
-- Make procurement's job easy — prepare all documentation upfront
+- Make procurement's job easy, prepare all documentation upfront
 
 ---
 
