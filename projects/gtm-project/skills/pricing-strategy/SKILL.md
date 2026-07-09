@@ -137,14 +137,15 @@ Show sets of 4–5 features; ask "most important" and "least important." Results
 
 ## Tier Structure
 
-**The Rule of 3**: Starter (50–60% of customers) → Pro/sweet spot (30–40%) → Business/Enterprise (5–10%).
+**The Rule of 3**: a good-better-best ladder still applies, but read it against the portfolio's real ladders, not a generic three-tier SaaS grid.
 
-**Anchor pricing**: Middle tier 3–4× starter price; top tier 2–3× middle. This makes the middle tier the obvious choice.
+**Anchor pricing** works portfolio-wide: modelstack's Complete Collection is listed at $999 "worth $2,267 individually," which anchors every smaller bundle and single template as the reasonable choice. MVAT Focus anchors its $39.99/yr against the $4.99/mo (pay yearly, get roughly four months free).
 
 ```
-Starter:  $29/mo  — core features, 5 users, email support
-Pro:      $99/mo  — everything + integrations, 20 users, priority support  ← Most Popular
-Business: $299/mo — everything + SSO, unlimited users, dedicated support
+modelstack good-better-best:  single template $29 to $197  ->  category bundle $119 to $449  ->  Complete Collection $999 (anchor)
+MVAT Focus freemium ladder:   free 25-min cap  ->  $0.99 lifetime IAP  ->  $4.99/mo or $39.99/yr web Pro (longer sessions, cloud sync, themes)
+Agor AI Ads service ladder:   Audit $299  ->  Pilot (small agreed budget)  ->  Managed retainer
+agor.me consulting ladder:    Audit $1,000  ->  focused project $15K  ->  transformation $50K to $250K+
 ```
 
 ### Good-Better-Best Framework
