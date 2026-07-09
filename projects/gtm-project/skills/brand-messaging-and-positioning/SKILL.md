@@ -160,8 +160,10 @@ Based on thousands of B2B message tests — each layer must be addressed in orde
 
 > For **(target customer)** who **(need/opportunity)**, the **(product name)** is a **(category)** that **(key benefit)**. Unlike **(competitive alternative)**, our product **(primary differentiation)**.
 
-**Example:**
-> For growth-stage SaaS companies who struggle to understand customer churn, ChurnPredict is a customer analytics platform that identifies at-risk accounts before they leave. Unlike generic analytics tools, ChurnPredict uses AI trained specifically on subscription business patterns to predict churn with 94% accuracy.
+**Example (real portfolio, modelstack):**
+> For founders, operators, and deal professionals who need a working financial or M&A model now, modelstack.digital is a digital template store that delivers professional-grade, operator-built templates for instant download from $29. Unlike a $2,000 to $10,000 consulting engagement or a from-scratch build, modelstack hands over the finished, editable model in minutes.
+
+Note how the "against" alternative (a consultant, or building it yourself) is named explicitly. Every property needs its own: MVAT Mirror positions against the questionnaire quiz, agor.me against an in-house build or a legacy agency, Agor AI Ads against ignoring AI-assistant answers entirely.
 
 ## April Dunford's Five Components
 

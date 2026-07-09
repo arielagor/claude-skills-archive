@@ -1,6 +1,6 @@
 ---
 name: data-and-funnel-analytics
-description: Analytics tracking, interpretation, funnel analysis, product metrics, and ROI measurement. Use when setting up GA4/GTM tracking, interpreting analytics data, analyzing conversion funnels, calculating ROI, or measuring product engagement. Triggers on "analytics," "GA4," "Google Analytics," "conversion tracking," "event tracking," "UTM parameters," "tag manager," "GTM," "tracking plan," "funnel analysis," "conversion rates," "user flow," "cohort analysis," "retention," "product metrics," "North Star metric," "ROI," "break-even," "payback period," "investment analysis," "validate my funnel," "why isn't my funnel converting," or "executive financial report." For A/B test setup, see ab-test-setup.
+description: Analytics tracking, interpretation, funnel analysis, product metrics, and ROI measurement, built around this vault's real analytics stack (Plausible, Stripe MCP read tools, Dub.co, and a not-yet-authenticated Supermetrics MCP), not a generic GA4/Mixpanel setup. Use when interpreting analytics data, analyzing conversion funnels, calculating ROI, or measuring product engagement across modelstack.digital, agor.me, the iOS apps, or scored.tools. Triggers on "analytics," "GA4," "Plausible," "conversion tracking," "event tracking," "UTM parameters," "Dub.co," "tracking plan," "funnel analysis," "conversion rates," "user flow," "cohort analysis," "retention," "product metrics," "North Star metric," "ROI," "break-even," "payback period," "investment analysis," "validate my funnel," "why isn't my funnel converting," or "executive financial report." For A/B test setup, see ab-test-setup.
 ---
 
 # Data & Funnel Analytics
@@ -8,6 +8,16 @@ description: Analytics tracking, interpretation, funnel analysis, product metric
 ## Workspace Context
 
 Read bootstrap context before asking questions: `strategy/brand.md` for brand, audience, offer, channels, tools, constraints, and metrics; `about/me.md` for personal voice; `content/ideas.md` and `content/calendar.md` for content planning. Use legacy product-marketing context files only as fallback. Save generated drafts to `content/<platform>/drafts/YYYY-MM-DD_short-topic-slug.md`, and route durable learnings back to `strategy/brand.md`, `about/me.md`, or `content/ideas.md`.
+
+**Also read the specific property's brief before assuming a funnel shape or an analytics tool.**
+This vault covers four properties (`briefs/modelstack.md`, `briefs/agor-consulting.md`,
+`briefs/ios-apps.md`, `briefs/scored-tools.md`) and they do not share one funnel or one analytics
+stack: modelstack.digital runs Plausible with real wired events (`Checkout Click`, `Email
+Signup`), agor.me runs GA4 as an exception (property 540566537) rather than Plausible, the iOS
+apps monetize through Apple IAP with no web funnel at all, and scored.tools has no payment rail
+yet. Read `data/REMAP.md` and `data/connections.md` for the vault-wide tool inventory, then the
+property's own brief for what is actually wired on that specific site, before writing tracking
+code or interpreting a number.
 
 ## Operating Contract
 
@@ -56,27 +66,42 @@ Rules: Specific over vague (`cta_hero_clicked` not `button_clicked`), past tense
 - **Page:** page_title, page_location, content_group
 - **PII hygiene:** Never send email, name, or phone as event properties. Use hashed user IDs only.
 
-### GA4 Implementation
+### Implementation: check the property's brief first, this vault runs two different tools
+
+**Plausible is the vault-wide default** (per `data/REMAP.md`), confirmed live on
+modelstack.digital with real custom events already wired in `index.html`:
 
 ```javascript
-// gtag.js custom event
+// Plausible custom event (matches modelstack.digital's live implementation)
+plausible('Checkout Click', { props: { product: productName, price: priceLabel } });
+plausible('Email Signup');
+```
+
+Plausible is cookieless by design (no consent banner needed for it specifically) and has no
+event/funnel builder as rich as GA4 or Mixpanel; treat funnel analysis on a Plausible-only
+property as goal-based and qualitative rather than assuming a full event schema exists.
+
+**GA4 is confirmed live only on agor.me** (property 540566537, measurement ID `G-TJFFG9WEKG`, per
+`briefs/agor-consulting.md`), as a deliberate exception, not the vault default. Don't assume GA4
+exists on any other property without checking that property's brief first:
+
+```javascript
+// gtag.js custom event (agor.me only)
 gtag('event', 'signup_completed', {
   'method': 'email',
   'plan': 'free',
   'user_id': userId
 });
-
-// GTM dataLayer
-dataLayer.push({
-  'event': 'signup_completed',
-  'method': 'email',
-  'plan': 'free'
-});
 ```
 
-**Enhanced Measurement** (enable in GA4): page_view, scroll, outbound_click, site_search, video_engagement, file_download.
+**Enhanced Measurement** (enable in GA4, agor.me only): page_view, scroll, outbound_click,
+site_search, video_engagement, file_download.
 
-**Conversions:** Admin → Events → Toggle "Mark as conversion." Counting: once per session (form submit) or every time (purchase).
+**Conversions (GA4, agor.me only):** Admin, Events, toggle "Mark as conversion." Counting: once
+per session (form submit) or every time (purchase).
+
+**No third-party SEO or session-replay tooling exists** (Ahrefs, Semrush, Hotjar, FullStory); see
+`data/REMAP.md` Row 2 and Row 3 before implying one is available.
 
 ### UTM Parameters
 
@@ -85,13 +110,19 @@ Convention: `utm_source={channel}&utm_medium={cpc|email|organic|social}&utm_camp
 - Apply to ALL paid and email links
 - Never use on internal links (breaks session attribution)
 - Lowercase, hyphens not spaces
+- **Wrap the UTM-tagged URL in a Dub.co link** (dashboard `app.dub.co/agor`, API base
+  `api.dub.co`) for click-level tracking on top of the UTM attribution; Dub.co is this vault's
+  live link-tracking tool (`data/REMAP.md` Row 6), not a generic shortener suggestion
 - Document in a UTM tracking sheet
 
 ### Privacy & Compliance
 
-- GDPR/CCPA: Implement consent management, block GA4 until consent granted
-- GA4 data retention: 14 months max (Admin → Data Settings)
-- IP anonymization enabled
+- Plausible needs no cookie-consent banner for its own tracking (cookieless, no personal data
+  collected); this does not exempt a property from GDPR/CCPA obligations for anything else on the
+  page (forms, Stripe, other scripts)
+- On agor.me specifically (the one property running GA4): implement consent management, block GA4
+  until consent granted, GA4 data retention capped at 14 months max (Admin, Data Settings), IP
+  anonymization enabled
 
 ---
 
