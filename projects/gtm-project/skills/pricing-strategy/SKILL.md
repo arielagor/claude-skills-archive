@@ -5,21 +5,39 @@ description: "When the user wants help with pricing decisions, packaging, or mon
 
 # Pricing Strategy
 
-## Workspace Context
+## When this fires
 
-Read bootstrap context before asking questions: `strategy/brand.md` for brand, audience, offer, channels, tools, constraints, and metrics; `about/me.md` for personal voice; `content/ideas.md` and `content/calendar.md` for content planning. Use legacy product-marketing context files only as fallback. Save generated drafts to `content/<platform>/drafts/YYYY-MM-DD_short-topic-slug.md`, and route durable learnings back to `strategy/brand.md`, `about/me.md`, or `content/ideas.md`.
+Any pricing, packaging, or monetization decision for a property in `PORTFOLIO_PROPERTIES.md`. Upstream framing assumes a venture-funded B2B SaaS with recurring MRR; Ariel's portfolio is mostly ONE-TIME pricing (digital templates, App Store IAP Pro unlocks, consumable credit packs) plus a productized-service wedge that scales to bespoke consulting, with only two true subscriptions (MVAT Focus web Pro and the pre-launch Agor Agents). Apply the SaaS and MRR frameworks below only where a subscription actually exists; use one-time-purchase and productized-service framing everywhere else. Every worked example in this skill is a real portfolio price point, not a hypothetical.
 
-## Operating Contract
+## Workspace context to read first
 
-This skill is self-contained for its frontmatter scope: use its local instructions, references, scripts, and assets as the playbook; ask only for missing task-specific inputs; hand off to adjacent skills instead of expanding scope; and return an actionable artifact, decision, plan, draft, or diagnostic.
+- `briefs/<property>.md` for the property being priced: `briefs/modelstack.md` (template store), `briefs/agor-consulting.md` (consulting plus the Agor AI Ads section), `briefs/ios-apps.md` (four apps), `briefs/scored-tools.md` (pre-revenue affiliate).
+- `strategy/brand.md` for the "no marketing fluff, prices exact and checkable" house rule, and `about/me.md` for voice on any pricing-page or price-change copy drafted here.
+- `data/REMAP.md`: Stripe is the source of truth for actual revenue via the Stripe MCP read tools (`mcp__stripe__stripe_api_read`, `fetch_stripe_resources`, `search_stripe_resources`), never a dashboard CSV export; ONE shared account (`acct_1T09QrAOqOwPWk86`) serves every product, so disambiguate by signal phrase. Analytics of record is Plausible (modelstack) and GA4 (agor.me), not the GA4/Mixpanel/Amplitude stack upstream assumes. There is no rich pricing-experiment or funnel platform in this stack, so keep A/B claims qualitative.
 
+## Portfolio price ladder (the real worked examples)
 
+Ground every framework below in these actual prices. Never round, soften, or invent a figure; verify against the property's brief and Stripe.
 
-Expert guidance on SaaS pricing, value metrics, tier structure, pricing research, and monetization.
+| Property / SKU | Model | Real price points |
+|---|---|---|
+| modelstack templates | One-time digital download | 35 templates $29 to $197; 6 bundles $119 to $999 (Complete Collection $999, listed worth $2,267); free lead magnet (Unit Economics Calculator) |
+| MVAT Focus | Freemium app, two paid rails | Free 25-min cap; App Store IAP lifetime unlock $0.99; Stripe web Pro $4.99/mo or $39.99/yr |
+| MVAT Mirror | Consumable IAP credit packs | $1.99 Starter, $4.99 Full History |
+| gifloop | Freemium app, one-time unlock | Free tier (reinstall-proof export trial counter); Pro unlock ~$4.99 (Apple IAP) |
+| Coquí Chorus (co-kee) | Freemium app, one-time unlock | Free tier; Pro unlock ~$4.99 (Apple IAP) covering all species, mixer, presets |
+| Agor AI Ads | Productized service ladder | AI Visibility Audit $299 fixed fee (credits toward Pilot); Pilot (small agreed budget); Managed (retainer, optional capped outcome-share) |
+| agor.me consulting | Productized wedge to bespoke | $1,000 AI Operations Audit entry; $15K focused automation projects; $50K to $250K+ transformations |
+| scored.tools | Affiliate (no owned price) | Pre-revenue; ElevenLabs affiliate live (22% recurring, lifetime, 60-day cookie) |
+
+The portfolio runs three pricing archetypes at once, and the right framework depends on which one a task touches:
+1. **One-time digital** (modelstack, three of the apps' Pro unlocks): value-based against the do-it-yourself or hire-a-pro alternative; no churn, so the metrics are units, refund rate, and average order value.
+2. **Freemium with a paid unlock or credit pack** (MVAT Focus, MVAT Mirror, gifloop, Coquí Chorus): a free tier removes the barrier, a charm-priced unlock or consumable converts at the moment of value.
+3. **Productized service scaling to bespoke** (Agor AI Ads, agor.me): a fixed-fee wedge (a $299 or $1,000 audit) de-risks the buyer and credits toward a larger, value-priced engagement.
 
 ## Before Starting
 
-Gather: product type, target market (SMB/mid-market/enterprise), GTM motion (self-serve/sales-led/hybrid), primary value delivered, competitive pricing, current conversion rate and ARPU, pricing goals (growth vs. revenue vs. profitability).
+Identify the property and its archetype from the ladder above, then gather: the "against" alternative the buyer would otherwise use, the current price and where it sits on the ladder, actual units/revenue from Stripe (or App Store Connect for IAP), and the goal (more conversions vs higher average order value vs opening the high-touch ladder).
 
 ---
 

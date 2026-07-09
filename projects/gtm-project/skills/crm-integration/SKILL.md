@@ -277,4 +277,3 @@ mcp__gbrain__add_tag({ slug: "people/jon-cooper", tag: "stage:call-booked" })
 5. No outward send (a follow-up email, a proposal) happens from this skill; that's a draft for
    Ariel to send, per the vault-wide dry-run policy.
 </example_session>
-</output>

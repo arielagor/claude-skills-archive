@@ -201,8 +201,8 @@ AI systems cite where you appear, not just your site:
 Compact, unambiguous facts AI can't misread. Pattern: `[Subject]` `[specific verb]` `[concrete object]`.
 
 ```
-✅ "HubSpot CRM syncs contact and company data."
-✅ "Lead Scoring assigns priority based on engagement."
+✅ "The ModelStack LBO Model calculates IRR and MOIC across a five-year hold."
+✅ "Agor AI Advisory delivers automation projects starting at $15,000."
 ❌ "The system helps with various tasks."
 ❌ "It can do many things for users."
 ```

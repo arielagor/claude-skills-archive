@@ -137,36 +137,67 @@ outward is gated per the pattern in `gated-outward-agent` - never a live send by
 
 | Stage | Entry Trigger | Key Automations |
 |-------|--------------|-----------------|
-| Subscriber | Email opt-in | Welcome series + newsletter |
-| Lead | Form submit OR score >20 | Enrich → nurture → sync CRM |
-| MQL | Score ≥100 OR demo request | Sales alert + task + pause marketing |
-| SQL | Sales qualified in CRM | Update nurture + notify CS |
-| Opportunity | Deal created | Pause outbound + enable deal-stage emails |
-| Customer | Deal won | Onboarding sequence + remove from prospects |
-| Churned | Cancellation | Win-back sequence |
+| Subscriber | Email opt-in | Welcome series + newsletter (drafted, Ariel sends) |
+| Lead | Form submit OR score >20 | GBrain enrich -> nurture track -> `put_page`/`add_tag` |
+| MQL | Score >=100 OR demo request | Draft alert to Ariel + revenue-scorecard entry + pause automated nurture |
+| SQL | Ariel manually qualifies | Update nurture + GBrain timeline entry |
+| Opportunity | Deal created in GBrain | Pause outbound automation + enable deal-stage email drafts |
+| Customer | Deal won | Onboarding sequence (drafts) + GBrain tag update |
+| Churned | Cancellation | Win-back sequence (drafts) |
 
 ---
 
 ## Key Workflows to Build
 
-**1. Demo Request → Sales Handoff**: Form submit → enrich → score/grade → create HubSpot deal → assign to rep → send confirmation email → start sales sequence.
+**1. Demo Request -> Draft Handoff**: Form submit -> GBrain enrich -> score/grade -> `put_page` a
+GBrain deal record -> draft a confirmation email (Gmail MCP, unsent) -> log to the revenue
+scorecard.
 
-**2. Trial Signup → Activation**: Signup → welcome email → onboarding checklist → day 3/7/14 milestone emails → conversion offer at day 14.
+**2. Trial Signup -> Activation**: Signup -> draft welcome email -> onboarding checklist -> day
+3/7/14 milestone email drafts -> conversion-offer draft at day 14.
 
-**3. Event/Webinar**: Registration → confirmation email → 3 reminders → post-webinar follow-up (attended) or recording offer (no-show) → add to nurture based on engagement.
+**3. Event/Webinar**: Registration -> confirmation email draft -> reminder drafts -> post-event
+follow-up draft (attended) or recording-offer draft (no-show) -> add to nurture based on
+engagement.
 
-**4. Customer Onboarding**: Won deal → CSM assignment notification → welcome email → onboarding checklist → check-in at 30/60/90 days → NPS survey at 90 days.
+**4. Customer Onboarding**: Won deal -> welcome email draft -> onboarding checklist -> check-in
+drafts at 30/60/90 days -> NPS survey draft at 90 days.
+
+Every "draft" above is a real Gmail draft or a file under `content/<platform>/drafts/`: the cron
+produces it, it never sends. Ariel reviews and sends manually, per the vault's dry-run policy.
 
 ---
 
-## HubSpot Implementation
+## Automation Implementation
 
-**Campaign setup**: Marketing → Campaigns → tag all assets (emails, landing pages, ads) with campaign ID.
+**Build sequence for any new automation** (mirrors the `gated-outward-agent` recipe):
 
-**UTM convention**: `utm_source={channel}&utm_medium={cpc|email|organic}&utm_campaign={id}&utm_content={variant}`
+1. Write the pipeline as named stages (for example POLL -> SCORE -> ROUTE -> DRAFT -> GATE ->
+   OUTPUT), each independently testable, per the global CLAUDE.md architecture rule.
+2. Default mode `OFF` in a `.env` the cron reads. `DRAFT` produces real Gmail drafts and GBrain
+   writes with zero outward action. `LIVE` is armed only after Ariel's explicit go, and only for
+   whitelisted recipients/scopes.
+3. Register the Task Scheduler job **S4U, Hidden=true**, for example:
+   `New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" -LogonType S4U -RunLevel Limited`.
+   Never `Interactive` - see `data/REMAP.md` Row 5 and the global CLAUDE.md Scheduled Tasks
+   section.
+4. Any reasoning step shells out to `claude -p` with `ANTHROPIC_API_KEY` stripped from the spawn
+   env, `stdio: ["ignore","pipe","pipe"]`, and a pinned `--model`.
+5. Every action that would touch the outside world routes through the safety gate described in
+   `gated-outward-agent`: kill switch, mode check, whitelist, the structural never-act class
+   (pricing, contract, legal, commitment, unknown first-contact), sender verification, rate
+   limit, quiet hours, and a veto window before anything fires.
+6. Any live link inside a drafted sequence is tracked with Dub.co (`app.dub.co/agor`), not a
+   HubSpot campaign ID. UTM convention:
+   `utm_source={channel}&utm_medium={cpc|email|organic}&utm_campaign={id}&utm_content={variant}`.
+7. Log every run: what fired, what was drafted versus sent, and where. A scheduled automation
+   with no record of its own actions is not verifiable, per the global CLAUDE.md verification
+   rule.
 
-**Attribution model**: W-shaped for hybrid PLG/sales-led (first touch + lead creation + close).
+**Reporting cadence**: Pull automation health (queue depth, drafts pending, errors) into
+`executive-dashboard-generator` alongside Stripe/Plausible data rather than a HubSpot reporting
+view - there isn't one.
 
-**Lead scoring setup**: Settings → Marketing → Lead Scoring. Set behavioral weights, demographic weights, and decay rules. Create MQL automation when score ≥100.
-
-**Reporting cadence**: Daily review of MQLs/SQLs. Weekly channel ROI. Monthly win/loss trends.
+**Reference build**: the Chief of Staff inbox agent, described in the Example section of
+`~/.claude/skills/gated-outward-agent/SKILL.md`, is the worked instance of this exact sequence,
+armed to LIVE with a verified self-send and idempotency proof.
