@@ -5,7 +5,6 @@ description: >
   Use when user wants to: (1) Check if a post will go viral, (2) Score a tweet for engagement potential, (3) Optimize or rewrite a tweet for algorithmic reach, (4) Understand why a tweet underperformed, (5) Build audience in a specific niche.
   Triggers: "Check if this will go viral", "Make this post buzz", "Will this tweet perform well?", "Optimize my tweet", "How can I make this viral?", "rewrite this tweet", "improve my tweet engagement", "twitter algorithm", "tweet reach", "debug underperforming tweet",
   "バズるかチェックして", "Xでバズる投稿にして", "伸びるかチェックして", "この投稿を伸ばして", "投稿を改善して", "ツイートを最適化して"
-license: AGPL-3.0 (referencing Twitter's open-source algorithm)
 ---
 
 # X Impact Checker

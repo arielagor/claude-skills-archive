@@ -1,6 +1,6 @@
 ---
 name: utm-builder
-description: Generate UTM-tagged URLs for campaign tracking. Create consistent, organized tracking links for Google Analytics, HubSpot, and other analytics platforms. Supports bulk generation, naming conventions, and campaign documentation. Use when creating tracking links, campaign URLs, or organizing marketing attribution.
+description: Generate UTM-tagged URLs for campaign tracking. Create consistent, organized tracking links that report through Plausible and shorten via Dub.co. Supports bulk generation, naming conventions, and campaign documentation. Use when creating tracking links, campaign URLs, or organizing marketing attribution.
 ---
 
 # UTM Builder
@@ -237,15 +237,15 @@ Example:
 ?utm_source=meta&utm_medium=cpc&utm_campaign={{campaign.name}}&utm_content={{ad.name}}
 ```
 
-### HubSpot Integration
+### Plausible + Dub.co Integration
 ```
-HubSpot auto-recognizes UTM parameters.
-Ensure consistency with HubSpot campaign naming.
+Plausible auto-parses UTM parameters into its Sources / Campaigns report; no tag setup needed.
+Dub.co preserves UTMs through the short link and tracks click counts.
 
 Best practice:
-- Create HubSpot campaign first
-- Use exact campaign name in utm_campaign
-- Tag all assets (emails, pages, ads) with same campaign
+- Define the campaign name once, reuse it verbatim in every utm_campaign
+- Shorten the tagged URL through Dub.co (agor account) for social and email
+- Tag all assets (posts, pages, emails) with the same campaign name so Plausible groups them
 ```
 
 ## Short URL Integration
