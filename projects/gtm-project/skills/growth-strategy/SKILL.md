@@ -80,7 +80,7 @@ The real loops running (or buildable) in the portfolio. Pick the one primary loo
 | **modelstack.digital** | Content -> SEO -> template sale | Daily blog post feeds Search Console keywords, ranks, drives organic buyers; the free Unit Economics Calculator captures email for nurture | One-time purchases: no recurring loop after the sale, so the loop must keep acquiring |
 | **agor.me consulting** | Authority content -> inbound booking | Daily blog + Leo-voiced audio + weekly episodes build authority; the chat/voice widget captures the booking; delivered work becomes referrals and case studies | Long consideration cycle; inbound depends on cadence not breaking |
 | **Agor AI Ads** | Audit -> pilot -> managed | The $299 audit produces a concrete result; the fee credits toward a pilot; a clean-attribution pilot becomes a managed retainer that expands | Attribution must be clean before the retainer rung, or the loop stalls |
-| **iOS apps** | Store discovery -> ratings -> ranking | ASO plus review velocity lifts category ranking, which lifts discovery; shareable outputs (a gifloop GIF, an MVAT Mirror result) can seed light virality | Consumer churn on the subscription tiers; ratings decay |
+| **iOS apps** | Store discovery -> ratings -> ranking | ASO plus review velocity lifts category ranking, which lifts discovery; shareable outputs (a gifloop GIF, an MVAT Mirror result) can seed light virality | Ratings decay; and for MVAT Focus's Stripe web Pro tier, subscription churn (the other apps are one-time IAP, not subscriptions) |
 | **scored.tools** | Tool submissions + reviews -> content -> traffic | Submitted tools and review pages create indexed content that draws searchers, some of whom submit or click affiliate links | Pre-revenue; affiliate is the only rung and only one program is live |
 
 Cross-promo between these properties (a modelstack reader to the consulting offer, one app to another) is real, but sequencing it across the portfolio is `portfolio-pm`'s `/pm sync` job. Design the single-property loop here; hand the cross-property weave to `portfolio-pm`.
@@ -93,8 +93,8 @@ Retention is the foundation, and it looks different per rung. Be honest about wh
 
 - **modelstack (one-time digital goods):** there is no subscription to retain. "Retention" here is repeat purchase and list engagement: bundle upsell, newsletter open/click, and cross-sell into the consulting rungs. Do not model it as SaaS churn; model it as reactivation and lifetime value across multiple one-time buys.
 - **agor.me consulting:** retention is repeat engagements, retainer continuation, and referral. The pre-call brief and delivery quality are the retention levers.
-- **Agor AI Ads managed retainer:** this is the one true recurring-revenue rung. Track net revenue retention and attribution health; a retainer only survives if the reported result stays clean.
-- **iOS subscription tiers (MVAT Focus, MVAT Mirror):** classic subscription retention. Watch trial-to-paid, early churn, and habit formation (streaks, daily use). Refunds go through Apple, not Stripe.
+- **Agor AI Ads managed retainer:** the marquee recurring-revenue rung on the consulting side. Track net revenue retention and attribution health; a retainer only survives if the reported result stays clean.
+- **MVAT Focus web Pro tier (Stripe):** the one live consumer subscription in the portfolio. Watch trial-to-paid, early churn, and habit formation (streaks, daily use); it bills and refunds through Stripe, not Apple. The other iOS apps are one-time Apple IAP (MVAT Mirror sells consumable credit packs, not a subscription), so their "retention" is repeat purchase and daily-use habit, not subscription churn.
 
 Fix activation before pouring on acquisition: a leaky bucket wastes the content engine's output.
 

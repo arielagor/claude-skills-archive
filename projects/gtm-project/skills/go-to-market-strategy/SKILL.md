@@ -42,7 +42,7 @@ Ariel's portfolio is not a single freemium-to-enterprise SaaS funnel. It is a la
 | Productized wedge | Agor AI Ads Visibility Audit | $299 | Productized on-ramp, partly self-serve | Stripe Checkout | agor-consulting |
 | Productized consulting entry | AI Operations Audit | $1,000 | Productized diagnostic, human-delivered | Off-platform, manual invoice | agor-consulting |
 | High-ticket | agor.me consulting engagements | $15K focused automation, $50K-$250K+ transformation | Human-closed, boutique, inbound-led | Off-platform, chat/voice widget to a call | agor-consulting |
-| Consumer (separate motion) | iOS apps: gifloop, MVAT Focus, MVAT Mirror, Coquí Chorus | $0.99-$4.99, plus small IAP subscription tiers | App Store discovery + ASO | Apple IAP (refunds via Apple) | ios-apps |
+| Consumer (separate motion) | iOS apps: gifloop, MVAT Focus, MVAT Mirror, Coquí Chorus | One-time IAP $0.99-$4.99 (MVAT Mirror sells $1.99/$4.99 consumable credit packs); MVAT Focus adds a $4.99/mo or $39.99/yr Stripe web Pro tier | App Store discovery + ASO | Apple IAP, refunds via Apple; MVAT Focus web tier via Stripe, refunds via Ariel | ios-apps |
 
 `scored.tools` sits alongside as a pre-revenue, content-and-affiliate top-of-funnel property (channel of record `hello@scored.tools`); treat it as authority and discovery surface that can feed the other rungs, not as a paid rung yet.
 
@@ -114,7 +114,7 @@ Keep the AI Ads scope boundary: this vault markets Agor AI Ads as Ariel's own of
 ### iOS apps
 
 1. This is App Store discovery, not a web launch. Route listing metadata work to `app-store-optimization` and the asc-listing-manager pattern.
-2. Growth is store ranking, review velocity, and subscription retention (MVAT Focus, MVAT Mirror). Refunds go through Apple.
+2. Growth is store ranking and review velocity. Most purchases are one-time Apple IAP (refunds via Apple), including MVAT Mirror's consumable credit packs. MVAT Focus is the exception with a Stripe web Pro tier that bills and refunds through Stripe, so it also has subscription retention to manage. Never treat all four apps as one payment rail.
 3. Cross-promote within the app family only.
 
 ### Product Hunt (optional, for modelstack or an app)
