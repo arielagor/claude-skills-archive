@@ -83,11 +83,11 @@ Expert outbound email execution for B2B sales and business development. Build hi
 
 ## Quick Start
 
-1. **Define ICP** — Who are you targeting and why?
-2. **Research Prospects** — Find personalization signals
-3. **Craft the Hook** — Lead with value, not a pitch
-4. **Build Sequence** — 5-7 touches across channels
-5. **Handle Responses** — Script for every outcome
+1. **Define ICP**: Who are you targeting and why?
+2. **Research Prospects**: Find personalization signals
+3. **Craft the Hook**: Lead with value, not a pitch
+4. **Build Sequence**: 5-7 touches across channels
+5. **Handle Responses**: Script for every outcome
 
 ---
 
@@ -117,7 +117,7 @@ Expert outbound email execution for B2B sales and business development. Build hi
 
 ### Write Like a Peer, Not a Vendor
 
-The email should read like it came from someone who understands their world — not someone trying to sell them something. Use contractions. Read it aloud. If it sounds like marketing copy, rewrite it.
+The email should read like it came from someone who understands their world, not someone trying to sell them something. Use contractions. Read it aloud. If it sounds like marketing copy, rewrite it.
 
 ### Every Sentence Must Earn Its Place
 
@@ -204,10 +204,10 @@ Tue–Thu, 10–11 AM or 2–3 PM in recipient's timezone.
 ### Personalization Patterns
 
 **Content-Based:**
-> "Your post on X resonated — especially the point about Y."
+> "Your post on X resonated, especially the point about Y."
 
 **Hiring Signal:**
-> "Noticed you're hiring X — usually means Y pain."
+> "Noticed you're hiring X, usually means Y pain."
 
 **Company News:**
 > "Saw the news about X. Insight: Y."
@@ -223,8 +223,8 @@ Tue–Thu, 10–11 AM or 2–3 PM in recipient's timezone.
 Make it impossible to ignore. Prove you know them.
 
 **Good:**
-- "Saw your post about X — made me think of Y"
-- "Noticed you're hiring X — usually means Y"
+- "Saw your post about X, made me think of Y"
+- "Noticed you're hiring X, usually means Y"
 - "Your talk on X was Y"
 
 **Bad:**
@@ -236,7 +236,7 @@ Make it impossible to ignore. Prove you know them.
 Show you understand their world.
 
 > "Companies at your stage usually struggle with X"
-> "Saw you're scaling — that usually creates Y"
+> "Saw you're scaling, that usually creates Y"
 
 ### The Value Offer
 Give before you ask.
@@ -261,12 +261,12 @@ Make it natural and low-friction.
 
 ## Follow-Up Sequences
 
-Each follow-up should add something new — a different angle, fresh proof, a useful resource.
+Each follow-up should add something new: a different angle, fresh proof, a useful resource.
 
 ### Follow-Up Templates
 
 **Email 2 (Value Bump):**
-> "Quick follow-up — additional insight. [Restate offer]."
+> "Quick follow-up, additional insight. [Restate offer]."
 
 **Email 3 (Different Angle):**
 > "New observation about their business. Thought this might be relevant."
