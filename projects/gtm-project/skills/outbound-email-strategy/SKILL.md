@@ -7,7 +7,71 @@ description: Comprehensive outbound email strategy skill for cold outreach, emai
 
 ## Workspace Context
 
-Read bootstrap context before asking questions: `strategy/brand.md` for brand, audience, offer, channels, tools, constraints, and metrics; `about/me.md` for personal voice; `content/ideas.md` and `content/calendar.md` for content planning. Use legacy product-marketing context files only as fallback. Save generated drafts to `content/<platform>/drafts/YYYY-MM-DD_short-topic-slug.md`, and route durable learnings back to `strategy/brand.md`, `about/me.md`, or `content/ideas.md`.
+Read `briefs\agor-consulting.md` first. It documents the primary outbound use case this skill
+serves: driving inbound to the two productized entry offers, the **$1,000 AI Operations Audit**
+(agor.me's consulting on-ramp) and the **$299 AI Visibility Audit** (Agor AI Ads' self-serve
+audit, credited toward a Pilot). Name these offers and prices in drafted copy instead of a
+generic "audit" or "assessment." Outbound cold contact is a supplement to the agor.me chat/voice
+widget's inbound bookings, not the primary channel, and every property's voice must read as one
+operator per `briefs\_portfolio.md`. Also read `strategy\brand.md` for brand, audience, and
+channel context and `content\ideas.md` / `content\calendar.md` for content planning where they
+exist. Save generated drafts to `content\<platform>\drafts\YYYY-MM-DD_short-topic-slug.md`, and
+route durable learnings back to `strategy\brand.md`, `about\me.md`, `briefs\agor-consulting.md`,
+or `content\ideas.md`.
+
+## Stack-Specific Hard Rules (read before drafting)
+
+Ariel's stack replaces the generic SaaS assumptions baked into the rest of this skill. See
+`data\REMAP.md` (row 5, email marketing SaaS) for the full substitution table this section is
+drawn from.
+
+### 1. Voice source (mandatory)
+
+Every drafted email must match Ariel's actual voice, not a generic cold-email register. Read
+`about\me.md` (the condensed, vault-local version) and the canonical full template library at
+`C:\Users\ariel\.claude\skills\ariel-email-voice\SKILL.md` before writing a single line of copy.
+Both sources agree on the same rules: direct opener (no "I hope this email finds you well"),
+warm but efficient tone, specific details over vague claims, no em-dashes anywhere, and the
+correct signature block for the sending identity (personal `~Ariel` for informal outreach, the
+"Agor AI Advisory" branded block for `agor.me`/Agor AI Ads outbound sent from `ariel@agor.me`).
+If a draft's tone drifts from either source, rewrite it before it goes to draft, don't ship the
+drift.
+
+### 2. Send mechanism (hard rule, not a suggestion)
+
+The only send path this skill may use is the Gmail MCP tool
+`mcp__claude_ai_Gmail__create_draft`. It creates a Gmail draft. It never sends a message. This
+skill drafts outbound email; a human, Ariel, reviews and sends every message himself. There is
+no bulk-send capability, no email-marketing SaaS, and no autonomous send path anywhere in this
+stack. Any upstream guidance below that implies Mailchimp, ConvertKit, SendGrid, Klaviyo,
+Outreach, Apollo, or any other bulk-send or sequencing platform does not apply in this vault and
+must not be followed as written: substitute `create_draft` for a single message, and use
+`list_drafts`, `search_threads`, and `get_thread` to review existing drafts and thread context
+before drafting a follow-up.
+
+### 3. Prospect sourcing
+
+Source and enrich prospects through GBrain MCP (`mcp__gbrain__*`), not a CRM and not a
+purchased list. GBrain already tracks 5,400+ people and 368 companies: use `query` for hybrid
+semantic search across the brain, `get_backlinks` to pull every conversation already linked to a
+contact, and `traverse_graph` to map a company's people or a person's connections before
+drafting a cold email, so the personalization references something real instead of being
+invented. For a net-new geographic B2B prospect list (a market or vertical with no existing
+GBrain coverage), hand off to the `library-business-prospect-list` skill
+(`C:\Users\ariel\.claude\skills\library-business-prospect-list\SKILL.md`) rather than rebuilding
+list-sourcing logic here. It already owns the free Data Axle Reference Solutions pipeline, the
+geocode-and-distance-sort workflow, and the owner/decision-maker title filtering this skill
+would otherwise have to reinvent.
+
+### 4. Compliance
+
+Do not re-derive CAN-SPAM or TCPA rules in this skill. The `library-business-prospect-list`
+skill already documents the compliance posture for regulated cold outreach: business landlines
+only for cold calls, federal and state Do-Not-Call scrubbing every 31 days, CAN-SPAM basics for
+email (real address, honest subject line, a working opt-out), and captive-agent carrier
+pre-approval where it applies. Read that skill's compliance notes and apply the same posture
+here rather than restating it; treat it as informational, not legal advice, exactly as it states
+itself.
 
 ## Operating Contract
 
@@ -294,6 +358,13 @@ Send 50/50 split to 100 prospects. Wait 48h, measure opens + replies. Winner goe
 
 ## Volume Guidelines
 
+These figures are industry-standard benchmarks for calibrating sequence pacing and quality, not
+a claim about this stack's actual throughput. Since the "Send mechanism" hard rule above means
+every message is a Gmail draft that Ariel reviews and sends by hand, real volume is bounded by
+his own review capacity, not by a sending platform's daily cap. Use this table to judge whether
+a batch of drafts is sized sensibly for the stage of the campaign, not as a target this skill
+will execute autonomously.
+
 | Stage | Volume | Focus |
 |-------|--------|-------|
 | Testing (Week 1-2) | 20-50/day | Find what works |
@@ -306,23 +377,35 @@ Send 50/50 split to 100 prospects. Wait 48h, measure opens + replies. Winner goe
 
 ## Compliance & Deliverability
 
-### Authentication (Required)
+This skill defers to the "Compliance" hard rule above (`library-business-prospect-list`'s
+CAN-SPAM/TCPA notes) rather than re-deriving compliance guidance. Domain authentication
+(SPF/DKIM/DMARC) is a property of Ariel's own Google Workspace/Gmail setup, already in place;
+this skill does not configure it and does not need to reason about it, because every send is a
+single Gmail draft reviewed and sent by Ariel from his own mailbox, never a bulk campaign from a
+dedicated sending domain. The reference material below is standard ESP background, kept only in
+case Ariel ever adds a real bulk-send tool to this stack; none of it is actionable for the
+draft-only Gmail workflow this skill actually runs today.
+
+### Authentication (background, not actionable in this stack)
 
 - **SPF**: Sender Policy Framework
 - **DKIM**: DomainKeys Identified Mail
 - **DMARC**: Domain-based Message Authentication
 
-### Spam Rate Thresholds
+### Spam Rate Thresholds (ESP reference, not this stack's mechanism)
 
 - Hard ceiling: **0.3%** complaint rate
 - Target: **<0.1%** for reliable inbox
 
-### Best Practices
+### Best Practices (what actually applies here)
 
-- Keep sending identity stable
-- Warm up new domains gradually
-- One-click unsubscribe (List-Unsubscribe-Post)
-- Follow CAN-SPAM requirements
+- Keep the sending identity stable: personal Gmail or `ariel@agor.me`, per the "Voice source"
+  signature rules above.
+- Every draft goes through `create_draft` for Ariel's review, per the "Send mechanism" hard rule
+  above; there is no domain warmup step because there is no automated sending volume.
+- Honor opt-outs manually in any sequence, since there is no ESP to automate a one-click
+  unsubscribe header.
+- Follow the CAN-SPAM basics named in the "Compliance" hard rule above.
 
 ---
 
@@ -341,14 +424,19 @@ Send 50/50 split to 100 prospects. Wait 48h, measure opens + replies. Winner goe
 
 ## The Outbound Math
 
-**Example:**
+**Example (industry-reference math, not this stack's live throughput):**
 - 100 emails/day × 5 days = 500 emails/week
 - 5% response rate = 25 responses
 - 50% positive = 12-13 interested
 - 50% book calls = 6-7 calls/week
 - 20% close = 1-2 customers/week
 
-**That's 4-8 customers/month from outbound.**
+**That's 4-8 customers/month from outbound**, at a volume this stack does not attempt
+autonomously: every one of those 500 weekly emails would be an individual Gmail draft Ariel
+reviews and sends himself, so treat this math as a benchmark for what "good" looks like at
+scale, not a plan this skill executes end to end. For agor.me specifically, the $15K-$250K
+engagement size means a handful of well-researched drafts per week, sourced from GBrain per the
+"Prospect sourcing" hard rule above, matters more than raw volume.
 
 ---
 
@@ -357,3 +445,9 @@ Send 50/50 split to 100 prospects. Wait 48h, measure opens + replies. Winner goe
 - [lead-generation-and-demand](../lead-generation-and-demand/SKILL.md) - Demand generation
 - [sales-and-revenue-operations](../sales-and-revenue-operations/SKILL.md) - Sales processes
 - [conversion-rate-optimization](../conversion-rate-optimization/SKILL.md) - CRO frameworks
+- **ariel-email-voice** (`C:\Users\ariel\.claude\skills\ariel-email-voice\SKILL.md`) - the
+  canonical voice template library referenced in "Voice source" above; read it before drafting
+  any copy.
+- **library-business-prospect-list** (`C:\Users\ariel\.claude\skills\library-business-prospect-list\SKILL.md`)
+  - net-new geographic B2B list building, plus the CAN-SPAM/TCPA compliance notes this skill
+  defers to instead of re-deriving them.
