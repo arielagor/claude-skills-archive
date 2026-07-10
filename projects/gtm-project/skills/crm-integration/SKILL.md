@@ -1,5 +1,5 @@
 ---
-name: "crm-integration"
+name: crm-integration
 description: "GBrain-as-CRM patterns for this vault: contact and company records, hybrid search, interaction history, relationship mapping, and pipeline-stage tagging via GBrain MCP tools, plus the file-based revenue scorecard for deal-stage tracking. Use when: CRM, contact record, lead sync, deal tracking, pipeline stage, activity logging, account mapping, relationship history, GBrain."
 ---
 
