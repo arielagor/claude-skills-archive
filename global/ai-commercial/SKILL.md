@@ -94,7 +94,7 @@ xAI voices: `leo eve ara rex sal` — pick one per character and keep it fixed.
 ### edl.json (the edit decision list)
 ```json
 { "out":"commercial-16x9.mp4", "w":1920, "h":1080, "fps":30,
-  "audio_dir":"audio", "clips_dir":"_film/shots", "music":"assets/music.mp3", "music_vol":0.35,
+  "audio_dir":"audio", "clips_dir":"_film/shots", "music":"assets/music.mp3", "music_vol":0.14,
   "endcard":{"headline":"Never miss another customer.","url":"app.agor.me","tag":"Your always-on AI receptionist"},
   "seq":[ {"kind":"insert","src":"insert-01","vo":"ray-01","dur":3.2},
           {"kind":"dlg","src":"ray-02"},
@@ -127,7 +127,7 @@ For 9:16: copy the EDL, set `w:1080,h:1920`, keep the same seq — the card rend
 - [ ] Same face/identity per character across every shot and BOTH engines.
 - [ ] 180°/screen direction never flips; eyelines match in shot-reverse-shot.
 - [ ] Lighting, palette, wardrobe consistent at every cut.
-- [ ] One voice per character, consistent loudness; music ducked under speech.
+- [ ] One voice per character, consistent loudness; music ducked under speech. **Check on phone speakers:** dialogue must sit clearly above music. Target dialogue ≈ −16 LUFS with the music bed ≥ 3 dB below and ducking harder under speech (assemble.py does this; verify with `ffmpeg -ss <dlg> -t 4 -i out.mp4 -af loudnorm=print_format=summary -f null -`).
 - [ ] No gibberish AI text on screen; end-card text fits its aspect (not cropped).
 - [ ] Hook lands in the first 3s; button/CTA is clean.
 - [ ] Aspect-correct framing in both 16:9 and 9:16 (no key action cropped).
