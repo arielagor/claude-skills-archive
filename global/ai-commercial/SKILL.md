@@ -14,6 +14,8 @@ description: |
 
 # AI Commercial — the hybrid dialogue-ad pipeline
 
+> See also: `seedance-narrated-short` is the narrated, no-lip-sync, long-form counterpart (a novel or essay adapted into a cinematic short with a narrator OVER the footage instead of speaking characters). Use that when nobody needs to lip-sync exact words.
+
 The two things that make an AI spot look amateur — **mouths that don't say the words** and
 **characters/worlds that drift shot-to-shot** — are solved by *routing each shot to the right
 engine* and *engineering continuity*, not in post. This skill is the codified, verified pipeline.
