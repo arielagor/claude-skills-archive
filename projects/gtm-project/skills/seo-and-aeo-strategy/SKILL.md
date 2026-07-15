@@ -1,0 +1,397 @@
+---
+name: seo-and-aeo-strategy
+description: SEO, AEO (Answer Engine Optimization), and GEO strategy for search engines and AI visibility. Use when working on "SEO audit," "technical SEO," "on-page SEO," "AI search optimization," "AEO," "GEO," "AI visibility," "optimize for ChatGPT," "optimize for Perplexity," "AI Overviews," "answer engine optimization," "generative engine optimization," "AI citations," "featured snippets," "meta tags," "schema markup," "search ranking," "content optimization," "E-E-A-T," "structured data," "search console," "SEO health check," "why am I not ranking," "AI search readiness," "backlink strategy," "link building," "domain authority," "programmatic SEO," "SEO at scale," "template-based SEO," "AEO monitoring," "AI search monitoring," "JSON-LD," "rich snippets," "schema.org," "SERP analysis," "search intent," "site architecture," "information architecture," "URL structure," "internal linking," or "navigation." For keyword research, see keyword-research-and-clustering.
+---
+
+# SEO & AEO Strategy
+
+## Scope boundary (read first)
+
+This skill covers SEO / AEO / AI-visibility work for **Ariel's OWN properties**: modelstack.digital, agor.me, scored.tools (and any other line in `PORTFOLIO_PROPERTIES.md`). It optimizes his own sites to rank and to be cited.
+
+**All client-facing AI-visibility delivery belongs to `/ai-ads`** (`~/.claude/skills/ai-ads/`), not here. That skill already owns the citation-verified authority knowledge base, the 8-stage campaign pipeline, the AI Visibility Index, and the rank-tracker, all with a human gate on every action that spends money. Do not rebuild any of that infrastructure in this vault. If a task is about getting a **client's** brand cited or advertised in an AI assistant, stop and route to `/ai-ads`.
+
+Reference `/ai-ads` only where it genuinely overlaps: the same public GEO research findings the `/ai-ads` authority KB maintains for clients also apply to optimizing Ariel's own properties, so it is a legitimate source to read from, never a place to duplicate work into.
+
+## Workspace Context
+
+Read the brief first. Before any property-specific work, read the matching `briefs\<property>.md` (`modelstack`, `agor-consulting`, `scored-tools`) and say so in an early "Workspace context" line of your output, per the vault's operating rules. Also read `data\REMAP.md` for the tool-substitution stack this skill runs on (no paid SEO SaaS exists here), `strategy\brand.md` for cross-property brand voice, `about\me.md` for personal voice, and `content\ideas.md` + `content\calendar.md` for content planning. If a brief does not exist yet, draft it from conversation context before proceeding, then read it on every later invocation.
+
+Save generated drafts to `content\<platform>\drafts\YYYY-MM-DD_short-topic-slug.md`. Route durable learnings back to the property brief, `strategy\brand.md`, `about\me.md`, or `content\ideas.md`. Every outward action stays draft-gated: a robots.txt change, a schema deployment, an outreach email, or a sitemap submission is proposed as an artifact and waits for Ariel's explicit go, never executed by this skill.
+
+## Operating Contract
+
+This skill is self-contained for its frontmatter scope: use its local instructions, references, scripts, and assets as the playbook; ask only for missing task-specific inputs; hand off to adjacent skills instead of expanding scope; and return an actionable artifact, decision, plan, draft, or diagnostic.
+
+
+
+Traditional SEO gets pages ranked. AI search optimization (AEO/GEO) gets content **cited**. This skill covers both.
+
+```
+SEO  → Rank in traditional search results (blue links)
+AEO  → Appear in featured snippets, AI Overviews, voice answers
+GEO  → Get cited in generative AI responses (ChatGPT, Claude, Perplexity)
+```
+
+**2025 reality:** AI Overviews appear in ~47% of Google searches. 58% of queries end without a click. Optimize for citation, not just ranking.
+
+---
+
+## Initial Assessment
+
+Use the Workspace Context above first. Only ask for what is missing.
+
+Before auditing, understand:
+
+1. **Site context** — Type (SaaS, e-commerce, blog), primary SEO goal, priority keywords/topics
+2. **Current state** — Known issues, organic traffic level, recent changes or migrations
+3. **AI visibility** — Does the brand appear in AI-generated answers today? Checked ChatGPT, Perplexity, Google AI Overviews?
+4. **Scope** — Full site vs. specific pages? Technical + on-page + AI, or one focus area?
+
+---
+
+## Technical SEO
+
+### Crawlability
+
+| Check | What to Verify |
+|-------|---------------|
+| **robots.txt** | No unintentional blocks, sitemap referenced, AI crawlers allowed |
+| **XML Sitemap** | Exists, submitted to Search Console, canonical URLs only, < 50K URLs |
+| **Site architecture** | Important pages within 3 clicks, logical hierarchy, no orphan pages |
+| **Crawl budget** | Parameterized URLs controlled, faceted nav handled, no session IDs in URLs |
+
+### Indexation
+
+- `site:domain.com` check vs. Search Console coverage report
+- Verify no `noindex` on important pages
+- Check canonical tags (self-referencing on unique pages, HTTP→HTTPS, www consistency)
+- Identify redirect chains/loops, soft 404s, duplicate content
+
+### Core Web Vitals & Speed
+
+| Metric | Target | Tool |
+|--------|--------|------|
+| LCP (Largest Contentful Paint) | < 2.5s | PageSpeed Insights |
+| INP (Interaction to Next Paint) | < 200ms | Chrome DevTools |
+| CLS (Cumulative Layout Shift) | < 0.1 | WebPageTest |
+| TTFB (Time to First Byte) | < 800ms | Search Console |
+
+### Mobile & Security
+
+- Responsive design (not separate m. site), viewport configured, adequate tap targets (48px min)
+- HTTPS across entire site, valid SSL, no mixed content, HSTS header
+
+### URL Structure
+
+- Lowercase, hyphen-separated, < 75 characters
+- Include target keywords naturally, avoid unnecessary parameters
+
+---
+
+## On-Page SEO
+
+### Title Tags
+
+- 50–60 characters, primary keyword near beginning
+- Unique per page, brand name at end (unless homepage)
+- Compelling and click-worthy
+
+### Meta Descriptions
+
+- 150–160 characters, include primary keyword
+- Clear value proposition with call-to-action, unique per page
+
+### Heading Structure
+
+- Single `<h1>` per page containing primary keyword
+- Logical hierarchy (H1 → H2 → H3), no skipped levels
+- Descriptive headings (not generic), include keywords naturally
+
+### Image SEO
+
+- Descriptive filenames with keywords, alt text on all images
+- Compressed, modern formats (WebP/AVIF), lazy load below-fold
+- Responsive images with `width`/`height` attributes
+
+### Internal Linking
+
+- Descriptive anchor text with keywords (not "click here")
+- Important pages well-linked, no broken internal links
+- Breadcrumb navigation for hierarchy
+
+### Content Quality (E-E-A-T)
+
+| Signal | Implementation |
+|--------|---------------|
+| **Experience** | First-hand accounts, case studies, original data |
+| **Expertise** | Author credentials visible, accurate detailed information |
+| **Authoritativeness** | Cited by others, industry credentials, recognized in space |
+| **Trustworthiness** | Transparent sourcing, contact info, privacy policy, HTTPS |
+
+---
+
+## AI Search Optimization (AEO/GEO)
+
+### How AI Search Platforms Select Sources
+
+| Platform | Source Selection | Key Factor |
+|----------|-----------------|------------|
+| **Google AI Overviews** | Strong correlation with traditional rankings | Top 5 organic positions favored |
+| **ChatGPT** | Wider range, not just top-ranked | Branded domain authority, recency |
+| **Perplexity** | Always cites with links | Authoritative, recent, well-structured |
+| **Gemini** | Google index + Knowledge Graph | E-E-A-T signals, structured data |
+| **Copilot** | Bing index | Microsoft ecosystem (LinkedIn, GitHub) |
+| **Claude** | Brave Search | Factual density, structural clarity |
+
+For detailed platform-specific ranking factors, see [references/platform-ranking-factors.md](references/platform-ranking-factors.md) and [references/platform-algorithms.md](references/platform-algorithms.md).
+
+### The Three Pillars
+
+**1. Structure — Make content extractable**
+
+AI systems extract passages, not pages. Every key claim should work standalone.
+
+- Lead every section with a direct answer (don't bury it)
+- Keep key answer passages to 40–60 words (optimal for snippet extraction)
+- Use H2/H3 headings that match how people phrase queries
+- Tables beat prose for comparisons; numbered lists beat paragraphs for processes
+
+**Inverted pyramid pattern:**
+```
+┌──────────────────────────────────┐
+│  DIRECT ANSWER (1-2 sentences)   │ ← AI extracts this first
+├──────────────────────────────────┤
+│  KEY FACTS & CONTEXT             │ ← Supporting bullets/data
+├──────────────────────────────────┤
+│  DETAILED EXPLANATION            │ ← Background, examples
+└──────────────────────────────────┘
+```
+
+**2. Authority — Make content citable**
+
+The Princeton GEO research (KDD 2024) ranked 9 optimization methods:
+
+| Method | Visibility Boost | How to Apply |
+|--------|:---------------:|--------------|
+| **Cite sources** | +40% | Add authoritative references with links |
+| **Add statistics** | +37% | Include specific numbers with sources |
+| **Add quotations** | +30% | Expert quotes with name and title |
+| **Authoritative tone** | +25% | Write with demonstrated expertise |
+| **Improve clarity** | +20% | Simplify complex concepts |
+| **Technical terms** | +18% | Use domain-specific terminology |
+| **Unique vocabulary** | +15% | Increase word diversity |
+| **Fluency optimization** | +15–30% | Improve readability and flow |
+| ~~Keyword stuffing~~ | **-10%** | **Actively hurts AI visibility** |
+
+**Best combination:** Fluency + Statistics = maximum boost. Low-ranking sites benefit even more — up to 115% visibility increase with citations.
+
+For detailed GEO research, see [references/geo-research.md](references/geo-research.md).
+
+**3. Presence — Be where AI looks**
+
+AI systems cite where you appear, not just your site:
+- Wikipedia mentions (7.8% of all ChatGPT citations)
+- Reddit discussions, YouTube content, Quora answers
+- Review sites (G2, Capterra, TrustRadius for B2B SaaS)
+- Industry publications and guest posts
+
+### Semantic Triples (Key AEO Technique)
+
+Compact, unambiguous facts AI can't misread. Pattern: `[Subject]` `[specific verb]` `[concrete object]`.
+
+```
+✅ "The ModelStack LBO Model calculates IRR and MOIC across a five-year hold."
+✅ "Agor AI Advisory delivers automation projects starting at $15,000."
+❌ "The system helps with various tasks."
+❌ "It can do many things for users."
+```
+
+### AI Crawler Configuration
+
+Ensure robots.txt allows AI crawlers:
+
+```
+User-agent: GPTBot          # OpenAI
+Allow: /
+User-agent: ChatGPT-User    # ChatGPT browsing
+Allow: /
+User-agent: PerplexityBot   # Perplexity
+Allow: /
+User-agent: ClaudeBot        # Anthropic
+Allow: /
+User-agent: Google-Extended  # Gemini/AI Overviews
+Allow: /
+```
+
+See [references/ai-crawlers.md](references/ai-crawlers.md) for full configuration.
+
+---
+
+## Structured Data for Search & AI
+
+Schema markup improves AI visibility by 30–40%. Priority types:
+
+| Content Type | Schema | Citation Impact |
+|-------------|--------|:---------------:|
+| FAQs | `FAQPage` | 2.5x inclusion |
+| Articles/Blog | `Article` + Author | 2.2x citations |
+| Organization | `Organization` | 2.8x citations |
+| How-to content | `HowTo` | Step extraction |
+| Products | `Product` | Pricing/features |
+| Reviews | `AggregateRating` | Trust signals |
+| Breadcrumbs | `BreadcrumbList` | Navigation context |
+
+For full JSON-LD templates, see [references/schema-templates.md](references/schema-templates.md) and [references/schema-for-ai.md](references/schema-for-ai.md).
+
+Validate at [Google Rich Results Test](https://search.google.com/test/rich-results) and [Schema.org Validator](https://validator.schema.org/).
+
+---
+
+## Content Types That Get Cited Most
+
+| Content Type | AI Citation Share | Why AI Cites It |
+|-------------|:----------------:|----------------|
+| Comparison articles | ~33% | Structured, balanced, high-intent |
+| Definitive guides | ~15% | Comprehensive, authoritative |
+| Original research/data | ~12% | Unique, citable statistics |
+| Best-of/listicles | ~10% | Clear structure, entity-rich |
+| Product pages | ~10% | Specific extractable details |
+| How-to guides | ~8% | Step-by-step structure |
+
+**Underperformers:** Generic blog posts without structure, thin product pages, gated content, undated content, PDF-only content.
+
+For content templates and patterns, see [references/content-patterns.md](references/content-patterns.md) and [references/content-templates.md](references/content-templates.md).
+
+---
+
+## AEO Measurement
+
+Track these four metrics monthly:
+
+### 1. AI Visibility
+Test priority queries across ChatGPT, Perplexity, Gemini, Google AI Overviews. **Target:** Appear in 60%+ of priority queries.
+
+### 2. AI Share of Voice
+`Share of Voice = (Your mentions / Total brand mentions) × 100`. **Target:** Match or exceed traditional search market share.
+
+### 3. AI Citations
+How often YOUR WEBSITE is the source. **Target:** Cited in 30%+ of relevant queries.
+
+### 4. Referral Demand
+Traffic originating in AI but arriving later (brand search after AI mention). Track via post-purchase survey: "How did you first hear about us?"
+
+### Monitoring Method (no paid tool in this stack)
+
+There is no Otterly / Peec / ZipTie / Profound-class AI-visibility SaaS in Ariel's stack, and no automated share-of-voice or citation-tracking tool. Measure the four metrics above with a **manual monthly prompt-test loop** instead, and record the results as a dated artifact so month-over-month movement is visible.
+
+| Method | How | Covers |
+|--------|-----|--------|
+| **Manual prompt testing** | Run each priority query yourself across ChatGPT, Perplexity, Gemini, and Google AI Overviews (`WebSearch` for the SERP/AI-Overview view; claude-in-chrome MCP or a plain browser for the chat assistants). Log whether the property is mentioned, whether it is cited, and which sources win. | Visibility, Citations, Share of Voice |
+| **Google Search Console** | Query/impression/click trends for the same topics; a brand-search lift after an AI mention is the referral-demand proxy. | Referral demand |
+| **Dated log file** | Save each month's run to `content\research\YYYY-MM-DD_ai-visibility-<property>.md` and diff against the prior month. | Trend over time |
+
+If Ariel ever wants automated multi-surface tracking, the `/ai-ads` venture already ships a rank-tracker (`bin/track-*.mjs`) built for client cells; that is client infrastructure and stays there. For his own properties, the manual loop above is the intended path. Do not stand up a competing tracker in this vault.
+
+### Interpreting Results
+
+| Visibility | Share of Voice | Diagnosis |
+|------------|----------------|-----------|
+| ↓ Down | ↓ Down | Platform algorithm change (industry-wide) |
+| ↓ Down | → Stable | Your content quality declined |
+| → Stable | ↓ Down | Competitors improved |
+| ↑ Up | ↑ Up | Your AEO strategy is working |
+
+---
+
+## Audit Checklists
+
+### Critical (Fix Immediately)
+- [ ] HTTPS enabled, valid SSL
+- [ ] robots.txt allows crawling (including AI bots)
+- [ ] No `noindex` on important pages
+- [ ] Title tags present, unique, with primary keyword
+- [ ] Single `<h1>` per page
+- [ ] AI crawlers not blocked in robots.txt
+
+### High Priority
+- [ ] Meta descriptions present and compelling
+- [ ] XML sitemap submitted to Search Console
+- [ ] Canonical URLs set correctly
+- [ ] Mobile-responsive, Core Web Vitals passing
+- [ ] FAQPage schema on FAQ/support pages
+- [ ] Article schema with author on blog/guide pages
+- [ ] "Last updated" date visible on content
+
+### Medium Priority
+- [ ] Internal linking strategy implemented
+- [ ] Image alt text on all images
+- [ ] Descriptive URLs with keywords
+- [ ] Breadcrumb navigation + schema
+- [ ] Author bios with credentials
+- [ ] Statistics cited with sources
+- [ ] Content answers queries in first paragraph
+
+### Ongoing
+- [ ] Fix crawl errors in Search Console
+- [ ] Update sitemap when content changes
+- [ ] Refresh content quarterly (competitive topics)
+- [ ] Monitor AI visibility monthly (manual or tools)
+- [ ] Check for broken links
+- [ ] Track AI share of voice vs. competitors
+
+For complete SEO checklist, see [references/seo-checklist.md](references/seo-checklist.md).
+
+---
+
+## Tools (Ariel's free stack)
+
+This vault runs on free, first-party tooling only. There is **no Semrush, Ahrefs, Moz, Screaming Frog, or DataForSEO** in the stack (see `data\REMAP.md` row 2). Use the following, and degrade gracefully where a paid capability has no substitute.
+
+| Tool | Use |
+|------|-----|
+| Google Search Console | Indexation, coverage, query/impression/click data, ranking movement, submit sitemaps, fix crawl errors. The primary ranking-and-indexation source. |
+| Google PageSpeed Insights | Performance + Core Web Vitals (field + lab) |
+| Rich Results Test | Validate structured data / rich-result eligibility |
+| Schema.org Validator | Validate any schema type |
+| WebSearch | Competitor SERP research, People-Also-Ask mining, AI-Overview view, keyword/topic discovery |
+| WebFetch + browser | Manual crawl of a small site (title/meta/heading/schema/robots checks) in place of a crawler; claude-in-chrome MCP for the AI chat assistants |
+| Manual SERP checks | Incognito queries and `site:` operators in place of a paid rank tracker |
+| `scripts/seo_audit.py` | No-API audit: meta tags, robots.txt, sitemap, load time, schema, AI-bot access. This is the one script that runs with no key. |
+
+### Capability gaps (state the gap, never fabricate a number)
+
+- **No Domain Authority / Domain Rating / Ahrefs Rank.** These are proprietary third-party scores; nothing in this stack computes them. If a task asks for a DA/DR filter or number, say so and substitute qualitative judgment plus the GSC **Links** report (top linking sites, referring-domain count) as the closest free signal.
+- **No backlink index.** There is no Ahrefs/Moz backlink database here. Use the GSC Links report for links Google already knows about; a full external backlink profile is not obtainable and should be flagged as such.
+- **No session-replay / heatmap** (Hotjar-class) and **no keyword-volume/difficulty database.** Keep keyword and funnel judgment qualitative, informed by WebSearch, autocomplete, and GSC's own query data.
+- **The DataForSEO scripts** (`keyword_research.py`, `serp_analysis.py`, `backlinks.py`, `domain_overview.py`, `competitor_gap.py`, `related_keywords.py`, `autocomplete_ideas.py`) require a paid `DATAFORSEO_LOGIN` / `DATAFORSEO_PASSWORD` that Ariel does **not** hold. Treat them as inert reference code, not the working path. Use the free tools above instead.
+
+See [references/tools-and-apis.md](references/tools-and-apis.md) for the full free-vs-unavailable breakdown.
+
+---
+
+## References
+
+- [references/platform-ranking-factors.md](references/platform-ranking-factors.md) — How each AI platform selects sources
+- [references/platform-algorithms.md](references/platform-algorithms.md) — Detailed ranking factors per platform
+- [references/geo-research.md](references/geo-research.md) — Princeton GEO research (9 methods)
+- [references/content-patterns.md](references/content-patterns.md) — AI-optimized content block templates
+- [references/content-templates.md](references/content-templates.md) — Page structure templates for AI
+- [references/schema-templates.md](references/schema-templates.md) — JSON-LD schema templates
+- [references/schema-for-ai.md](references/schema-for-ai.md) — Schema markup for AI visibility
+- [references/ai-crawlers.md](references/ai-crawlers.md) — AI crawler robots.txt configuration
+- [references/seo-checklist.md](references/seo-checklist.md) — Complete SEO audit checklist
+- [references/aeo-geo-patterns.md](references/aeo-geo-patterns.md) — Content patterns for AI citation
+- [references/ai-writing-detection.md](references/ai-writing-detection.md) — AI writing patterns to avoid
+- [references/query-research.md](references/query-research.md) — Query research methodology
+- [references/tools-and-apis.md](references/tools-and-apis.md) — Tools and API reference
+- [references/google-docs-summary.md](references/google-docs-summary.md) — Google documentation summary
+
+## Related Skills
+
+- **keyword-research-and-clustering** — Keyword research, expansion, and topic clustering
+- **keyword-research-and-clustering** — Keyword expansion and clustering before SEO page planning
+- **competitor-analysis** — Comparison pages and competitor-backed search strategy
+- **content-strategy-and-planning** — Turning SEO opportunities into an editorial roadmap
+- **content-strategy-and-planning** — Planning what content to create
+- **data-and-funnel-analytics** — Measuring SEO/AEO performance
