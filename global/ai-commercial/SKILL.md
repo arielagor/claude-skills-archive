@@ -120,8 +120,21 @@ For 9:16: copy the EDL, set `w:1080,h:1920`, keep the same seq — the card rend
   Seedance clips are non-editable after generation.
 - On-screen text is ALWAYS a post overlay (AI renders gibberish text).
 - Pronunciation: spell "Agor" as **"uh-gor"** in any TTS script (see `feedback_agor_pronunciation_uhgore`).
-- Ariel's live voice = HeyGen Avatar V **starfish** clones `80c4f65d` / `8404d63d`. The ElevenLabs
-  voice `38db58ee` is **dead (0 credits)** — never use it for the founder button.
+- **Ariel's real assets, resolved against the live API 2026-07-15 (the old note conflated voices with
+  avatars — `80c4f65d` / `8404d63d` are VOICE ids, not avatar groups):**
+  - **Avatar V twin (the real trained Ariel): `avatar_id` `b636f6a57ba14b039aa4e10d1928cb6f`**
+    ("Ariel", `/avatar/v3/` preview, half-body, trained in a **wine-cellar/restaurant set** — plan
+    the background, it ships with the avatar).
+  - **Voice clones:** `80c4f65d357140a5a6adda04c9a7e189` ("Ariel Voice Clone 2026_06_25", newer) and
+    `8404d63d254a4c48afe11d00e2e14025` ("Ariel", older, is the `default_voice_id` on the group).
+  - **TRAP — the "Ariel" avatar group `111c9cd2c912466e9bb23392588da409` is MIXED.** 7 of its 8
+    entries are `talking_photo` looks with `business_type:"generated"` (AI-invented faces: "Man in
+    blue blazer", "Bearded man in tan blazer", "Ariel behind a studio microphone"). Those are
+    **Avatar IV**, not Ariel. Only the entry carrying an `avatar_id` field (`b636f6a5…`) is the real
+    Avatar V twin; the generated looks carry `id` instead. **Never pull an id from this group
+    blind** — filter on the `avatar_id` field, or you will put a stranger's face on Ariel's story.
+  - The ElevenLabs voice `38db58ee85c24d07a91dd622f382d111` ("Ariel Agor - best") is **dead
+    (0 credits)** but STILL LISTED in `/v2/voices` — never use it for the founder button.
 - SendUserFile: ≲3 MiB, one file per call, `display:"render"`.
 
 ## QC checklist (watch the final for)
