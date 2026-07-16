@@ -134,9 +134,18 @@ For 9:16: copy the EDL, set `w:1080,h:1920`, keep the same seq — the card rend
 - Pronunciation: spell "Agor" as **"uh-gor"** in any TTS script (see `feedback_agor_pronunciation_uhgore`).
 - **Ariel's real assets, resolved against the live API 2026-07-15 (the old note conflated voices with
   avatars — `80c4f65d` / `8404d63d` are VOICE ids, not avatar groups):**
-  - **Avatar V twin (the real trained Ariel): `avatar_id` `b636f6a57ba14b039aa4e10d1928cb6f`**
-    ("Ariel", `/avatar/v3/` preview, half-body, trained in a **wine-cellar/restaurant set** — plan
-    the background, it ships with the avatar).
+  - **ARIEL'S PREFERRED LOOKS (his pick 2026-07-15) — all in offices, all genuinely him:**
+    `48c2c143450044abb5cac4fb10b0974c` grey blazer, city window ·
+    `aa42be6e4cdd4696a2ae016c13921cc1` navy blazer, boardroom ·
+    `f57aaeab87ed452892b387563d3c24eb` tan blazer, presentation screen ·
+    `25bbbeb5eec944b3a3e7271d80494caf` black suit, lounge ·
+    `1556bb72d645418c9c4551d1e35d9580` white polo, open-plan office.
+    **He explicitly does NOT want** the wine-cellar digital-twin look
+    (`b636f6a57ba14b039aa4e10d1928cb6f`, "Ariel", `/avatar/v3/` preview) — that set ships baked into
+    the twin and reads wrong for business work.
+  - **`business_type:"generated"` does NOT mean a generated PERSON.** It means the LOOK (wardrobe +
+    set) was synthesized from Ariel's likeness. All five above are visibly, unmistakably him. Do not
+    reject them as "AI-invented faces" — that misread cost a whole P0 revision on 2026-07-15.
   - **Voice: use his xAI clones, NOT the HeyGen ones** (his instruction, 2026-07-15). Default
     **`gpp66sriwbgy`**. Generate the line with `gen_tts.py`, upload the mp3 as an audio asset, and
     drive the Avatar V twin from that `audio_asset_id` — same pattern as the Avatar IV path, so his
