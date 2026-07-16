@@ -16,9 +16,22 @@ The router CLI (always invoke with bun.exe by absolute path):
 bun "C:\Users\ariel\.claude\projects\modelmix\src\cli.ts" <command> ...
 ```
 
+## Master switch
+
+modelmix has an on/off switch. If it's OFF, do NOT delegate — `mix run` will
+refuse anyway (exit with "modelmix is OFF"). Check with:
+
+```bash
+bun "C:\Users\ariel\.claude\projects\modelmix\src\cli.ts" status
+```
+
+`mix off` disables routing and hides the statusline; `mix on` restores both.
+When Ariel says "turn modelmix off/on" or "toggle modelmix", run
+`mix off` / `mix on` / `mix toggle`.
+
 ## When to delegate
 
-Delegate a subtask when ALL hold:
+Delegate a subtask when ALL hold (and modelmix is ON):
 - Self-contained: a clear input → output contract, everything the model needs
   fits in the prompt you send it.
 - No repo writes: the subtask produces text you will integrate yourself.
