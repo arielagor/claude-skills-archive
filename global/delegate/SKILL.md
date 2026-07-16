@@ -7,8 +7,9 @@ description: Route self-contained subtasks to cheaper/faster models via the mode
 
 You are the orchestrator. modelmix routes self-contained subtasks to the best
 quality-per-dollar model and logs every call to a ledger that powers the
-statusline mix (e.g. `Fable 12% | gem-flash 55% | qwen 33% | saved $0.83`)
-and the `mix dash` TUI.
+statusline mix (e.g. `[Fable 82% | 468,179 tok, $123.97] [gem-flash 15% |
+19,300 tok, $0.08] saved $0.16` — each segment is share, tokens, and the
+token→$ cost conversion at that model's API rate) and the `mix dash` TUI.
 
 The router CLI (always invoke with bun.exe by absolute path):
 
