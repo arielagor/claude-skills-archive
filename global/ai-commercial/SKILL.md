@@ -154,12 +154,16 @@ For 9:16: copy the EDL, set `w:1080,h:1920`, keep the same seq — the card rend
     `8404d63d254a4c48afe11d00e2e14025` "Ariel", the group's `default_voice_id`) still exist and
     still work, but are no longer the default — do not reach for them just because the avatar group
     points at one.
-  - **TRAP — the "Ariel" avatar group `111c9cd2c912466e9bb23392588da409` is MIXED.** 7 of its 8
-    entries are `talking_photo` looks with `business_type:"generated"` (AI-invented faces: "Man in
-    blue blazer", "Bearded man in tan blazer", "Ariel behind a studio microphone"). Those are
-    **Avatar IV**, not Ariel. Only the entry carrying an `avatar_id` field (`b636f6a5…`) is the real
-    Avatar V twin; the generated looks carry `id` instead. **Never pull an id from this group
-    blind** — filter on the `avatar_id` field, or you will put a stranger's face on Ariel's story.
+  - **THE REAL TRAP is the ENGINE, not the look.** `POST /v2/video/generate` has **no engine
+    selector and silently gives you Avatar IV.** Using the right avatar is NOT enough. **Avatar V
+    requires `POST /v3/videos` with `engine: {"type":"avatar_v"}`** — the v3 schema says outright
+    "Defaults to Avatar IV when omitted". Verified 2026-07-15: identical line + identical
+    `audio_asset_id`, v2 finished in **15 seconds at 1132 kbps**, v3+avatar_v took **~10 minutes at
+    1772 kbps**. If a "dialogue shot" renders in seconds, it is Avatar IV — throw it away.
+  - **Group shape (`111c9cd2c912466e9bb23392588da409`), for parsing only:** the generated photo looks
+    carry an `id` field; the wine-cellar video twin carries `avatar_id`. Both are Ariel. Photo looks
+    accept `engine: avatar_v` — the schema auto-selects an `instant_avatar` sibling in the group as
+    the animation reference (`reference_look_id` overrides it).
   - The ElevenLabs voice `38db58ee85c24d07a91dd622f382d111` ("Ariel Agor - best") is **dead
     (0 credits)** but STILL LISTED in `/v2/voices` — never use it for the founder button.
 - SendUserFile: ≲3 MiB, one file per call, `display:"render"`.
