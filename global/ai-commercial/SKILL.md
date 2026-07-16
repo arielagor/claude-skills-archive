@@ -67,7 +67,13 @@ next shot's opening, crossfade seams.
 **P5 — Repair any Seedance talking shot → Lipsync Precision** vs the P2 VO. **Three hard input
 rules** (any wrong = fail): audio/video within **15%** duration (trim clip to VO length first) ·
 source must carry an **audio track** (mux silent if none) · a **frontal prominent face** must be
-present.
+present. **Also use P5 to fix SOFT AVATAR V lip sync** (verified 2026-07-16): Avatar V on a photo
+look can render mouth motion that doesn't tightly match phonemes — `POST /v3/lipsyncs` with
+`mode:"precision"`, video+audio as uploaded asset_ids, `keep_the_same_format:true`, `fps_mode:"cfr"`
+regenerates the mouth to match the exact audio while keeping the Avatar V look. Don't just re-roll
+the render (Avatar V renders at 25fps; a re-roll rarely fixes soft sync). Before blaming assembly,
+MEASURE: a clip's video vs audio stream duration + start_time — if they match pre/post-encode
+(they will), the sync issue is in the render, not the concat.
 
 **P6 — Assemble + deliver (local ffmpeg, no API).**
 ```bash

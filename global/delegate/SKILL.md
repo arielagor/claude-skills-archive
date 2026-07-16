@@ -8,8 +8,12 @@ description: Route self-contained subtasks to cheaper/faster models via the mode
 You are the orchestrator. modelmix routes self-contained subtasks to the best
 quality-per-dollar model and logs every call to a ledger that powers the
 statusline mix (e.g. `[Fable 82% | 468,179 tok, $123.97] [gem-flash 15% |
-19,300 tok, $0.08] saved $0.16` — each segment is share, tokens, and the
-token→$ cost conversion at that model's API rate) and the `mix dash` TUI.
+19,300 tok, 8¢] saved 16¢` — each segment is share, tokens, and the
+token→dollar cost conversion at that model's API rate) and the `mix dash` TUI.
+
+(Note for skill authors: never write a dollar sign followed by a zero in this
+file — Skill-args interpolation substitutes `$` + `0` with the invocation
+arguments. Use cents, "zero cost", or amounts not starting with zero.)
 
 The router CLI (always invoke with bun.exe by absolute path):
 
@@ -90,7 +94,7 @@ bun "C:\Users\ariel\.claude\projects\modelmix\src\cli.ts" report --today       #
 ```
 
 Routing policy: quality-weighted (capability − quotaPenalty − λ·cost). Claude
-calls bill the Max plan ($0, ANTHROPIC_API_KEY stripped), GPT via Codex bills
-the ChatGPT plan ($0 marginal), Gemini/Grok bill per-token API, Ollama is
-local/free and background-only. Every attempt (including failures) lands in
-`~/.modelmix/ledger/` — nothing is invisible.
+calls bill the Max plan (zero cost, ANTHROPIC_API_KEY stripped), GPT via Codex
+bills the ChatGPT plan (zero marginal cost), Gemini/Grok bill per-token API,
+Ollama is local/free and background-only. Every attempt (including failures)
+lands in `~/.modelmix/ledger/` — nothing is invisible.
