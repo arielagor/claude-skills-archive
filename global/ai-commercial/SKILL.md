@@ -91,7 +91,19 @@ renders both aspects). Reframe dialogue shots to the vertical via the assembler'
 [ {"id":"ray-02","voice":"sal","text":"I'll call you right back, I promise."},
   {"id":"maya-03","voice":"ara","text":"Rough morning, Ray?"} ]
 ```
-xAI voices: `leo eve ara rex sal` — pick one per character and keep it fixed.
+**Ariel's own voice = his xAI custom clones.** Default to **`gpp66sriwbgy`** (his stated pick as the
+one that sounds most like him, 2026-07-15). Others: `npoaqvdxjns6`, `anarpdtrfv7i`, `6vufxectrwux`.
+Use these for any founder button or first-person Ariel VO, in preference to the HeyGen voice clones.
+
+**Built-in xAI voices — the voice NAME is the voice_id.** (`leo eve ara rex sal` was a stale subset;
+the real list is 26.) Male: `Altair` elegant/premium · `Atlas` commanding · `Castor` easygoing ·
+`Cosmo` bright/curious · `Helios` upbeat/versatile · `Helix` bold/adrenaline · `Kepler` inventive ·
+`Leo` authoritative · `Lumen` warm/articulate · `Lux` grounded/quietly wise · `Naksh` warm/wise ·
+`Orion` rich/cinematic · `Perseus` trustworthy · `Rex` confident/clear · `Rigel` precise/professional ·
+`Sal` smooth/balanced · `Sirius` quick-witted/playful · `Zagan` dramatic · `Zenith` sharp/driven.
+Female: `Ara` warm/friendly · `Carina` soft/soothing · `Celeste` compassionate · `Eve` energetic ·
+`Iris` friendly/charming · `Luna` gentle/nurturing · `Ursa` warm/steadfast.
+Pick one per character and keep it fixed. Full table + usage: `scripts/gen_tts.py` docstring.
 
 ### edl.json (the edit decision list)
 ```json
@@ -125,8 +137,14 @@ For 9:16: copy the EDL, set `w:1080,h:1920`, keep the same seq — the card rend
   - **Avatar V twin (the real trained Ariel): `avatar_id` `b636f6a57ba14b039aa4e10d1928cb6f`**
     ("Ariel", `/avatar/v3/` preview, half-body, trained in a **wine-cellar/restaurant set** — plan
     the background, it ships with the avatar).
-  - **Voice clones:** `80c4f65d357140a5a6adda04c9a7e189` ("Ariel Voice Clone 2026_06_25", newer) and
-    `8404d63d254a4c48afe11d00e2e14025` ("Ariel", older, is the `default_voice_id` on the group).
+  - **Voice: use his xAI clones, NOT the HeyGen ones** (his instruction, 2026-07-15). Default
+    **`gpp66sriwbgy`**. Generate the line with `gen_tts.py`, upload the mp3 as an audio asset, and
+    drive the Avatar V twin from that `audio_asset_id` — same pattern as the Avatar IV path, so his
+    real face is driven by his preferred voice. The HeyGen clones
+    (`80c4f65d357140a5a6adda04c9a7e189` "Ariel Voice Clone 2026_06_25",
+    `8404d63d254a4c48afe11d00e2e14025` "Ariel", the group's `default_voice_id`) still exist and
+    still work, but are no longer the default — do not reach for them just because the avatar group
+    points at one.
   - **TRAP — the "Ariel" avatar group `111c9cd2c912466e9bb23392588da409` is MIXED.** 7 of its 8
     entries are `talking_photo` looks with `business_type:"generated"` (AI-invented faces: "Man in
     blue blazer", "Bearded man in tan blazer", "Ariel behind a studio microphone"). Those are
