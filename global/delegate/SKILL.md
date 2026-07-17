@@ -80,7 +80,29 @@ bun "C:\Users\ariel\.claude\projects\modelmix\src\cli.ts" run \
    calls with `run_in_background: true`, then collect results as they finish.
    The dashboard groups them live under the parent task.
 
-4. **Integrate and verify yourself.** The cheap models have a real quality
+4. **Cache-aware fan-out (saves real money on shared context).** Gemini, xAI,
+   and OpenAI cache prompt PREFIXES automatically and bill cached tokens at
+   25-50% of the input rate — and the router routes follow-ups with a
+   recently-seen prefix back to the same model so the cache actually hits.
+   To exploit this when N subtasks share a large common context (same
+   document, N questions):
+   - **Shared context FIRST, per-item question LAST** in every subtask
+     prompt, byte-identical across subtasks (build one context block, append
+     each question after it). Question-first ordering never caches.
+   - **Send the first subtask alone, then fan out the rest** — a cache entry
+     only becomes readable once the first response starts, so N simultaneous
+     identical prefixes all pay cold price.
+   - **Keep the burst within ~5 minutes** (the conservative cache window the
+     router assumes) and use the same `--type` so the same model keeps winning.
+   - Below ~4,000 characters of shared context none of this matters —
+     provider caches have ~1,024-token minimums; just fan out freely.
+   - Honesty note: provider-side caching is BEST-EFFORT (especially Gemini's
+     implicit cache near its minimum). The router biases toward the possible
+     saving at zero downside; the ledger bills cached tokens only when the
+     provider actually reports them. Check `mix report` (cache% column) to
+     see what actually hit.
+
+5. **Integrate and verify yourself.** The cheap models have a real quality
    floor. Read every delegated output before using it; redo anything weak
    yourself (that's still a net win — you spent zero context on the drafts).
 
