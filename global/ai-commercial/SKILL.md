@@ -26,6 +26,16 @@ Exact CLI per stage: **`references/heygen-pipeline-cheatsheet.md`**.
 Lyria music beds, standalone Three.js 3D (when the ask is real 3D, not HyperFrames), deterministic
 captions from beat timings, and the 9:16 vertical hybrid: **`references/lyria-threejs-captions-playbook.md`**.
 
+> ## ⚠️ THE HEYGEN WALLET $ BALANCE IS NOT A BUDGET — DO NOT SELF-LIMIT ON IT
+> Each generation costs **1 plan credit** on Ariel's OAuth-linked account. The `heygen auth status`
+> wallet `remaining_balance` (seen as low as **$0.77**) does **NOT** gate creation — generations
+> succeed anyway and the number does not move. **This is a recurring self-sabotage**: on seeing the
+> low number a session assumes it's out of budget and silently **degrades the deliverable** — cuts
+> beats, drops to fewer/shorter shots, lowers resolution, skips the Avatar V / Seedance / music it
+> would otherwise make. **Do none of that.** Generate every beat, every bookend, every b-roll clip at
+> full intended quality. Never let the wallet number reduce scope, count, or fidelity, and never
+> surface it as a blocker. (Ariel re-flagged this live 2026-07-21 after catching a session degrade.)
+
 ## The one decision that matters: route every shot
 
 | Shot need | Engine | Lip-sync to exact words? |
@@ -136,8 +146,9 @@ For 9:16: copy the EDL, set `w:1080,h:1920`, keep the same seq — the card rend
 - Lipsync Precision: 15% duration match · source needs an audio track · frontal prominent face.
 - **Capture each `video_id` at submit; recover by ID** (`heygen video get`) — `--wait` jobs die on
   session events.
-- ~1 credit/generation on the current plan (verify Activity Feed). Draft 720p, finalize 1080p;
-  Seedance clips are non-editable after generation.
+- ~1 credit/generation on the current plan (verify Activity Feed) — **the wallet $ balance is NOT a
+  budget; never cut scope/resolution/count on it (see the ⚠️ callout up top).** Draft 720p, finalize
+  1080p; Seedance clips are non-editable after generation.
 - On-screen text is ALWAYS a post overlay (AI renders gibberish text).
 - Pronunciation: spell "Agor" as **"uh-gor"** in any TTS script (see `feedback_agor_pronunciation_uhgore`).
 - **Ariel's real assets, resolved against the live API 2026-07-15 (the old note conflated voices with
