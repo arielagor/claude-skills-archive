@@ -107,13 +107,13 @@ Based on the routing decision, execute using the appropriate method below.
 **Auth**: `x-goog-api-key` header or `?key=` query param
 **Env var**: `GOOGLE_AI_API_KEY`
 **Get key**: https://aistudio.google.com/apikey
-**Models**: `gemini-2.5-flash` (fast/cheap), `gemini-2.5-pro` (best quality)
+**Models**: `gemini-3.6-flash` (balanced text, GA default), `gemini-3.5-flash-lite` (fastest/cheapest, high-throughput), `gemini-3.1-pro-preview` (best quality). Native image generation uses an image model — `gemini-3.1-flash-image-preview` (see below), not a text model.
 
 #### Text Generation
 
 ```bash
 curl -s -X POST \
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$GOOGLE_AI_API_KEY" \
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=$GOOGLE_AI_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [{"parts": [{"text": "YOUR_PROMPT_HERE"}]}]
@@ -126,7 +126,7 @@ Parse response: `.candidates[0].content.parts[0].text`
 
 ```bash
 curl -s -X POST \
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$GOOGLE_AI_API_KEY" \
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=$GOOGLE_AI_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [{"parts": [{"text": "Generate an image: YOUR_IMAGE_PROMPT"}]}],
@@ -163,7 +163,7 @@ To send an image for analysis, include it as base64 in the request:
 IMAGE_B64=$(base64 -w0 input.png)  # Linux
 # IMAGE_B64=$(base64 -i input.png)  # macOS
 curl -s -X POST \
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$GOOGLE_AI_API_KEY" \
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=$GOOGLE_AI_API_KEY" \
   -H "Content-Type: application/json" \
   -d "{
     \"contents\": [{\"parts\": [

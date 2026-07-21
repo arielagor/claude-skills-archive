@@ -23,6 +23,8 @@ engine* and *engineering continuity*, not in post. This skill is the codified, v
 **A commercial is 90% decided before a frame is generated.** Do P0 pre-pro and get it approved
 before spending any generation. Full craft reference: **`references/agency-guide.md`** (14 sections).
 Exact CLI per stage: **`references/heygen-pipeline-cheatsheet.md`**.
+Lyria music beds, standalone Three.js 3D (when the ask is real 3D, not HyperFrames), deterministic
+captions from beat timings, and the 9:16 vertical hybrid: **`references/lyria-threejs-captions-playbook.md`**.
 
 ## The one decision that matters: route every shot
 
