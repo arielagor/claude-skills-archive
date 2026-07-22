@@ -15,6 +15,12 @@ description: |
 # AI Commercial — the hybrid dialogue-ad pipeline
 
 > See also: `seedance-narrated-short` is the narrated, no-lip-sync, long-form counterpart (a novel or essay adapted into a cinematic short with a narrator OVER the footage instead of speaking characters). Use that when nobody needs to lip-sync exact words.
+>
+> **Run this build under `video-canvas-method`.** That skill owns the production-management layer
+> (canvas-as-repo, asset cards, six approval gates) and does not touch any craft rule below. Its one
+> hard addition: **G3, the keyframe gate. Every shot gets an approved STILL before any motion is
+> generated.** A wrong face, wardrobe, palette, 180 side or text artifact is visible in a still and
+> costs a fraction to fix there.
 
 The two things that make an AI spot look amateur — **mouths that don't say the words** and
 **characters/worlds that drift shot-to-shot** — are solved by *routing each shot to the right
@@ -50,6 +56,12 @@ shot, one voice per character drives the face; on a wide CINEMATIC shot, use VO 
 lip-sync). Don't use Video Agent for a directed multi-shot spot (it steals editorial control).
 
 ## Workflow (P0 → P6)
+
+> **Gate mapping to `video-canvas-method`:** P0 covers G0/G1/G2 (brief, story, style card, asset
+> cards). **G3 sits between P0 and P3/P4**: generate a keyframe still per storyboard shot, tile them
+> with `video-canvas-method/scripts/sheet.py keys`, approve, and only then generate motion. Carry the
+> approved still into the Seedance call as a `references` image alongside the element refs. P4's
+> Pass-0-by-eye is NOT replaced by this: a still cannot show time-pressure.
 
 **P0 — Pre-pro (no API, must be approved first).** Brief → **SMP** (one insight-driven sentence) →
 **Big Idea** → two-column A/V script (~2.5 words/sec; a :60 ≈ 150 spoken words max) → storyboard

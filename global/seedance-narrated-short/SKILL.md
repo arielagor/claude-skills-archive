@@ -57,6 +57,14 @@ finished film**, voice-free ≥ 55–60%. Silence is scored, never empty.
 
 ---
 
+> **Run this build under `video-canvas-method`** (production management: canvas-as-repo, asset cards,
+> six approval gates). It changes no craft rule here. Gate mapping: P0/P1 = G0/G1, **P2 = G2** (the
+> per-character look cards are exactly what closes G2, which makes GOTCHA-1 structurally impossible),
+> **G3 sits between P2 and P3**: a keyframe still per beat, tiled with
+> `video-canvas-method/scripts/sheet.py keys`, approved before `generate.mjs` spends a credit. P4
+> Pass 0 stays exactly as written and is NOT replaced: stills cannot show time-pressure, and that is
+> the variable P4 exists to judge.
+
 ## The pipeline (P0 → P10)
 
 **P0 — The source text.** If adapting, you need real prose, not a synopsis. If only a synopsis exists,

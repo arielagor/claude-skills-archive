@@ -16,6 +16,11 @@ date: 2026-06-01
 
 # HyperFrames long-form video — the HYBRID pattern
 
+> **Run the build under `video-canvas-method`** for the production-management layer (canvas-as-repo,
+> asset cards, six approval gates). Relevant here: G3, approve a still per graphic/scene before
+> rendering it, and `video-canvas-method/scripts/sheet.py` for the low-res verification pass that
+> catches drift, empty tails and mirrored textures before you spend a full 1080p render.
+
 ## Problem
 HeyGen HyperFrames renders video by seeking headless Chrome frame-by-frame. It is built for SHORT
 clips. A 9-minute multi-video composition fights it hard: timeouts, ~9-hour renders, black panels,
