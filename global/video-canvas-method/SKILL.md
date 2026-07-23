@@ -94,7 +94,8 @@ prompt:   |
 
 ## Running G3 on our stack
 
-Nothing new gets bought. Everything below already exists here.
+No new service gets signed up for. Every engine below is on a key we already hold, though not all of
+them are free at the margin: see the routing table for which ones spend real dollars per second.
 
 1. **Generate the keyframe.** `scripts/keyframe.mjs`, one still per shot, style card pasted in
    verbatim via `--style` and the character/environment cards attached via `--ref`.
