@@ -9,7 +9,10 @@ description: >-
   storyboard. Sits under `ai-commercial` (dialogue ads), `seedance-narrated-short` (narrated film),
   and `hyperframes-*` (motion graphics) and does not replace any of them: they own CRAFT, this owns
   WHEN WORK GETS APPROVED and WHAT GETS WRITTEN DOWN. Ported from TopView AI Canvas methodology
-  (2026-07-22), verified against our own HeyGen + Seedance + xAI-TTS + ffmpeg stack.
+  (2026-07-22) and run entirely on keys we already pay for: keyframes via gemini-3.1-flash-image or
+  gpt-image-2, motion via HeyGen Seedance (1 credit, the default) or Veo 3.1 when a shot must start
+  and end on exact approved frames. Also use when asked whether we can lock a first/last frame, or
+  what a video build will cost.
 ---
 
 # The Canvas Method
@@ -249,9 +252,21 @@ native audio stream. The approved still is no longer a hint the model may ignore
 Reference-only vendored copy of the official client, with its local guard:
 `~/.claude/skills/topview-skill/` (see its `LOCAL-POLICY.md`; do not authenticate it, do not run it).
 
+## Scripts
+
+| Script | Does | Costs |
+|---|---|---|
+| `scripts/keyframe.mjs` | G3 stills. `--model gemini` (default) or `gpt-image-2`, `--ref`, `--style` | ~$0.067/img |
+| `scripts/sheet.py` | labelled contact sheet for the G3 and G4 reviews | free |
+| `scripts/animate.mjs` | G3 to G4 via Veo 3.1 with `--first` / `--last`; `--op` resumes a job | $0.05-0.60/s |
+
+All three are dependency-free (node built-ins / Pillow) and read their keys from
+`~/.claude/settings.json`. `animate.mjs --dry` prints the request and the price without submitting.
+
 ## Companions
 
 `ai-commercial` (dialogue ads, the P0 to P6 pipeline) · `seedance-narrated-short` (narrated film,
 P0 to P10, FILM-CRAFT doctrine) · `hyperframes-longform-video` (HTML motion graphics) ·
-`heygen` (single talking head) · `media-use` (assets and licensing) · `image-generator` (keyframes) ·
+`heygen` (single talking head) · `media-use` (assets and licensing) · `image-generator` (keyframes
+when you want the agent's style direction rather than a raw call) ·
 `crossfamily-council` (judge the output, jury excludes the producing family).
