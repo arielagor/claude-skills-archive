@@ -93,18 +93,49 @@ prompt:   |
 
 Nothing new gets bought. Everything below already exists here.
 
-1. **Generate the keyframe** with the `image-generator` agent (latest Gemini Flash image model), one
-   still per shot, with the style card pasted in verbatim and the character reference still attached.
+1. **Generate the keyframe.** `scripts/keyframe.mjs`, one still per shot, style card pasted in
+   verbatim via `--style` and the character/environment cards attached via `--ref`.
+   ```bash
+   node scripts/keyframe.mjs "wide, the empty booth, rain on the glass" \
+     --style canvas/assets/style.card.md --ref canvas/assets/env-diner.png \
+     --out canvas/scenes/03-diner.key.png
+   ```
+   Defaults to `gemini-3.1-flash-image` (about $0.067). Pass `--model gpt-image-2` when the frame
+   carries text you need to read in order to approve it. Building shot N+1's keyframe with shot N's
+   as a `--ref` is how the palette and set stay put; it is also how you get a matched pair for step 4.
 2. **Contact sheet before spend.** Tile the stills with labels into `SHEET-keys.png` and Read it.
    Judging twelve stills in one image is the cheapest QC in the whole pipeline. `scripts/sheet.py`
    does this (it generalizes the felt-time 2x2 verification pass).
 3. **Approve or locally edit.** A failing still gets re-prompted on its own. The others are untouched
    and their approval still stands.
-4. **Carry the approved still into motion.** HeyGen `cinematic_avatar` accepts no first-frame or
-   last-frame parameter (a real limitation, see "What we do not have" below), but it does accept
-   `references` at up to 9 images. The approved keyframe goes in as a reference alongside the 3 or
-   fewer element refs, with "preserve composition and colors" in the prompt as usual.
+4. **Carry the approved still into motion, by the route the shot deserves** (table below).
 5. **Only now generate.** Then `SHEET-motion.png` (first, middle, last frame of each clip) for G4.
+
+### Engine routing at G4
+
+The engine choice is a cost decision, and the two costs are not the same kind of thing. Read the
+warning at the top of `ai-commercial/SKILL.md` before this table: HeyGen is 1 plan credit per
+generation and its wallet dollar figure gates nothing, so **HeyGen is never the thing to economize
+on.** Veo is metered in real dollars against `GEMINI_API_KEY`, so it is a deliberate purchase.
+
+| The shot needs | Engine | Cost | How the keyframe is used |
+|---|---|---|---|
+| A character to SPEAK exact words | Avatar IV / V | 1 credit | keyframe informs the look; VO drives the mouth |
+| Ordinary cinematic motion, identity from an avatar | HeyGen Seedance `cinematic_avatar` | 1 credit | keyframe passed in `references` (<=9) + "preserve composition and colors" |
+| **To start AND end on exact approved frames** | **Veo 3.1** | **$0.10/s at fast 720p** | **`--first` and `--last`, literal** |
+| A hard continuity seam between two shots | Veo 3.1 | as above | shot N's last still is shot N+1's `--first` |
+
+**Default to HeyGen.** Reach for Veo when a specific seam or a specific composition is worth paying
+for: the shot that has to land on the end-card framing, the one join where a cut would expose drift,
+the hero shot. A whole film routed through Veo at 8s a clip is a real invoice, and it does not
+inherit our avatar identity system.
+
+```bash
+node scripts/animate.mjs "slow push-in, the lamp flickers once, nothing else moves" \
+  --first canvas/scenes/03-diner.key.png --last canvas/scenes/04-cup.key.png \
+  --out canvas/scenes/03-diner.mp4 --model fast --duration 8
+```
+`--duration 8` is not a preference. `--last` is rejected at 4s and 6s.
 
 **Continuity chaining still applies.** Compose each keyframe so that it ends where the next shot's
 keyframe begins. That instruction is now checkable at G3 by looking at two stills side by side,
@@ -155,6 +186,11 @@ away any of these:
   its methodology carries a cost-estimation habit. Do not import that habit. Never cut scope,
   resolution, shot count or fidelity because of a wallet number.
 
+  The Veo and OpenAI routes are the one real exception, and keeping the two straight is the whole
+  point: **HeyGen credits are not money and Veo seconds are.** Never ration HeyGen. Do choose Veo
+  shot by shot. If a piece is being quietly shrunk, the cause is almost always someone misreading the
+  HeyGen wallet, which has happened repeatedly.
+
 ## What we deliberately reject from TopView's method
 
 - **Agent-proposed scene sequence.** Their agent drafts the shot order and you approve it. That is
@@ -165,23 +201,50 @@ away any of these:
 - **No pacing doctrine.** Canvas has no equivalent of the time-pressure rule or a CV target. It will
   approve a beautiful, uniform, unwatchable slideshow. Our rhythm rules outrank their workflow.
 
-## What we do not have (recorded honestly)
+## What we already had and were not using (verified 2026-07-22)
 
-TopView's API exposes controls our current stack lacks. We are not using it (Ariel's decision,
-2026-07-22, no spend), and these are the specific reasons that decision is worth revisiting later:
+An earlier draft of this file listed first-frame/last-frame control as a capability our stack lacks.
+That was wrong, and the error mattered: it is a **HeyGen** limitation, not a stack limitation. The
+keys in `~/.claude/settings.json` already reach every engine below. Nothing new was bought.
 
-- **First-frame and last-frame image-to-video.** HeyGen `cinematic_avatar` has neither. A large part
-  of our continuity engineering exists to work around that absence.
-- **Omni Reference tag syntax** (`<<<Image1>>>`, `<<<Video1>>>` inside the prompt) for explicit
-  style-from-here, motion-from-there control.
-- **Seedance 2.5** is marketed at 30s single pass, 4K, 50 multimodal references, identity consistent
-  from first frame to last. **Unverified and probably not reachable**: as of 2026-07-22 TopView's own
-  API docs list Seedance 1.5 pro at 12s with reference caps of 3 to 9 images, and the official skill's
-  model table tops out at 15s "Seedance 2.0-level" Standard/Fast. If a real 30s single-pass clip
-  becomes reachable, it collapses the 15s ceiling that our dissolve-chain workaround exists to defeat,
-  and that is worth re-opening the decision for.
-- **GPT Image 2** claims crisp, correctly-spelled on-screen text at 4K. If true it would bear on our
-  text-is-always-a-post-overlay rule. Untested by us. **The rule stands.**
+| TopView Canvas uses | We already have | On which key | Verified |
+|---|---|---|---|
+| GPT-Image-2 for storyboard frames | `gpt-image-2` (also `gpt-image-1.5`, `chatgpt-image-latest`) | `OPENAI_API_KEY` | models list |
+| Seedance for motion | HeyGen `cinematic_avatar` | `HEYGEN_API_KEY` | in production |
+| first frame + last frame i2v | **`veo-3.1-*-generate-preview`** | `GEMINI_API_KEY` | **generated a clip, confirmed below** |
+| (none) | `sora-2`, `sora-2-pro` | `OPENAI_API_KEY` | models list, untried |
+| music | `lyria-3-clip-preview`, `lyria-3-pro-preview` | `GEMINI_API_KEY` | models list + docs |
+
+### The Veo 3.1 result, in full
+
+A push-in on a diner booth: two keyframes generated with `keyframe.mjs` (the second built from the
+first as a reference, so the palette and set match), then `animate.mjs` with both attached. The
+output's **first frame is keyframe 1 and its last frame is keyframe 2**, 8s, 1280x720, 24fps, with a
+native audio stream. The approved still is no longer a hint the model may ignore. It is the frame.
+
+**Verified constraints, learned by probing (failed submits cost nothing):**
+- `lastFrame` **requires `durationSeconds: 8`**. At 4s or 6s the API returns
+  `400 INVALID_ARGUMENT "Your use case is currently not supported"` on both `fast` and `full`. The
+  message names nothing, so this is worth remembering rather than rediscovering.
+- Durations are 4, 6, or 8 only. 8 is also required for 1080p, 4k, reference images, and extension.
+- Veo 3.1 has **no seed**. Aspect is 16:9 or 9:16 only.
+- Cost is per second of output: `full` $0.40 (720p/1080p) / $0.60 (4k) · `fast` $0.10 / $0.12 / $0.30
+  · `lite` $0.05 / $0.08. The verification clip above cost about $0.80.
+
+### Still genuinely missing
+
+- **Omni Reference tag syntax** (`<<<Image1>>>`, `<<<Video1>>>` inside one prompt) for explicit
+  style-from-here, motion-from-there control. No engine we hold exposes this. Approximate it by
+  passing separate reference stills and saying which controls what in prose.
+- **Seedance 2.5 at its marketed tier** (30s single pass, 4K, 50 multimodal references, identity
+  consistent first frame to last). Not reachable from TopView's public API either: as of 2026-07-22
+  their docs top out at Seedance 1.5 pro / 12s with reference caps of 3 to 9. Our 15s ceiling and the
+  dissolve-chain workaround both stand. Veo 3.1's extension (+7s, up to 20 times, 720p only) is the
+  nearest thing we hold, and it is not the same thing.
+- **GPT Image 2's crisp-text claim** is now testable rather than theoretical, since the model is on
+  the OpenAI key. Still untested. **The text-is-always-a-post-overlay rule stands** until someone
+  tests it, and it will keep standing for final deliverables regardless: the reason to render text
+  into a keyframe is to make the approval artifact legible, not to ship it.
 
 Reference-only vendored copy of the official client, with its local guard:
 `~/.claude/skills/topview-skill/` (see its `LOCAL-POLICY.md`; do not authenticate it, do not run it).
