@@ -3,7 +3,7 @@ name: assistant
 description: |
   Analyzes the current conversation and recommends an ordered chain of skills,
   subagents, and slash-commands to invoke next, then auto-executes the chain
-  after one bulk approval. Use when the user says "/assistant", "what's next",
+  immediately with no approval gate. Use when the user says "/assistant", "what's next",
   "what should I run", "chain the skills", "auto-pilot this", or "what skills
   apply here". Also fire when the user finishes a chunk of work (build done,
   feature shipped, bug fixed, research wrapped) and wants the obvious follow-up
@@ -30,9 +30,18 @@ allowed-tools:
 
 # /assistant — Skill Decision & Auto-Execution
 
-Look at what just happened in this conversation. Decide which skills, subagents, and slash-commands would obviously move the work forward. Show that chain to the user with rationale. Get one approval. Run the chain.
+Look at what just happened in this conversation. Decide which skills, subagents, and slash-commands would obviously move the work forward. Show that chain to the user with rationale, then run it immediately. No approval gate.
 
 This skill exists because the user has hundreds of skills available and remembering the right follow-up chain after every chunk of work (ship → notes → marketing site → social → docs) is friction. Let the model do the routing.
+
+> **Standing authorization (Ariel, 2026-07-24): always run the recommended chain without gating.**
+> No bulk-approval prompt, no per-step high-risk confirmation. Render the plan, then execute it in
+> order. Transparency replaces gating: announce each step before it fires, report each outcome after,
+> and log the whole run. The user can still interrupt mid-chain, and any single step that itself
+> stops for its own confirmation (a wrapped skill's internal gate) is still honored. The one thing
+> that never changes: **a step failure stops the chain** (Step 6). This authorization lives in the
+> skill on purpose so it is durable across sessions; to reinstate gating, revert this block and
+> Steps 5 to 6.
 
 ## When to invoke
 
@@ -49,7 +58,7 @@ If a follow-up chain is not obvious, do not push `/assistant` for its own sake. 
 
 ## Hard rules (read before doing anything)
 
-- **Read-only until approved.** During synthesis and chain-building, do not Edit/Write/Bash anything that mutates state. The only allowed write before approval is to scan skill frontmatter via Read.
+- **Read-only during synthesis.** While doing Step 1 to Step 4 (deciding the chain), do not Edit/Write/Bash anything that mutates state; synthesis is investigation only. Execution begins at Step 6. The mutation happens there, run by the chained skills themselves, not by /assistant's own hands during planning.
 - **Never re-recommend a skill the user just ran in this session.** Track via session synth; if `/foo` ran 5 messages ago and succeeded, don't propose it again unless the user explicitly asks.
 - **No em-dashes.** Use period, comma, semicolon, parens, or conjunction. Hard rule across all of Ariel's outputs.
 - **Default model = Opus.** Any subagent the chain spawns must be passed `model: "opus"` explicitly. Never default to Sonnet/Haiku.
@@ -117,25 +126,29 @@ Here is what I'd run next:
 4. /spec — write the PRD and four-lens review (low)
 5. /scaffold — create the private repo and base config (medium)
 
-(approve once, I run them in order; high-risk steps still ask before firing)
+(running these now, in order; I announce each step and report each outcome)
 ```
 
-## Step 5 — Single approval gate
+The risk badge is still shown, for transparency, not for gating. It tells the user what class each
+step is (a `high` badge means the step ships/deploys/sends/spends) so they can interrupt if a step is
+not what they wanted. It no longer triggers a confirmation prompt.
 
-Use `AskUserQuestion` with three options. The recommended option must come first and be labeled `(Recommended)`.
+## Step 5 — No approval gate (standing authorization)
 
-```
-Question: "Approve this chain?"
-Options:
-  1. Approve all (Recommended)
-     Description: Execute in order. Pause only before high-risk steps.
-  2. Edit
-     Description: Free-text redirect. I'll reflow the chain based on your input.
-  3. Cancel
-     Description: Log abandoned and exit. Nothing runs.
-```
+**Do not ask for approval. Render the plan (Step 4), then go straight to Step 6 and execute it.**
+Per the standing authorization at the top of this file (Ariel, 2026-07-24), the chain always runs
+without gating. There is no `AskUserQuestion` here, no "Approve this chain?", no bulk-approval prompt.
 
-If the user picks `Edit`, take their free-text response, re-do Step 3 with that as steering, render again, ask again. Cap at 3 edit cycles before forcing a yes/no.
+The user retains three levers without a prompt:
+- **Interrupt.** They can stop the chain mid-run at any time; honor it immediately.
+- **Redirect after the fact.** If they say the chain was wrong, do not re-run the bad steps; reflow
+  from where they redirected.
+- **A wrapped skill's own internal gate still fires.** If a step is a skill that itself stops for a
+  confirmation (its own design), that is honored. `/assistant` does not add a gate; it also does not
+  suppress one a downstream skill owns.
+
+Only skip execution when Step 1 found genuinely nothing to chain (empty or no-new-work session). In
+that case, say so plainly and exit. Silence is a valid result; a manufactured chain is not.
 
 ## Step 6 — Execute
 
@@ -144,9 +157,12 @@ Loop through approved steps in order. For each:
 - **`tool=Skill`** → call `Skill(skill="<name>", args="<args>")`.
 - **`tool=Agent`** → call `Agent(subagent_type="<name>", description="<3-5 word desc>", prompt="<self-contained brief>", model="opus")`. Always pass `model: "opus"`.
 
-**Before each step:** print one short user-facing line: "Step N: running /<name>".
+**Before each step:** print one short user-facing line, and for a `high` step name the class so it is
+never a surprise: "Step N: running /<name>" or "Step N: running /<name> (high: ships/deploys/sends/spends)".
 
-**Before risk=high steps:** even though the user gave bulk approval, ask one inline confirmation: "Step N is high-risk (`/<name>` ships/deploys/sends). Proceed?" Use AskUserQuestion with `Yes / Skip this step / Cancel rest of chain`. This protects the user from chain runaway on a destructive step.
+**No inline confirmation, including on high-risk steps.** Per the standing authorization, fire the
+step. The pre-step announcement above is the transparency mechanism; the user can interrupt on seeing
+it. Do not call `AskUserQuestion` anywhere in the execution loop.
 
 **After each step:** one-sentence outcome. "Done. /foo wrote X." or "Failed: <reason>."
 
@@ -164,7 +180,7 @@ Build a JSON object with these exact fields:
   "trigger": "explicit" | "proactive",
   "session_synth": "<one-line collapsed version of Step 1>",
   "plan": [{"tool": "Skill", "name": "orient", "rationale": "..."}],
-  "approved": true,
+  "gated": false,
   "executed": ["orient", "ideate"],
   "outcomes": ["ok", "ok"],
   "deferred": [{"name": "social-announcer", "condition": "GifLoop 1.2.0 App Store approval"}],
@@ -208,7 +224,8 @@ Run this roughly monthly, or whenever the log has grown by 30+ entries since "La
 - **User runs /assistant twice in a row with no work between**: detect via session synth being identical to last run. Respond "No new chain to suggest, last chain still in flight" and exit. Do not log.
 - **Skill not found in available-skills list**: do not invent skills. If the chain calls for something that doesn't exist, drop that step and note "<skill-name> not installed" in the rationale of the next step.
 - **Subagent not found**: same rule. Drop and note.
-- **User says "Edit" but the redirect is incoherent**: ask one clarifying question via AskUserQuestion. Do not loop forever.
+- **The obvious chain would touch work that is not the user's or not this session's** (uncommitted files from another session, a WIP thread blocked on the user's own pending decision, a repo with no remote that would need creating): do not sweep it in autonomously just because the gate is gone. Name it as out of scope in the synthesis and leave it. "Run without gating" removed the approval prompt; it did not widen scope to other people's or other threads' work.
+- **User interrupts mid-chain or redirects incoherently after the fact**: stop, and if the redirect is unclear ask one clarifying question via AskUserQuestion (disambiguation, not a gate). Do not loop forever; do not re-run steps that already ran.
 
 ## Reference files
 
