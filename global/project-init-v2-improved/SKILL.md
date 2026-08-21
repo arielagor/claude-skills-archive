@@ -29,6 +29,7 @@ Once you have enough context:
 3. If a stack was identified, populate the Stack section with real commands and conventions (not placeholders)
 4. Remove any sections that don't apply — a solo script doesn't need PR conventions
 5. Confirm the generated files with the user before writing any project code
+6. Run `prod-gate` (the `production-discipline` plugin) to assign a production tier, apply the unconditional Tier 0 items, and write `docs/decisions/production-deferrals.md` plus a `## Production tier:` stanza in the CLAUDE.md you just created. It infers stack, deploy target, and shape gates from the repo, and it already has the answers to Q4 (testing), Q5 (deployment) and Q6 (CI) from the interview above — pass them rather than letting it re-ask. Skip only if the user declines.
 
 ## Step 3: Task Directory
 
