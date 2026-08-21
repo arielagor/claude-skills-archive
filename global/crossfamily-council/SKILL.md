@@ -30,9 +30,30 @@ the design and forced the project to walk back its own overclaims before shippin
 - **Gemini** needs `GEMINI_API_KEY` (REST generateContent, Gemini-3 thinkingLevel high).
 - **OpenAI** needs `OPENAI_API_KEY` (REST /v1/responses, reasoning effort high).
 - **xAI/Grok** needs `XAI_API_KEY` (REST /v1/responses at api.x.ai — OpenAI-compatible, `grok-4.5` reasoning effort high).
-- Newest SOTA per family by default (`claude-opus-4-8`, `gemini-3.1-pro-preview`, `gpt-5.5`, `grok-4.5`);
+- Newest SOTA per family by default (`opus`, `gemini-3.1-pro-preview`, `gpt-5.5`, `grok-4.5`);
   override with `TELOS_CLAUDE_MODEL` / `TELOS_GEMINI_MODEL` / `TELOS_OPENAI_MODEL` / `TELOS_XAI_MODEL`. It degrades
   gracefully: with one family available it is a single reasoner; with four it is a real panel.
+  **Claude is the `opus` ALIAS, not a pinned id** - Claude Code resolves it to the newest Opus at
+  call time, so this line cannot go stale the way the previous hardcoded version pin did.
+
+### Silent-degradation guards (added 2026-08-21 after two runs quietly lost half the panel)
+
+A degraded panel still returns a confident-looking answer, so these failures cost you
+cross-family coverage without ever announcing themselves. Both are now fixed at the default:
+
+- **`TELOS_TIMEOUT` defaults to 900s** (was 240). `claude -p` at high reasoning effort with a
+  large `--context` routinely exceeded 240s, so Claude timed out on EVERY run carrying a real
+  document and the panel silently dropped to three families.
+- **`TELOS_MAX_OUTPUT_TOKENS` defaults to 32768** (was a hardcoded 8192). Reasoning models bill
+  hidden reasoning against `max_output_tokens`; at `effort=high` the budget was consumed before
+  any visible text, so the call returned HTTP 200 with an empty body and reported the bare word
+  `empty`, which reads like broken wiring. It now retries once at double the cap and, if still
+  empty, reports `status`, `incomplete_reason` and `reasoning_tokens` so the cause is legible.
+- `TELOS_REASONING_EFFORT` (default `high`) lowers effort if you would rather spend the budget
+  on output than on reasoning.
+
+**Always check `families_used` in the output.** Fewer than four means the panel degraded, and a
+two-family panel is not the cross-provider check this skill exists to provide.
 
 ## How to run
 
