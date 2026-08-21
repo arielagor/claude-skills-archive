@@ -47,7 +47,8 @@ This skill exists because the user has hundreds of skills available and remember
 
 **Explicit triggers** — user says any of: `/assistant`, "what should I run", "what's next", "chain the skills", "auto-pilot this", "what skills apply here".
 
-**Proactive triggers** — at the end of any of these natural boundaries, suggest running `/assistant` if 2+ follow-up skills are obvious:
+**Proactive triggers** — at the end of any of these natural boundaries, suggest running `/assistant` if 2+ follow-up skills are obvious.
+(**Log them honestly:** see the `trigger` values in Step 7. A boundary suggestion the user then accepts is `"suggested"`, NOT `"proactive"`.)
 - A build, deploy, or release just finished.
 - A feature was just merged.
 - A bug investigation just wrapped.
@@ -188,7 +189,20 @@ Build a JSON object with these exact fields:
 }
 ```
 
-`trigger` is `"explicit"` when the user invoked /assistant or a trigger phrase themselves, `"proactive"` when Claude suggested it at a workflow boundary. `deferred` is `[]` when nothing was deferred.
+`trigger` records WHO started the run. Three values, and the distinction matters because the
+previous two-value scheme was unobservable:
+
+- `"explicit"` — the user typed `/assistant` or a trigger phrase themselves.
+- `"suggested"` — Claude proposed running it at a workflow boundary and the user then invoked it.
+- `"proactive"` — Claude invoked the Skill tool ITSELF, with no user turn in between.
+
+**Why this changed (2026-08-20 tune):** across 188 logged runs the split was `explicit: 134,
+proactive: 0`. Not a single proactive run, ever. The reason is structural, not behavioral: this
+skill only executes when invoked, so if Claude suggests it and the user accepts, the user typed it
+and the run correctly logged `"explicit"`. Under the old two-value scheme `"proactive"` could only
+be reached by Claude self-invoking, which nothing instructed it to do. The `"suggested"` value makes
+the boundary-suggestion path observable, so a future tune can actually measure whether proactive
+suggestion is working instead of reading a permanent zero. `deferred` is `[]` when nothing was deferred.
 
 Append it as one JSONL line via `scripts\log-recommendation.ps1`. Write the JSON to a temp file first; do not pipe it through shell quoting (embedded quotes in session_synth break `echo '<json>'`):
 
@@ -210,9 +224,14 @@ The log exists so the heuristics can learn from reality. When invoked as `/assis
 2. Surface, with counts:
    - Chains observed 3+ times that are not in `references/chain-heuristics.md`.
    - Steps repeatedly skipped or deferred by the user (candidates for demotion or removal from a canonical chain).
-   - Steps recommended 3+ times but never approved (the heuristic is miscalibrated; stop proposing them).
+   - Steps recommended 3+ times but never approved. **Dead metric since gating was removed
+     (2026-07-24): every recommendation now executes, so this is structurally always zero.** Read
+     chain SHAPE and the `outcomes` strings instead; that is where real failures surface.
    - Recommended skills that no longer exist in the available-skills list (heuristics referencing deleted skills).
-   - Explicit vs proactive trigger split, and whether proactive runs get approved at a materially lower rate.
+   - Trigger split across `explicit` / `suggested` / `proactive`. Baseline at the 2026-08-20 tune:
+     134 explicit, 0 proactive, `suggested` did not yet exist. If `suggested` is still 0 several
+     tunes from now, Claude is not actually offering `/assistant` at workflow boundaries and that
+     section of this file should be cut rather than left as decoration.
 3. Propose concrete edits to `chain-heuristics.md` and `risky-skills.md` as a diff-style summary.
 4. After ONE approval, apply the edits and update the "Last tuned" line in chain-heuristics.md with the date and run count.
 
