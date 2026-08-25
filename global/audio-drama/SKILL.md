@@ -145,6 +145,29 @@ check would have been dead code if the cut had landed in silence.
 - `-t` truncates but never EXTENDS. Pad the voice stem with `apad` so all stems match the
   timeline, or the sidechain key dies early.
 
+### 7b. A fourth trap: `alimiter` auto-levels by default
+
+**Always `alimiter=limit=X:level=disabled`.** Its `level` option defaults to `true`, which is auto
+level: it applies gain so the output peak REACHES the limit. It is a normaliser with a ceiling,
+not a ceiling.
+
+That silently undoes the measurement discipline in section 6 above. In a 2026-08-24 build the
+final trim came out at **-0.20 dB where it should have been +3.00 dB** — the limiter was doing the
+levelling and every carefully measured stem gain upstream was decorative. It also pins each
+master's peak exactly at the ceiling, so lossy-encode overshoot (0.5-1.2 dB, worst on short bright
+transients) pushes true peak over a -1.0 dBTP gate. 19 of 40 files failed for that reason alone.
+
+Consequences worth internalising:
+
+- **The ceiling is the lever for peaks, not the trim.** With `level=disabled` the limiter clamps at
+  the ceiling regardless of what is fed in, so backing off an upstream gain lowers loudness without
+  lowering the peak at all.
+- Set the sample ceiling BELOW the true-peak target, or better: encode, measure the encoded file's
+  true peak, lower the ceiling by the measured excess, re-encode.
+- ⚠ `~/.claude/projects/the-unfurling/mixdown.mjs:91` and `script/cast.mjs:25,32` still omit the
+  flag. That master measured fine (-16.3 LUFS / TP -1.4), so the effect there was evidently small
+  and I did not chase why; set the flag anyway rather than rely on it.
+
 ## Score and foley
 
 **Score: Google Lyria 3** (`lyria-3-pro-preview`) via the Gemini Interactions API. Query

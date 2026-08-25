@@ -74,6 +74,53 @@ claude -p "Run exactly this once and report verbatim allow/deny: printf x >> \$H
 - Add env-exfil heuristics (ASK on full-env dumps piped/redirected, or commands naming >=3 secret env vars alongside a network binary) if the machine holds secrets in `settings.json env{}`.
 - The deeper principle this instantiates: bake findings in as the lowest-altitude structural mechanism and prove with a fired event, not a doc. See memory `feedback_bake_lessons_in_as_enforcement_not_principles`.
 
+## Event contracts beyond PreToolUse (verified 2026-08-23)
+
+This skill originally assumed PreToolUse. Building `resume-context` / `/goal` / `pivot-tripwire`
+surfaced five facts that each decide whether a hook fires at all.
+
+1. **Hooks load IMMEDIATELY on `settings.json` write, not at session start.** A hook you just wired
+   is armed for the CURRENT session and can block your own next command. Test the deny path with
+   something harmless.
+2. **`UserPromptSubmit` delivers the prompt as `user_prompt`, NOT `prompt`.** Reading `.prompt`
+   yields undefined, the regex never matches, and the hook is silently dead while exiting 0. Read
+   `user_prompt ?? user_prompt_raw ?? prompt`.
+3. **Exit 2 on `UserPromptSubmit` ERASES the prompt.** Always exit 0 there. For
+   `UserPromptSubmit` / `UserPromptExpansion` / `SessionStart`, plain stdout IS the context
+   injection; prefer plain text over JSON, since it still lands if the schema drifts.
+4. **`Stop` blocks via `{"hookSpecificOutput":{"hookEventName":"Stop","decision":"block","reason":...}}`.**
+   `stop_hook_active` is too weak a brake for a long objective: the documented pattern (exit 0 when
+   true) yields exactly ONE continuation. Use a persisted iteration counter plus a wall-clock
+   deadline, and fail OPEN when state is unreadable.
+5. **Multi-hook `PreToolUse` precedence is UNDOCUMENTED.** The docs say matching hooks "run in
+   parallel" and never define allow-vs-deny. **Never ship a hook returning a broad `allow`**: if a
+   peer gate matches `Write|Edit|Bash` (i.e. everything), a broad `allow` may silently disarm it.
+   A deny-only hook cannot disarm anything and is always safe. When the goal is "grant autonomy",
+   prefer context injection on `UserPromptSubmit` over a permission decision.
+
+### The bypass token must be a PREFIX, not a mention
+
+`/GATE_ADMIN=1/.test(command)` matches the token **anywhere**, so a shell comment or a commit
+message that merely documents it disarms the gate. Observed 2026-08-23: the commit introducing a
+new tripwire logged a spurious bypass from its own commit message, and a deny-matching command with
+the token in a trailing comment was ALLOWED. Anchor it (`/^\s*TOKEN=1\s+\S/`) and read
+`tool_input.command`, not a concatenation of command+url+prompt+content.
+**`commit-gate.mjs` carried the unanchored form and was fixed 2026-08-23**; its log showed 2 of 6
+real bypasses were accidental. Tighten further by requiring the gated action to appear in the SAME
+segment as the prefix, which also matches shell semantics (`TOKEN=1 npm test && git commit` sets the
+var for `npm test` only).
+
+### Phrase-triggered hooks: measure before you build
+
+For any hook triggered by what the user SAYS, measure the regex against the full transcript corpus
+INCLUDING automation prompts, which is where accidental firing comes from. A "verify" trigger
+measured 1,061 matches at 2% precision and was abandoned before a line was written. See memory
+`feedback_measure_trigger_precision_before_building`.
+
+The cautionary case for this entire skill: **`check-boil.sh` was a phrase hook for
+`/boil-the-ocean` (37 real uses) that emitted a top-level `permissionDecision` instead of the
+nested `hookSpecificOutput` and never fired once in three months.**
+
 ## References
 
 - Claude Code hooks (PreToolUse / SessionStart) and the `hookSpecificOutput.permissionDecision` contract: Claude Code docs.
