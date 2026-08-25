@@ -10,10 +10,12 @@ description: >-
   Lyria 3 score, synthesized foley, stem assembly, ducked mixdown, and a ship gate. NOT for video
   (use `seedance-narrated-short` for narrated film, `hyperframes` for motion graphics,
   `ai-commercial` for dialogue ads), NOT for writing the script text itself, and NOT for
-  ElevenLabs markup authoring (use `elevenlabs-tts-scripting`). Reference implementation:
-  `~/.claude/projects/the-unfurling`.
+  ElevenLabs markup authoring (use `elevenlabs-tts-scripting`), and NOT for audio whose timing is
+  PRESCRIBED rather than emergent, such as a counted workout, an interval timer, a meditation or a
+  hypnosis track (use `timed-guided-audio`, which inverts this pipeline). Reference
+  implementation: `~/.claude/projects/the-unfurling`.
 author: Claude Code
-version: 1.0.0
+version: 1.1.0
 date: 2026-08-22
 ---
 
