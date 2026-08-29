@@ -77,8 +77,52 @@ Try the canonical top-level board URL first. See playbook §5.
 - **Foreground the evidenced stack that matches the JD;** cut aspirational tools the
   JD doesn't ask for (§4).
 
+## Rendering gate — extract the text layer and read it back (added 2026-08-29)
+
+**A resume PDF that looks perfect can fail an ATS keyword search invisibly.** Two font bugs found
+the hard way, both of which would have shipped:
+
+- **Georgia SILENTLY DROPS SEMICOLONS** from the PDF text layer, turning every semicolon-delimited
+  skills line into run-on prose for a parser. Times New Roman does it too.
+- **Cambria / Calibri / Constantia / Palatino map the ASCII hyphen to U+2011** (non-breaking hyphen),
+  so `OpenAI-compatible`, `full-stack` and `retrieval-augmented` stop matching a recruiter's search.
+
+Only **XCharter** (a proper resume serif, ships with MiKTeX), TeX Gyre Pagella/Termes, and Carlito
+get both right. Use:
+
+```latex
+\setmainfont{XCharter}[Extension=.otf, UprightFont=*-Roman, BoldFont=*-Bold,
+                       ItalicFont=*-Italic, BoldItalicFont=*-BoldItalic, Ligatures=TeX]
+\hyphenation{Cloudflare OpenAI TypeScript PostgreSQL ...}  % a line-broken keyword does not match
+```
+
+**Never ship without running the actual ATS simulation:**
+
+```bash
+pdftotext -layout -enc UTF-8 resume.pdf - > extracted.txt
+# assert every JD keyword is present in WHITESPACE-NORMALIZED text (line wraps split phrases),
+# and that the only non-ASCII chars are bullet / en-dash / apostrophe
+```
+
+Also: `\MakeUppercase` inside `\titleformat` breaks modern titlesec (`Use of \ttl@row@i doesn't
+match its definition`) — write section names in caps instead. Use `|` not `\textbullet` for header
+separators. Details: [[feedback-latex-resume-fonts-break-ats-extraction]].
+
+**Format is a parsing constraint, not a style choice.** Agencies re-key into Bullhorn/JobDiva/Ceipal
+and reformat onto their own letterhead, which is why they want **Word**. Ship a single-column `.docx`
+alongside the PDF, with contact details in the BODY (parsers drop headers/footers), no tables, no
+columns, no icons, no text boxes.
+
 ## Don't
 
 - Don't draft from a summarized JD or a summarized evidence pack.
 - Don't auto-send without an explicit go.
 - Don't over-claim to fill a requirement slot — flag the gap honestly instead.
+- **Don't claim GBrain as something Ariel built.** The engine is Garry Tan's open-source project
+  (`github.com/garrytan/gbrain`, **0 commits by Ariel**); several older resumes get this wrong. His
+  are `arielagor/gbrain-infra` (the ~60-script ingestion/enrichment/reliability layer) and
+  `arielagor/brain` (158/161 commits). Correct phrasing and the general rule (check `git remote -v`
+  before naming a system — heavy use is not authorship): [[feedback-gbrain-engine-is-garrytans-not-ariels]].
+- **Don't cite `receptionist-bench` benchmark numbers** — its own README says they are placeholders.
+- **Don't claim Python at scale.** Of 8,244 `.py` files, ~7,678 are vendored; authored Python is
+  ~60 files. "Working Python" is the honest ceiling.
