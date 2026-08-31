@@ -108,6 +108,24 @@ The stdlib parser is fine here because the input is a file you just generated. I
 this at OOXML from an untrusted source, use `defusedxml` instead — stdlib parsers are exposed to
 XXE and entity-expansion attacks.
 
+### Better: reuse the validator that already exists
+
+The `docx` skill ships a full OOXML validator at
+`~/.claude/skills/docx/scripts/office/validators/base.py`, with the ECMA schemas bundled
+(`core.xml` maps to `ecma/fouth-edition/opc-coreProperties.xsd`). Prefer it over a hand-rolled check:
+
+- **`validate_xml()`** parses every part with lxml and reports `XMLSyntaxError` with line and
+  message. This is the method that catches this exact bug — it produces
+  "Namespace prefix dc on creator is not defined, line 1, column 163".
+- **`validate_file_against_xsd()`** goes further and validates against the real schema, catching
+  structural mistakes that are well-formed but invalid.
+
+**Do not reach for `validate_namespaces()` for this.** Despite the name it only checks that
+namespaces listed in an `mc:Ignorable` attribute are declared, and it does
+`except lxml.etree.XMLSyntaxError: continue` — so it **silently skips the very file you broke**.
+That is the same trap as the string match, one level up: a check whose name implies coverage it
+does not have.
+
 Then re-run whatever downstream tool consumes the file (a measurement script, `openpyxl.load_workbook`,
 a recalc) and confirm it still returns data rather than an error.
 
