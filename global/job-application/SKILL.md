@@ -121,7 +121,7 @@ columns, no icons, no text boxes.
 - **Don't claim GBrain as something Ariel built.** The engine is Garry Tan's open-source project
   (`github.com/garrytan/gbrain`, **0 commits by Ariel**); several older resumes get this wrong. His
   are `arielagor/gbrain-infra` (the ~60-script ingestion/enrichment/reliability layer) and
-  `arielagor/brain` (158/161 commits). Correct phrasing and the general rule (check `git remote -v`
+  `arielagor/brain` (157/161 commits). Correct phrasing and the general rule (check `git remote -v`
   before naming a system — heavy use is not authorship): [[feedback-gbrain-engine-is-garrytans-not-ariels]].
 - **Don't cite `receptionist-bench` benchmark numbers** — its own README says they are placeholders.
 - **Don't claim Python at scale.** Of 8,244 `.py` files, ~7,678 are vendored; authored Python is
