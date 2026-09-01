@@ -1,6 +1,6 @@
 ---
 name: web-action
-description: Execute a high-level web goal (e.g. "add Gmail alias foo@bar.com", "delete LinkedIn comment X", "publish GTM container Y") by trying API → claude-in-chrome MCP → Playwright in order with 60s timeouts and automatic fallback. Logs successful paths to memory so future runs prefer the proven route.
+description: Execute a high-level web goal (e.g. "add Gmail alias foo@bar.com", "delete LinkedIn comment X", "publish GTM container Y", "fill out and submit this application form") by trying API → claude-in-chrome MCP → Playwright in order with 60s timeouts and automatic fallback. Logs successful paths to memory so future runs prefer the proven route. Also the canonical reference for filling any React form in the browser: read the "React control traps" section before using form_input, which silently fails on comboboxes, radios and checkboxes (renders correct, validates empty) and has caused a blocked submit and an application submitted with no resume attached.
 ---
 
 # web-action
@@ -58,6 +58,45 @@ Default order (when there's no learned preference):
    - Per CLAUDE.md and memory, this is the **preferred browser automation path**
    - Use `tabs_context_mcp` first to see existing tabs, `tabs_create_mcp` for new
    - Use `find` + `form_input` + click sequences
+   - **Read "React control traps" below before filling any form.** `form_input` reports success on
+     controls it did not actually set.
+
+### React control traps (verified 2026-09-01, Greenhouse; same pattern on Ashby)
+
+`form_input` works on **text inputs and textareas** and silently fails on **every other React
+control**. It returns `ok`, the field renders the right value on screen, and the form still
+validates it as **empty**. This has caused a blocked submit and, on a prior run, a submitted
+application with no resume attached.
+
+| Control | `form_input` | What to do |
+|---|---|---|
+| text input, textarea | works | `form_input` |
+| combobox / select | **silently fails** (still shows "Select...") | click by ref, `type` the option text, `key Enter` |
+| radio | **silently fails** (stays unselected) | real click on the option |
+| checkbox | **worst case: renders CHECKED but validates empty** | real click, then verify |
+
+**The checkbox double-click trap.** After a `form_input` on a checkbox, one real click **UNCHECKS**
+it: React's state still believes it is unchecked, so your click toggles React on while the DOM
+property flips off. Two real clicks total. Screenshot between them.
+
+**Click by `ref`, never by coordinate.** These pages reflow between the screenshot and the click, so
+coordinates go stale inside a single tool call. Ref-clicks survive the reflow.
+
+**Prefer keyboard over option-clicking on comboboxes.** `find` repeatedly reports an open menu as
+closed ("no dropdown option currently visible in an open menu") while a screenshot shows it open.
+Click the control by ref, `type` the option text, press Enter. Use `Down Enter` for a single option.
+
+**Verify with `get_page_text`, not screenshots.** On heavy forms `Page.captureScreenshot` timed out
+(30s, "renderer may be frozen") on roughly half of attempts and several successes returned a blank
+viewport. `get_page_text` was reliable every time and renders selected combobox values and
+validation errors inline. Screenshots remain the only way to read checkbox state.
+
+**Locating a blocked submit.** A failed validation sends nothing (no duplicate risk). The error text
+renders **directly beneath the failing field group**, so `get_page_text` shows it in position. Trust
+that over `find`, which misattributed the failing field on this run.
+
+**Submit last, with a freshly captured ref.** Never batch clicks on a re-rendering form. Detail:
+`~/.claude/projects/C--Users-ariel/memory/feedback_browser_cannot_submit_embedded_ats_forms.md`.
 
 3. **Playwright** — `mcp__plugin_playwright_playwright__*` tools
    - Last resort. Often conflicts with the user's running Chrome session.
