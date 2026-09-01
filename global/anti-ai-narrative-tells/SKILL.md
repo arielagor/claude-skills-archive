@@ -107,3 +107,21 @@ Full per-model fingerprint table: `references/per-model-fingerprints.md`.
 - `references/per-model-fingerprints.md` — Table 16. Per-model tells for all five LLMs (Claude, GPT, Gemini, DeepSeek, Kimi). Load when auditing prose that might be from another model, or to know which Claude tells to fight hardest.
 - `references/rewrite-moves.md` — Concrete rewrite patterns: how to break a single causal chain, how to introduce a protag without external description, how to use anachrony without confusing the reader.
 - `references/study-summary.md` — One-page summary of the paper's methodology and key findings. Load for context or when explaining to others why these patterns matter.
+
+---
+
+## See also: `write-longform-fiction`
+
+This skill covers narrative STRUCTURE. It does not cover lexicon or process, and on a long-form
+build those are where the expensive failures live.
+
+Load `write-longform-fiction` alongside this one whenever the job is a novella, novel, screenplay or
+a prose-to-script chain. It enforces the things this skill is silent on: research the craft and
+commit a rules file before any prose, cap invented vocabulary at three ordinary words never defined,
+give the protagonist a concrete blockable want on a clock, never reproduce an in-world document, and
+lint AGAINST jargon rather than for it.
+
+Recorded honestly, 2026-09-01: this skill was active during a session that produced two long-form
+works which were both rejected, one of them explicitly as "reads like it was written for an AI...
+unreadable". The counter-defaults here were applied and were not sufficient alone, because the
+failure was lexical and procedural rather than structural. That is why the companion skill exists.
