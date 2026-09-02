@@ -9,12 +9,16 @@ description: |
   the PROTOCOL says so, not because that is how long the narration ran. Covers the prescriptive
   timeline, exact-BPM tempo locking (Lyria 3 refuses numeric BPM, so the grid is synthesized), the
   slot-fit gate that forces copy to fit its window, per-clip levelling, and a rep-lock assertion
-  that proves cues land on the beat in the rendered audio. NOT for a script-driven piece whose
-  timing follows the performance (use `audio-drama`), NOT for video (`hyperframes`,
-  `seedance-narrated-short`), NOT for authoring ElevenLabs markup (`elevenlabs-tts-scripting`).
+  that proves cues land on the beat in the rendered audio. Also the contemplative variant (hypnosis,
+  meditation, self-inquiry in a cloned voice): named gap tiers as the only pacing lever, a runtime
+  scaler over the contemplative tiers, bed ranking by hypnotic score before generating anything,
+  a local STT omission check with homophone folding, and publishing the master as an agor.me
+  podcast episode. NOT for a script-driven piece whose timing follows the performance (use
+  `audio-drama`), NOT for video (`hyperframes`, `seedance-narrated-short`), NOT for authoring
+  ElevenLabs markup (`elevenlabs-tts-scripting`).
 author: Claude Code
-version: 1.0.0
-date: 2026-08-24
+version: 1.1.0
+date: 2026-09-01
 ---
 
 # Timed guided audio
@@ -134,15 +138,136 @@ isolated ducked-music branch · chapter count · embedded cover · **rep lock**.
 - **Measure the right artifact.** Read truncation off the RAW API response, not a file you have
   since trimmed; trimming removes exactly the decay a tail test looks for.
 
-## Reference implementation
+## Variant: contemplative pieces (hypnosis, meditation, self-inquiry)
 
-`~/.claude/projects/recomp-audio-guides` — 40 masters (4 music styles x 5 sessions x 2 rest
+Added 2026-09-01 from the satori-session build ("Could You Stop It Completely?", 45:00, Ariel's
+xAI clone `gpp66sriwbgy`, every gate passing). Same inversion as the workout case, with one
+difference: there is no grid and no slot. The silence IS the protocol, so the timeline is measured
+clip + prescribed gap, and the gaps are the whole design surface.
+
+### V1. Named gap tiers, and the clone at native pace
+
+Every line in `script/script.json` carries a tier name, not a number:
+
+```json
+"gaps": { "beat": 1.2, "pause": 2.5, "long": 5, "settle": 10, "abide": 25, "open": 150 }
+```
+
+`beat` and `pause` are conversational rhythm, `long`/`settle`/`abide` are contemplative, `open`
+is the single final drop (bed only). Retuning how the whole session breathes is a six-number edit
+followed by `timeline && build-voice && mixdown && verify`; nothing else moves. **The voice is
+never slowed.** Ariel's standing correction (2026-08-22): "use the normal way the xAI outputs the
+script, don't slow it down, it just sounds weird." So no `speed`, no `atempo`, no sentence
+splitting of a paragraph to manufacture gaps. Hypnotic pace comes from short utterances (8 to 32
+words, one idea each, one TTS call each) and digital silence between them. Gap rules that keep a
+hypnotic subject held instead of asleep: any gap of 25 s or more is entered on a question or a
+stay-awake line; any gap over 90 s except the final drop gets a two-word touch ("just this").
+
+### V2. The runtime scaler touches only the contemplative tiers
+
+`timeline.mjs` sums the fixed part (measured voice, `beat`/`pause`/`open` gaps, lead-in, tail-out)
+and the scalable part (`long`/`settle`/`abide` at base values), solves
+`factor = (target - fixed) / scalable` exactly, clamps it to 0.7 to 2.5 and logs if the clamp
+binds, then fails the build if the total lands outside the runtime band (43 to 47 min for a 45
+target). Extra runtime therefore lands after instructions and questions, never mid-induction and
+never as a slower voice. Reference: 144 cues, factor 1.481, voice 16:09, silence 28:51,
+total 44:59.8, `long 5 -> 7.4`, `settle 10 -> 14.81`, `abide 25 -> 37.02`.
+
+### V3. Rank the beds on disk before generating one
+
+`music/rank.py` scores every candidate on four ratios (40 to 500 Hz energy share, 6 to 12 kHz
+energy share inverted, crest inverted, 2 s window envelope spread inverted; the original
+analyser's duration weight is dropped because every candidate is looped), normalises within the
+candidate set and writes `beds/rank.json` plus the winner to `beds/bed.mp3`. The committed
+recomp bed `clean/rest.mp3` won at **0.851** against the best of three fresh Lyria 3 Pro takes at
+**0.629** (high band -57.6 dB vs -40 to -50, envelope std 2.1 dB). So: score the beds already on
+disk first and generate only if none clears the bar. Lyria output is not reproducible from its
+prompt, so commit whichever take ships. Lyria rejects any prompt that names an artist ("in the
+style of X", Prohibited Use on every attempt); describe the sound instead. An iCloud placeholder
+(`RECALL_ON_DATA_ACCESS`) makes ffprobe say "Invalid argument" and a copy hang until the cloud
+times out; skip it or hydrate from the Mac. No binaural or isochronic layer: the absorption stage
+asks the listener to rest on their own pleasant sensation, and an entrainment tone competes with
+it (decision 001 in the reference repo).
+
+### V4. Truncation gate on the RAW tail, then an STT omission check
+
+xAI returns HTTP 200 with a cut-off body often enough that status is not evidence. `voice/gate.mjs`
+reads `parts/manifest.json`, whose tail figure `render.mjs` measured on the RAW response before
+trimming (last 80 ms peak vs clip peak, abrupt if above -12 dB; also under 800 bytes, under 0.10 s
+per word, or over 300 wpm on 12+ words). The trimmed copy cannot be tested: trimming removes
+exactly the decay a tail test looks for.
+
+A clip that drops a clause mid-sentence has a clean tail, so the truncation gate cannot see it.
+`tools/stt.py` transcribes every levelled clip with faster-whisper `small` (CPU int8, local, free,
+`condition_on_previous_text=False`, keeps existing entries so a re-render transcribes only the
+changed clips) and `voice/verify-clips.mjs` fails any clip over **15% WER** after normalising both
+sides (lowercase, digits spelled out, punctuation stripped, clips under 1 s exempt because Whisper
+hallucinates on them). **Fold homophones** before comparing (`four/for`, `two/too/to`,
+`onto/on to`): Whisper picks the spelling by context, and a countdown "four" heard as "for" is a
+false failure. Read the diff, not only the number: "a tension too" transcribed as "attention to"
+is what a listener in a deep state will hear, and it is a script fix, not an STT fix. Reference:
+143 clips, mean WER 0.8%, none over 15%. First pass about 16 min CPU, seconds after.
+
+### V5. Ship gate for a contemplative master
+
+Same shape as the workout gate with the content-specific numbers: integrated -23 to -19 LUFS
+(bed at a measured -30 LUFS pre-duck, speech target -17 dBFS on `vo.wav`), true peak at or below
+-1.0 dBTP, bed continuity on the isolated `duckout` stem (no 12 s block below -55 dBFS outside
+the fade windows, so a listener never thinks the file ended), longest silent run in `vo.wav` no
+more than the longest named gap plus 1 s (proves nothing fell out of the timeline), chapter count,
+embedded cover. Reference master: 45:00.0, -21.4 LUFS, -2.60 dBTP, speech -17.0 dBFS, duck
+-8.3 dB, 8 chapters.
+
+### V6. Publishing the master as an agor.me podcast episode
+
+Three artefacts on `main` plus one blob; no NotebookLM, no post. Upload with
+`uploadEpisodeAudioToBlob(fs.readFileSync(mp3), "YYYY-MM-DD")` from the agor.me repo (cwd there so
+`dotenv` finds `.env.local`; the 62 MB set 403'd once and the helper's retry landed). Verify by
+HEAD 200 and a tail `Range` 206 whose bytes equal the local tail; the route is `force-dynamic`, so
+audio is live before any deploy. Episode mdx in `src/app/resources/episodes/<date>-<slug>.mdx`
+(`publishedAt` long form, `audioUrl: "/episode-audio/<key>"`, `duration: "MM:SS"`, `papers: []`,
+`keyInsights: []`, HTML body); cover 1400 to 3000 px square RGB with no alpha (check magic bytes,
+the reference `art/cover.png` was a JPEG). The feed is `force-static`, so the item appears on the
+next build; Spotify has no publish API and crawls on its own schedule. **If the checkout is on
+another session's branch, publish through a detached worktree** at `origin/main` with a junction
+to the main tree's `node_modules` so husky and tsc run, push `HEAD:main`, and delete the junction
+with `(Get-Item).Delete()` BEFORE removing the worktree or the removal recurses into the real
+`node_modules`. Never run `scripts/notify-episode-published.ts` unless subscribers are meant to be
+emailed. Details: memories `feedback_detached_worktree_publish_junction_node_modules` and
+`reference_agor_blog_publish_and_podcast_from_post`.
+
+### Contemplative gotchas
+
+- The 22 MB mobile copy and an 11 MB lite copy both timed out on `SendUserFile` (30 s window,
+  three attempts). The cap is 30 MiB; the practical ceiling that day was under 11 MB. Send the
+  script and a short excerpt, put the masters on iCloud and the mounted Drive.
+- `build-voice` about 2 min, `mixdown` about 3 min at 45 min of audio, and `placeCues` writes
+  ~2 GB of full-length mono wavs to `build/tmp`. Run both detached (`Start-Process node
+  -RedirectStandardOutput`) and poll with `Get-Process`; the shell tool kills foreground commands
+  at 10 minutes. `Tee-Object` inside a background PowerShell task never creates its log file.
+- Commit `parts/raw/` and `beds/`: xAI TTS is not deterministic (a re-render changes every
+  duration and therefore the timeline) and Lyria is not reproducible from its prompt.
+- Keep Pali, Sanskrit, and Japanese terms out of the spoken text (TTS mispronunciation, and the
+  listener does not need them); say "joy", "absorption", "stillness". Denylist grep in the docs
+  build. Stages that pose inquiry questions never assert the answer; grep fails on "there is no",
+  "you are awareness", "no one is".
+
+## Reference implementations
+
+`~/.claude/projects/recomp-audio-guides`: 40 masters (4 music styles x 5 sessions x 2 rest
 variants), every gate passing. `plan/timeline.mjs` is the timeline, `music/pulse.py` the grid,
 `voice/gate.mjs` the slot-fit gate, `verify-master.mjs` the ship gate.
 
+`~/.claude/projects/satori-session` (private `arielagor/satori-session`): the contemplative
+variant, one 45:00 master, every gate passing. `script/script.json` holds the gap tiers,
+`timeline.mjs` the scaler, `music/rank.py` the bed ranking, `voice/gate.mjs` the raw-tail
+truncation gate, `tools/stt.py` + `voice/verify-clips.mjs` the omission check, `verify-master.mjs`
+the ship gate, `HANDOFF.md` the change recipes, `docs/decisions/001-runtime-pace-bed-no-binaural.md`
+the decisions.
+
 ## Notes
 
-See also: `audio-drama` for the emergent-timing case (script in, performance sets the pace) — it
+See also: `audio-drama` for the emergent-timing case (script in, performance sets the pace); it
 owns casting by measured F0, foley, and the multi-voice mix, all of which apply here too.
 `heuristic-detector-hygiene` for the discipline behind the gates. `media-use` for asset sourcing.
 
@@ -150,7 +275,9 @@ Related memories: `feedback-ffmpeg-alimiter-auto-level-defeats-gain-staging`,
 `feedback-measure-the-right-artifact-not-the-threshold`,
 `feedback-never-author-code-through-a-shell-command`,
 `feedback-spawnsync-pool-gives-zero-parallelism`, `feedback-xai-tts-runs-fast-pacing-levers`,
-`reference-lyria-3`.
+`reference-lyria-3`, `project_satori_session`, `feedback_lyria_blocks_artist_names_in_prompts`,
+`feedback_detached_worktree_publish_junction_node_modules`,
+`reference_agor_blog_publish_and_podcast_from_post`, `feedback_senduserfile_delivery_surface_gap`.
 
 ## References
 
