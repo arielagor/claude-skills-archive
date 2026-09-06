@@ -204,6 +204,13 @@ be reached by Claude self-invoking, which nothing instructed it to do. The `"sug
 the boundary-suggestion path observable, so a future tune can actually measure whether proactive
 suggestion is working instead of reading a permanent zero. `deferred` is `[]` when nothing was deferred.
 
+**Decision rule set 2026-09-06 (226 runs).** `suggested` has been recorded **0 times across the 38
+runs since it was introduced**; the split is still `explicit: 172`, `suggested: 0`, `proactive: 0`
+(plus 54 pre-schema entries carrying no trigger at all). One tuning cycle is not enough to conclude,
+so it stays for now. **If `suggested` is still 0 at the next tune, cut the proactive-triggers section
+of this file outright** rather than leave it as decoration. A documented behavior that has never once
+occurred across two full tuning cycles is not a behavior, it is a wish.
+
 Append it as one JSONL line via `scripts\log-recommendation.ps1`. Write the JSON to a temp file first; do not pipe it through shell quoting (embedded quotes in session_synth break `echo '<json>'`):
 
 ```powershell
@@ -213,6 +220,10 @@ Remove-Item $env:TEMP\assistant-log-entry.json
 ```
 
 In practice: use the Write tool to create the temp JSON file (avoids all quoting), then run the script with `-JsonFile`, then delete the temp file.
+
+**Logging hygiene, added 2026-09-06 (read this before writing the entry).** `executed` carries **only skill or subagent names**, exactly as they would be invoked. Ad-hoc inline work goes in the `outcomes` text, never in `executed`.
+
+This is not pedantry. Real values found in the log include `git push origin master`, `manual edits`, `phase-1-pdf-fix`, `cleanup-orphaned-helper`, `gbrain-curator-inline`, `promote-harness` and `file-tooling-to-gbrain`. Because chain shapes are mined by joining `executed`, **20 of the 38 shapes since the last tune were unique 1x free-text strings that aggregate into nothing.** Every such entry is a run whose lesson is permanently unavailable to tuning. If a step was done inline rather than by firing the skill, name the skill in `executed` and say "done inline" in `outcomes`.
 
 Log on every run, including cancelled and abandoned. The log file is `C:\Users\ariel\.claude\projects\C--Users-ariel\memory\assistant-log.jsonl`. The log is append-only; never read from it during a normal run, only write. The single exception is tune mode (below).
 
