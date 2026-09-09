@@ -82,6 +82,24 @@ property flips off. Two real clicks total. Screenshot between them.
 **Click by `ref`, never by coordinate.** These pages reflow between the screenshot and the click, so
 coordinates go stale inside a single tool call. Ref-clicks survive the reflow.
 
+**But refs do NOT survive a scroll in a virtualized list** (verified 2026-09-09, AgentGraph builder
+profile). A `ref_N` is an index into a snapshot of the accessibility tree, not a stable handle. A
+virtualized list renders only a window of its items, so after a scroll the same ref numbers re-bind
+to different DOM nodes: clicks land on the wrong rows and every one of them still reports `ok`.
+Re-read after every scroll and never reuse a ref captured before one. In that situation a coordinate
+click off a fresh screenshot is the more reliable option, the reverse of the rule above.
+
+**A multi-label `find` can return an off-by-one mapping.** Asking `find` for twelve checkbox labels
+in a single query returned twelve confident label-to-ref pairs, two of them wrong: the click meant
+for "Model Ops & Routing" hit "Experimentation & Personalization", and a second silently un-toggled a
+box that had just been set. A follow-up single-label find proved the mismatch. Use one find per label
+whenever the mapping has to be exact; multi-label queries are for discovery, not for driving clicks.
+
+**Read the selection back before you save.** After any batch of checkbox or radio clicks, diff the
+resulting state (the chips, the summary text, or best of all the service's own read API) against what
+you intended. On that run the browser reported a clean twelve-for-twelve while the profile was
+actually wrong, and the server-side read (`agentgraph_builder_me`) is what established the truth.
+
 **Prefer keyboard over option-clicking on comboboxes.** `find` repeatedly reports an open menu as
 closed ("no dropdown option currently visible in an open menu") while a screenshot shows it open.
 Click the control by ref, `type` the option text, press Enter. Use `Down Enter` for a single option.
