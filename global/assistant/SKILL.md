@@ -83,6 +83,8 @@ Pull this from the conversation only. Do not pull from MEMORY.md, GBrain, or git
 
 Keep this section to 5 bullets max. If the session is genuinely empty (e.g. the user just opened a new session and immediately typed `/assistant`), say so and exit cleanly: "Nothing to chain off yet. Do something, then ask me again."
 
+**Exception, added 2026-09-09: an empty session in a beads repo is not empty.** Before exiting, run Step 2's `test -d .beads` check. If the repo has a queue, `bd ready` is a stored answer to "what next" that does not depend on this session having done anything, and exiting would throw it away. Build the chain from the queue instead and say where it came from. Only exit early when there is no session context **and** no beads workspace.
+
 ## Step 2 — Inventory available execution surfaces
 
 Three sources, in priority order:
@@ -190,6 +192,8 @@ it. Do not call `AskUserQuestion` anywhere in the execution loop.
 
 **Deferrals:** when a step is dropped because an external condition isn't met yet ("App Store approval pending", "after Ariel sends the drafts"), record it as a deferral instead of silently dropping it: capture the step name and the blocking condition. After the chain finishes, if any deferral has a concrete date or checkable condition, offer ONE `/schedule` one-shot that runs the deferred sub-chain when the condition should have cleared. Never auto-create the scheduled task; offer it and let the user decide.
 
+**In a beads repo, also file the deferral as a bead** (`bd create`, with the blocking condition in the description; `bd defer <id>` if it should stay out of the ready queue until then). A deferral that exists only as a field in the Step 7 log JSON is invisible to the next session, because the log is append-only and never read on a normal run. A deferred bead resurfaces in `bd ready` on its own once its blocker closes, which is the whole reason the queue is worth consulting. This does not replace the `/schedule` offer for time-based conditions; it replaces losing the deferral.
+
 ## Step 7 — Log
 
 Build a JSON object with these exact fields:
@@ -269,7 +273,7 @@ Run this roughly monthly, or whenever the log has grown by 30+ entries since "La
 
 ## Edge cases
 
-- **Empty session** (Step 1 produced nothing): say so, exit, do not log.
+- **Empty session** (Step 1 produced nothing): say so, exit, do not log. **Unless the repo has a `.beads/` queue**, in which case build the chain from `bd ready` and log normally; see the Step 1 exception.
 - **User runs /assistant twice in a row with no work between**: detect via session synth being identical to last run. Respond "No new chain to suggest, last chain still in flight" and exit. Do not log.
 - **Skill not found in available-skills list**: do not invent skills. If the chain calls for something that doesn't exist, drop that step and note "<skill-name> not installed" in the rationale of the next step.
 - **Subagent not found**: same rule. Drop and note.
