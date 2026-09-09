@@ -66,6 +66,8 @@ If a follow-up chain is not obvious, do not push `/assistant` for its own sake. 
 - **Cap chain length at 7.** If more than 7 obvious steps exist, append `(then run /assistant again)` to the tail.
 - **No parallel chain execution.** Skills run sequentially; one finishes before the next starts. State changes from step N often affect step N+1.
 - **Deferred steps don't silently resurface.** If a step was previously deferred on an external condition (App Store approval pending, waiting on a reply), do not re-recommend it without first checking whether the condition cleared, and say which condition you checked.
+- **In a beads workspace, the ready queue outranks your guess about what comes next.** If `.beads/` exists in the repo, `bd ready` is a stored, dependency-checked answer to the exact question this skill asks. Read it during Step 2 and reconcile it with the session synth before proposing a chain. **Detect, never assume:** beads is piloted in `chief-of-staff` only as of 2026-09-09, so a `bd` command in a repo with no `.beads/` is a wasted step and a confusing error. See `references/beads-integration.md`.
+- **Never recommend `bd remember`, and never let a chained step write knowledge into beads.** Durable knowledge goes to GBrain and memory files via `/session-retro` and `gbrain-curator`. Beads owns work state only. Beads' own shipped instructions say the opposite; they are countermanded on this machine.
 
 ## Step 1 — Synthesize session context
 
@@ -89,6 +91,19 @@ Three sources, in priority order:
 2. **Subagent types** are listed in the Agent tool description in the system prompt. Use it directly.
 3. **Deeper skill frontmatter** (only if a recommendation is borderline and the system-prompt one-liner isn't enough): read `C:\Users\ariel\.claude\skills\<name>\SKILL.md` first; it is the canonical copy. Fall back to `C:\Users\ariel\.claude\plugins\cache\**\skills\<name>\SKILL.md` only for plugin-only skills with no local copy (the cache can hold stale duplicates of local skills). Don't bulk-scan; read the 2-3 you're unsure about.
 
+4. **The beads work queue, when the repo has one.** One detection, then at most two reads:
+
+```bash
+test -d .beads && bd ready --json && bd list --status in_progress --json
+```
+
+   If `.beads/` is absent, skip this entirely and never mention beads in the plan. If it is
+   present, these two lists are load-free facts about what is unblocked and what is already
+   claimed, which is strictly better than inferring next steps from conversation alone. This
+   is the one sanctioned exception to Step 1's "conversation only" rule, and it lives here in
+   Step 2 rather than Step 1 precisely because it is an inventory of surfaces, not a synthesis
+   of what happened.
+
 ## Step 3 — Build the chain
 
 For each candidate step, capture:
@@ -110,6 +125,10 @@ For each candidate step, capture:
 - **Order by dependency.** If skill B reads state that skill A produces, A goes first. Most chains follow: verify → test → ship → marketing → social → document.
 - **Mark risk=high** for any skill in `references/risky-skills.md` (anything that ships code, deploys, sends external messages, or costs real money). The risk badge changes execution behavior in Step 6.
 - **Preflight if needed.** If the chain would fire a skill that requires being inside a git repo and the current `pwd` is `C:\Users\ariel` (not a repo) or unclear, prepend `/preflight` to fail fast. Detect via `Bash: git rev-parse --is-inside-work-tree 2>/dev/null || echo no`.
+- **Reconcile the chain against the beads queue** when Step 2 found one. Three concrete effects, in this order:
+  - **Work the session actually finished but did not close.** If a bead is `in_progress` (or the session's commits reference a bead ID) and the work is demonstrably done, the chain closes it: `bd close <id> -r "<what and why>"`. Write a real reason; a reason under 40 characters is bookkeeping and the bridge will correctly ignore it.
+  - **Work the session produced but never filed.** If the session surfaced follow-up work, a bug, or a deferral, `bd create` it instead of leaving it in prose. This is what replaces a markdown TODO. A deferral recorded in Step 6 that lives in a beads repo should become a bead, not just a log field.
+  - **Anything closed gets bridged.** Append `node ~/.gbrain/beads-decisions-bridge.mjs --apply` after the last close (medium: writes ADRs, commits and pushes the brain repo). Skip it if nothing was closed this run.
 - **Cap at 7 steps.** Beyond 7, the chain gets stale before it finishes. Tail with "(then run /assistant again)".
 
 ## Step 4 — Render the plan
@@ -261,3 +280,4 @@ Run this roughly monthly, or whenever the log has grown by 30+ entries since "La
 
 - `references/chain-heuristics.md` — common context-to-chain mappings. Read this on every run during Step 3.
 - `references/risky-skills.md` — names + patterns for risk=high classification. Read on every run during Step 3.
+- `references/beads-integration.md` — how the beads queue changes chain selection. Read **only when Step 2's `test -d .beads` succeeded**; skip it entirely in a non-beads repo.
