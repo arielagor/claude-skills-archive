@@ -83,7 +83,7 @@ Pull this from the conversation only. Do not pull from MEMORY.md, GBrain, or git
 
 Keep this section to 5 bullets max. If the session is genuinely empty (e.g. the user just opened a new session and immediately typed `/assistant`), say so and exit cleanly: "Nothing to chain off yet. Do something, then ask me again."
 
-**Exception, added 2026-09-09: an empty session in a beads repo is not empty.** Before exiting, run Step 2's `test -d .beads` check. If the repo has a queue, `bd ready` is a stored answer to "what next" that does not depend on this session having done anything, and exiting would throw it away. Build the chain from the queue instead and say where it came from. Only exit early when there is no session context **and** no beads workspace.
+**Exception, added 2026-09-09: an empty session in a beads repo is not empty.** Before exiting, run Step 2's `test -f .beads/config.yaml` check. If the repo has a queue, `bd ready` is a stored answer to "what next" that does not depend on this session having done anything, and exiting would throw it away. Build the chain from the queue instead and say where it came from. Only exit early when there is no session context **and** no beads workspace.
 
 ## Step 2 — Inventory available execution surfaces
 
@@ -96,10 +96,18 @@ Three sources, in priority order:
 4. **The beads work queue, when the repo has one.** One detection, then at most two reads:
 
 ```bash
-test -d .beads && bd ready --json && bd list --status in_progress --json
+test -f .beads/config.yaml && bd ready --json && bd list --status in_progress --json
 ```
 
-   If `.beads/` is absent, skip this entirely and never mention beads in the plan. If it is
+   **Detect on `config.yaml`, NOT on the directory.** `test -d .beads` is a false positive and
+   was one on this machine: `C:\Users\ariel\.beads` exists, holds a single 0-byte
+   `eventsData/eventkit.lock`, and belongs to an unrelated tool that collided on the name. Since
+   `C:\Users\ariel` is the default cwd for most sessions, a directory-only check would fire
+   `bd ready` against a non-workspace on nearly every run. A real workspace has `config.yaml`,
+   `metadata.json`, `interactions.jsonl` and `embeddeddolt` (verified against the
+   `chief-of-staff` pilot, 2026-09-09).
+
+   If there is no `.beads/config.yaml`, skip this entirely and never mention beads in the plan. If it is
    present, these two lists are load-free facts about what is unblocked and what is already
    claimed, which is strictly better than inferring next steps from conversation alone. This
    is the one sanctioned exception to Step 1's "conversation only" rule, and it lives here in
@@ -284,4 +292,4 @@ Run this roughly monthly, or whenever the log has grown by 30+ entries since "La
 
 - `references/chain-heuristics.md` — common context-to-chain mappings. Read this on every run during Step 3.
 - `references/risky-skills.md` — names + patterns for risk=high classification. Read on every run during Step 3.
-- `references/beads-integration.md` — how the beads queue changes chain selection. Read **only when Step 2's `test -d .beads` succeeded**; skip it entirely in a non-beads repo.
+- `references/beads-integration.md` — how the beads queue changes chain selection. Read **only when Step 2's `test -f .beads/config.yaml` succeeded**; skip it entirely in a non-beads repo.
