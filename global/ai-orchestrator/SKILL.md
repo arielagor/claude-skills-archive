@@ -82,14 +82,14 @@ Analyze the user's request and route to the best tool using this decision tree.
 | Research + auto podcast | **NotebookLM** (browser) | Claude + WebSearch |
 | Research + slides | **NotebookLM** (browser) | Claude + manual |
 | Quick research | **Claude** (direct) + WebSearch | Gemini |
-| Second opinion / comparison | **Gemini** or **GPT-4o** | — |
+| Second opinion / comparison | **Gemini** or **OpenAI flagship** | — |
 
 ### Text Generation
 
 | Scenario | Best Tool | Fallback |
 |----------|-----------|----------|
 | Default / in-session | **Claude** (direct, no API call) | — |
-| Second opinion | **Gemini** via API | GPT-4o |
+| Second opinion | **Gemini** via API | OpenAI flagship |
 | Comparison across models | Run all three, present results | — |
 
 ---
@@ -289,13 +289,15 @@ PDF, text, Google Doc, or YouTube video.
 
 ---
 
-### 5. OpenAI GPT-4o + GPT-Image (Text + Image Gen)
+### 5. OpenAI flagship text + GPT-Image (Text + Image Gen)
 
 **Auth**: `Authorization: Bearer $OPENAI_API_KEY`
 **Env var**: `OPENAI_API_KEY`
 **Get key**: https://platform.openai.com/api-keys
 
-#### Text Generation (GPT-4o)
+#### Text Generation (OpenAI's current flagship multimodal model)
+
+> **Verify the current model ID before use** — `curl https://api.openai.com/v1/models -H "Authorization: Bearer $OPENAI_API_KEY"`. The string below is an example, not a pin; OpenAI retires model IDs and a stale one fails closed.
 
 ```bash
 curl -s -X POST https://api.openai.com/v1/chat/completions \
@@ -467,7 +469,7 @@ When an API call fails, follow these fallback chains:
 | TTS | ElevenLabs MCP | ElevenLabs REST | — | Ask user |
 | Music/SFX | ElevenLabs MCP | — | — | Ask user |
 | Research | NotebookLM | Claude+WebSearch | Gemini | — |
-| Text gen | Claude (direct) | Gemini | GPT-4o | — |
+| Text gen | Claude (direct) | Gemini | OpenAI flagship | — |
 
 ### Browser Automation Failure
 1. Take a screenshot to diagnose the issue
@@ -479,6 +481,8 @@ When an API call fails, follow these fallback chains:
 ## Cost Reference
 
 **RULE**: For any single operation costing over $1, confirm with the user before executing.
+
+**Prices verified: 2026-09-12 — re-check before quoting.** Vendor pricing moves without notice; treat the table below as an order-of-magnitude guide for the >$1 rule, not as a quotable figure.
 
 | Operation | Tool | Approx Cost |
 |-----------|------|------------|
@@ -508,7 +512,7 @@ If a key is missing, provide these instructions:
 4. Copy the key
 5. Add to `.env`: `GOOGLE_AI_API_KEY=your-key-here`
 
-### OPENAI_API_KEY (GPT-4o, GPT-Image)
+### OPENAI_API_KEY (OpenAI flagship text, GPT-Image)
 1. Go to https://platform.openai.com/api-keys
 2. Click "Create new secret key"
 3. Copy the key (shown only once)
@@ -652,7 +656,7 @@ Common commands and what they route to:
 "compose background music..."    → ElevenLabs MCP generate_music
 "research this topic..."         → NotebookLM (browser) or Claude+WebSearch
 "make a podcast about..."        → NotebookLM Audio Overview
-"compare models on..."           → Run prompt through Gemini + GPT-4o + Claude
+"compare models on..."           → Run prompt through Gemini + OpenAI flagship + Claude
 "run the content pipeline"       → Preset 1: Full Session Pipeline
 "create artwork for session X"   → Preset 2: Session Artwork
 "social media burst for..."      → Preset 4: Social Content Burst
@@ -686,7 +690,7 @@ multiple services in parallel and present the results side by side.
 
 ### Text Comparison
 
-1. Send the same prompt to Claude (direct), Gemini, and GPT-4o in parallel
+1. Send the same prompt to Claude (direct), Gemini, and the OpenAI flagship in parallel
 2. Present all three responses with tool labels
 3. Let user choose or combine the best parts
 

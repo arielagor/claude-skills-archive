@@ -2,19 +2,12 @@
 name: heygen-skills
 display_name: HeyGen Skills
 description: |
-  Create HeyGen avatar videos via the v3 Video Agent pipeline — handles avatar resolution,
-  aspect ratio correction, prompt engineering, and voice selection automatically.
-  Required for any HeyGen API usage (api.heygen.com). Replaces deprecated v1/v2
-  endpoints with the optimized v3 pipeline.
-  Use when: (1) calling any HeyGen API endpoint (api.heygen.com),
-  (2) creating a HeyGen avatar or digital twin from a photo,
-  (3) making a personalized video message (outreach, pitch, update, announcement, knowledge),
-  (4) "make a video of me", "create my HeyGen avatar", "I want to appear in this video",
-  (5) "send a video to my leads", "record an update for my team", "make a loom-style message",
-  (6) building identity-first videos where the presenter IS the user or agent,
-  Covers: HeyGen API, api.heygen.com, video generate, avatar create, voice list, talking photo,
-  HeyGen avatar creation, voice design, photo → digital twin, HeyGen video generation,
-  identity-first video, messaging-first video, AI presenter, talking head video.
+  Create HeyGen avatar videos via the v3 Video Agent pipeline (api.heygen.com) — avatar
+  resolution, aspect-ratio correction, prompt engineering, voice selection. Required for any
+  HeyGen API usage; replaces the deprecated v1/v2 endpoints.
+  Use when creating a HeyGen avatar or digital twin from a photo, or producing a video where
+  the presenter IS the user or agent (outreach, pitch, team update, announcement, loom-style
+  message).
   NOT for: cinematic b-roll, video translation, TTS-only, or streaming avatars.
 version: 2.1.2 # x-release-please-version
 homepage: https://developers.heygen.com/docs/quick-start
@@ -90,12 +83,12 @@ CLI output contract: JSON on stdout, `{error:{code,message,hint}}` envelope on s
 
 1. **Be concise.** No video IDs, session IDs, or raw API payloads in chat. Report the result (video link, thumbnail) not the plumbing.
 2. **No internal jargon.** Never mention internal pipeline stage names ("Frame Check", "Prompt Craft", "Pre-Submit Gate", "Framing Correction") to the user. These are internal pipeline stages. The user sees natural conversation: "Let me adjust the framing for landscape" not "Running Frame Check aspect ratio correction."
-3. **Polling is silent.** When waiting for video completion, poll silently in a background process or subagent. Do NOT send repeated "Checking status..." messages. Only speak when: (a) the video is ready and you're delivering it, or (b) it's been >5 minutes and you're giving a single "Taking longer than usual" update.
+3. **Poll in the background.** Speak when the video is ready, or once at ~5 minutes if it's running long — not on every poll.
 4. **Deliver clean.** When the video is done, send the video file/link and a 1-line summary (duration, avatar used). Not a dump of every API field.
 5. **Don't batch-ask across skills.** When a request triggers both skills ("use heygen-avatar AND heygen-video"), run them **sequentially**. Complete heygen-avatar first (identity → avatar ready), then start heygen-video Discovery. Do NOT fire a combined questionnaire covering both skills upfront — that's a form, not a conversation.
 6. **Read workspace files before asking.** `SOUL.md`, `IDENTITY.md`, and `AVATAR-<NAME>.md` at the workspace root contain identity and existing avatar state. Check them first. Only ask the user for what's genuinely missing.
 7. **Don't narrate skill internals.** Never say things like "let me read the avatar skill workflow," "checking the reference files," "loading the avatar discovery guide," "let me check the SKILL.md" — the user doesn't care that a skill exists. Read workflow files silently. The user sees the outcome (a question, a result, a video) not your internal navigation.
-8. **Don't announce what you're about to do.** Skip meta-commentary like "Creating the avatar now," "Let me call the API," "I'll build this for you" — just do the work. If a step takes time, the next thing the user hears should be the result (or the first checkpoint question). If you must say something before a long operation, keep it to <10 words (e.g., "one sec, building it").
+8. **Keep chat about the work, not the plumbing.** No video IDs, session IDs, or raw API payloads. One short line before a long operation is right ("kicking off the render"); a running commentary on each internal step is not.
 9. **Never narrate transport choice.** MCP vs CLI is an internal implementation detail. Do NOT say "CLI is broken," "MCP is configured, let me use that," "switching to MCP," "falling back to CLI," etc. Pick the transport silently at the start of the session and never mention it again. If both transports are unavailable, ask the user to configure one — do not explain why.
 
 ---
