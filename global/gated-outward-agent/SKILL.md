@@ -91,8 +91,9 @@ the confidence, what it did or drafted, and why.
 ## Stack seams (reuse the proven ones)
 
 - **LLM = `claude -p` on the Max plan.** Strip `ANTHROPIC_API_KEY` + cloud flags
-  from the spawn env; `stdio: ["ignore","pipe","pipe"]`; pin `--model` (Fable 5 ->
-  Opus 4.8); parse the first balanced `{...}` (never line-1-only); `taskkill /T /F`
+  from the spawn env; `stdio: ["ignore","pipe","pipe"]`; pin `--model` (Opus 5 ->
+  Opus 4.8 — never Fable in an unattended agent); parse the first balanced `{...}`
+  (never line-1-only); `taskkill /T /F`
   on win32; `--disallowedTools Write,Edit,Bash,...` for text-only calls.
   (`feedback_claude_p_subprocess_ignore_stdin_pin_model`, `feedback_model_fallback_fable_then_opus`.)
 - **Idempotency under a scheduler.** Guard the WORKER process with a node pid+ts
