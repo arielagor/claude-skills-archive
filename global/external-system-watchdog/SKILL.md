@@ -12,7 +12,8 @@ description: |
   traps (wrong comparison, absence-during-latency, ignoring their own status endpoint,
   inferring config from data), throttle-never-suppress alert policy, and proving the monitor by
   making it fire on a real defect. NOT for scanning your own repo (see heuristic-detector-hygiene),
-  one-off verification of a claimed completion (see verify), or post-deploy canaries (see canary).
+  one-off verification of a claimed completion (see verify), post-deploy canaries (see canary), or
+  publishing an external system's data to a page of your own (see self-refreshing-data-page).
 author: Claude Code
 version: 1.0.0
 date: 2026-09-01
