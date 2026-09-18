@@ -37,9 +37,14 @@ State the resolved company + role back in one line, then continue.
 ## Step 2 — Run the pipeline (per the playbook §2)
 
 1. **Spec capture (Iron Law, §1)** — JD verbatim into context. Then gather the
-   candidate's real evidence: GBrain (`mcp__gbrain__query`), LinkedIn profile, the
-   live portfolio page (for Ariel: `agor.me/portfolio`), most-recent resume files,
-   GitHub, App Store links. Never draft from a summary of either text.
+   candidate's real evidence. **For Ariel, read
+   `C:\Users\ariel\.claude\CAREER-SOURCE-OF-TRUTH.md` FIRST and treat it as the
+   authority on employment history, dates, titles and numbers** — it is the career
+   database, built from 16 dated resumes plus independent dated evidence, and it
+   carries a "claims no document supports" list that is binding. A resume file that
+   disagrees with it is wrong. Then supplement: GBrain (`mcp__gbrain__query`),
+   LinkedIn profile, the live portfolio page (`agor.me/portfolio`), GitHub, App
+   Store links. Never draft from a summary of either text.
 2. **Map** — build the requirement→evidence matrix (STRONG / PARTIAL / GAP).
 3. **Solve → Review → Revise (§2 steps 3–5)** — fan out across subagents where it
    helps; every subagent gets the full JD + full evidence pack, never a digest.
