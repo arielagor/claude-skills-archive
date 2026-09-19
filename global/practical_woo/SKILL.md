@@ -232,6 +232,18 @@ on them. The skill itself does not. Audit mode reports.
   has a method. All four are absence or judgment calls. They are the reason
   `checklist.md` exists and the reason Audit mode requires actually reading the
   piece.
+- **The linter cannot tell a quotation from the writer's own phrasing.**
+  Auditing the holdout *The Spiritual Path Is a Side Effect* produced exactly
+  one blocking hit, `realm of`, and it sits inside a direct quotation of the
+  Diamond Sutra. `humanizer`'s `--ignore-blockquotes` handles markdown
+  blockquotes but not inline quoted text. Treat a blocking hit inside quotation
+  marks as a false positive and say so in the audit rather than editing someone
+  else's sentence.
+- **Two registers, and only one carries move 7.** The corpus contains
+  instructional pieces that end in the reader's hands and reflective pieces
+  that do not. Measured imperative density has a floor of zero. The checklist
+  gates move 7 on register for this reason, which the held-out test is what
+  established. Do not reintroduce it as an unconditional requirement.
 - **Transfer past the contemplative domain is proven for one pack only**
   (`domains/building.md`). It has not been exercised at volume.
 
