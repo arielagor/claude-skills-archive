@@ -83,12 +83,17 @@ Copies engine/tools/analysis/scripts + templates, writes `project.json`, runs `n
 
 - **Song given:** nothing to do. Lyrics as plain lines; `[Chorus]` tags and `(x2)` are handled.
 - **Lyrics → song:** `node scripts/gen_song.mjs --lyrics assets/lyrics.txt --prompt "<genre, mood, instruments, vocal>" --out assets/song.mp3`
-  (`lyria-3-pro-preview`, up to ~3 min, GEMINI_API_KEY, ~$0.08). It saves the exact lyrics sent; align against those.
-  Set `"audio"` in project.json.
+  (`lyria-3-pro-preview`, GEMINI_API_KEY, ~$0.08; `--dry-run` shows the prompt). Lyria returns the lyrics **as sung**
+  (its own sections, repeats and ad-libs) next to the audio: gen_song saves them as `assets/lyrics_sung.txt`. **Set
+  project.json `"text"` to `lyrics_sung.txt`, not the lyrics you sent**, and `"audio"` to the mp3. `--duration` is a hint
+  Lyria may ignore (asked 1:20, got 2:42): render the range you need with `--from/--to`.
 - **Script → narration:** `python scripts/narrate.py --script assets/script.txt --out-dir assets [--voice gpp66sriwbgy]`
-  → `narration.mp3` + `narration_lines.json` (exact line offsets). One line per sentence or beat; blank line = paragraph gap.
-- **Clip jobs:** `python scripts/clip.py --in long.mp3 --out assets/clip.mp3 --from 612.4 --to 790` — pick ranges from a
-  first-pass transcript (`run.py` on the full file, then read `data.summary.txt`).
+  → `narration.mp3` + `narration_lines.json` (exact line offsets, used as a prior by alignment), and it sets the
+  project's `"audio"` itself. One line per sentence or beat; a blank line = paragraph gap.
+- **Clip jobs:** `python scripts/clip.py --in long.mp3 --out assets/clip.mp3 --from 612.4 --to 790`. Pick ranges from a
+  first-pass transcript (`run.py` on the full file, then read `data.summary.txt`). The clip can keep the FULL transcript
+  as its `"text"`: alignment detects the length mismatch and trims the known text to what the clip contains
+  (measured: 50 s of a 15-min drama against its 2,133-word transcript → exactly the 6 lines in the window, 100%).
 
 ## 3 · Analysis
 
@@ -99,8 +104,12 @@ Writes `data.js` (`META` · `TEXT.lines[{text,s,e,speaker,words[{t,s,e,i}]}]` ·
 `data.summary.txt`: header (tempo, phase, beat0/period, downbeat, sections), then every line `start-end * [speaker] text`
 (`*` = has interpolated words), then a 5 s energy table. **Read the whole summary before storyboarding.**
 Checks: song alignment coverage ≥ 70% (else fix lyrics or add a Demucs vocal stem via `"analysis": {"stem": …}`);
-tempo plausible; speech modes report `phase: none` (no beat grid: `BT()` throws by design).
-Override anything in `project.json` `"meta"` (e.g. a hand-measured `beat0`/`beatPeriod`, `downbeat`).
+tempo plausible (a slow groove may track at double time: judge by feel, override `beatPeriod`); speech modes report
+`phase: none` (no beat grid: `BT()` throws by design). `phase: beats` means the tempo drifts (the original song's grid
+drifted up to 0.87 s): cut with `BT(n)` / `snap(t,'downbeat')`, never with `B0 + n*BEAT` arithmetic. The **downbeat**
+is a best guess from bass energy; if big cuts feel a beat early/late, set `meta.downbeat`.
+Override anything in `project.json` `"meta"`. Runtimes on this laptop's CPU: Whisper ~0.9–1.2x realtime (a 60-min
+episode ≈ 1 h of transcription, once; it's cached), features seconds, alignment < 1 s.
 
 ## 4 · Prove the pipeline before any art
 
@@ -164,8 +173,12 @@ interruption). Then the ship gate, then `SendUserFile` the masters (and one shee
 ## Episode density (long recordings, when chosen at intake)
 
 Build 4–8 sets (`defineSet(id, (t, lt, dur, params) => …)`: a home set per speaker, a two-shot, topic sets), plan
-with `autoPlan({ by: 'speaker', minHold: 6, maxHold: 18, choose })`, register with `episode(plan)`, hand-override
-key spans. Every set must stay alive for 18 s without a cut. Details: [references/density.md](references/density.md).
+with `autoPlan({ by: 'speaker', minHold: 6, maxHold: 18, minCut: 2.5, choose: (span, i) => ({ set, params }) })`
+(`span` = `{a, b, lines, speaker, text}`; choose topic sets with word-boundary regexes: `/hum/` matched "human"),
+register with `episode(plan)`, hand-override key spans. Print the plan's holds and set counts once
+(`window.__plan = plan` + a page evaluate, or read `__shots()`) before rendering. Every set must stay alive for 18 s
+without a cut: arc the camera across the hold with `lt/dur`. Worked example: `examples/podcast-unfurling-episode`.
+Details: [references/density.md](references/density.md).
 
 ## Looks
 
@@ -193,6 +206,12 @@ file. See [references/looks.md](references/looks.md).
 - **Frame budget**: scene p95 < 150 ms (`check --bench`). Hundreds of shapes are fine, tens of thousands aren't.
 - **Frame time is `from + i/fps` with a global i** in every render path; boil and grain are floors of `t`, so any
   other formula moves them.
+- **Captions over the subject**: captions sit at a fixed band per aspect (9:16 at 70% height). Keep faces out of it,
+  or move the band: project.json `"captionStyle": { "y": .9, "size": 70, "maxChars": 20 }`.
+- **Silhouettes need a lit backdrop.** Dark figures on dark ground vanish (both looks): put heads against a window, a
+  lit wall, a fire, the sky. The smoke tests lost a crowd and a dog this way until they were moved against light.
+- **Projects vendor the engine.** After changing the repo's engine/tools/analysis, refresh a project with
+  `node ~/.claude/projects/procedural-video/tools/new_project.mjs --update <project dir>`.
 - The commit gate runs `npm test`; the repo's port test (~80 s) is not in it. After touching `engine/looks/paint.js`
   or `engine/core/*`, run `node tools/porttest.mjs` in the repo: it must PASS bit-exact.
 
@@ -221,7 +240,7 @@ file. See [references/looks.md](references/looks.md).
 | `analysis/*.py` | audio_io, features, beats, transcribe, textnorm, align, segment, build_data, run |
 | `scripts/narrate.py`, `gen_song.mjs`, `clip.py` | audio prep |
 | `templates/` | STORYBOARD.md, ANIMATION_GUIDE.md, theme.js, cast.js, placeholder c1.js |
-| `examples/` | smoke-test projects, one per mode |
+| `examples/` | smoke-test projects: `song-the-painter` (Lyria song, paint, beats + sung words, focus), `narration-every-frame` / `narration-dogfood` (TTS, 9:16 stage, clean, word captions), `podcast-unfurling-clip` (clip vs full transcript, talker, captions), `podcast-unfurling-episode` (5.5 min, sets + autoPlan, clean) |
 | `docs/decisions/` | why things are the way they are |
 
 ## See also
