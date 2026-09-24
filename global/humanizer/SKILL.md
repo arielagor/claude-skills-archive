@@ -147,12 +147,14 @@ frontmatter, headings, sources, the URL and every number preserved.
 
 ## Costs
 
-Lint and prompt injection are free. The repair pass is 1-2 `claude -p` calls on
-the Max plan, so flat-rate. `ANTHROPIC_API_KEY` and the cloud-provider flags
-are stripped from the child env — with any of them set, Claude Code's
-precedence is API key over OAuth and the call lands silently on the metered
-API. Override the model with `HUMANIZER_MODEL`; it defaults to
-`claude-sonnet-5`, then the CLI default if that id is unknown.
+Lint and prompt injection are free. The repair pass is 1-2 calls on the Max
+plan through the shared lean seam, `~/.claude/scripts/lib/lean-claude.mjs`
+(since 2026-09-24), which loads about 500 tokens of context instead of the ~93K
+a bare `claude -p` carried, allows no tools, keeps `ANTHROPIC_API_KEY` out of
+the child env, and writes each call to `~/.claude/logs/llm-ledger.jsonl` under
+the job `humanizer:<property>`. Tier `standard` (Sonnet); override with
+`HUMANIZER_TIER`. A failed or quota-skipped repair returns the original text
+unchanged, with the reason in `error`.
 
 ## Known limits
 
