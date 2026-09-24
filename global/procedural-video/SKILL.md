@@ -62,10 +62,35 @@ Ask only what isn't already clear from the request:
 | Mode | **song** (audio + lyrics) · **lyrics → song** (Lyria makes the track) · **podcast** (a recording; optional speaker-labelled transcript `NAME: text`) · **script → narration** (xAI TTS) | from the files given |
 | Aspects | any of 16:9, 9:16, 1:1 (one project renders all) | all three |
 | Stage | the aspect you compose for; others are crops of it | 16:9, or 9:16 if vertical-first |
-| Look | **paint** (moving oil painting) · **clean** (flat illustrated, Canvas2D) | paint |
+| **Look (preset)** | one of the 17 presets below, **chosen from the gallery** (see "Choosing the look") | `paint` |
 | Captions | off · lines · words (highlighted spoken word) | off for music, words for speech |
 | **Long audio (> ~5 min)** | **clip** (1–5 min segments at full density) or **full episode** (sets, lower density). **Always ask; never assume.** | — |
 | Direction | one or two lines in the user's words; "your call" is fine | — |
+
+### Choosing the look (always, before any creative work)
+
+Unless the request already names a look, **show the options before scaffolding**:
+1. `SendUserFile` the gallery **`~/.claude/skills/procedural-video/references/look-gallery.jpg`** (all 17 presets on
+   the same frame, labelled), with the list below.
+2. Ask with AskUserQuestion: first the **family** (Painted · Clean · Ink & print · Watercolor), then the **variant**
+   inside it (≤ 4 options each; "Other" takes any preset name). Recommend what suits the material: music → Painted;
+   speech with captions → Clean or Halftone; literary / sombre → Ink or Woodcut; gentle / warm → Watercolor.
+3. The paint variants differ mostly in **motion** (boil rate, stroke size), which a still can't show. If the choice is
+   between paint variants, render a 5 s preview of each on the project once chapter I exists
+   (`node tools/render.mjs --from 20 --to 25 --preset paint-loose`) instead of arguing from stills.
+4. Scaffold with `--preset <name>`. It can change later: the look is chosen at render time and every preset renders the
+   same scenes. Once chapter I exists, re-check on the project's own frames:
+   `node tools/looks.mjs out/check/looks.jpg --times <3 good times> --presets <2-4 candidates>`.
+
+| Family | Presets (`--preset`) |
+|---|---|
+| Painted | `paint` (default: moving oil painting) · `paint-loose` (impressionist) · `paint-gouache` (tight, calm) · `paint-still` (meditative) · `paint-agitated` (chaotic) · `paint-dreamy` (heavy warm bloom) |
+| Clean | `clean` (as drawn, light grain) · `clean-flat` (bold flat graphic) · `clean-film` (grain + vignette) |
+| Ink & print | `ink` (ink wash on cream paper) · `ink-sumi` (tinted sumi-e) · `woodcut` (carved linework, hatching) · `woodcut-spot` (woodcut on tinted paper) · `halftone` (comic dot screen, bold outlines) · `halftone-pop` (bigger dots, fewer colours) |
+| Watercolor | `watercolor` (transparent washes, bleeding colour, wet rims) · `watercolor-wet` (more bleed, heavier granulation) |
+
+Presets live in `engine/looks/presets.json` (look + base settings + multipliers). Scene code still wins over a
+preset's base settings; the preset's multipliers apply last. Details and every setting: [references/looks.md](references/looks.md).
 
 Narration voice is Ariel's clone **`gpp66sriwbgy`** ("Ariel Agor - Smooth") unless told otherwise. Music via
 Lyria: no artist names, no numeric BPM (both are refused or ignored).
@@ -75,7 +100,8 @@ Lyria: no artist names, no numeric BPM (both are refused or ignored).
 ```
 node ~/.claude/projects/procedural-video/tools/new_project.mjs --name "Title" --mode song|podcast|narration \
   [--audio file] [--text lyrics.txt|script.txt|transcript.txt] [--text-format lyrics|script|speakers] \
-  [--stage 16:9] [--aspects 16:9,9:16,1:1] [--look paint|clean] [--captions off|words|lines] [--density clip|episode] --git
+  [--stage 16:9] [--aspects 16:9,9:16,1:1] [--preset <name>] [--captions off|words|lines] [--density clip|episode] \
+  [--slug name] [--dest dir] --git          # --git for projects under ~/.claude/projects, not inside another repo
 ```
 Copies engine/tools/analysis/scripts + templates, writes `project.json`, runs `npm install`, prints next steps.
 
@@ -182,9 +208,11 @@ Details: [references/density.md](references/density.md).
 
 ## Looks
 
-`paint` (GPU strokes; settings boil/bloom/flowK/strokeK/grain/vig; `whip()` smears strokes) and `clean` (Canvas2D;
-grain/vig/bloom; `whip()` is a motion blur). Same scenes, either look, chosen at render time. Adding a look is one
-file. See [references/looks.md](references/looks.md).
+Six renderers: `paint` (GPU brushstrokes; `whip()` smears strokes), `clean` (Canvas2D, no GPU needed), and four
+shader looks: `ink`, `woodcut`, `halftone`, `watercolor` (auto-exposed, so night scenes still read on paper), plus
+17 named presets over them. Same scenes, any look, chosen at render time (`--preset`, `--look`). Scenes built for
+paint read well in every look: strong silhouettes and value contrast are what all six key on. Adding a look is one
+file (`makeShaderLook` in `engine/looks/_shader.js` does the plumbing). See [references/looks.md](references/looks.md).
 
 ## Gotchas (each one measured)
 
