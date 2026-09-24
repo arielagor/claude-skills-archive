@@ -2,7 +2,8 @@
 name: procedural-video
 description: >-
   Turn a song, a podcast or interview recording, or a script into a finished video where every frame is
-  drawn by code Claude writes (a moving oil painting, or a clean illustrated look), cut to the audio's own
+  drawn by code Claude writes, in a look chosen from a gallery of 17 presets (moving oil painting, clean
+  illustration, ink wash, woodcut, halftone comic, watercolor, and variants), cut to the audio's own
   words and beats, delivered in 16:9, 9:16 and 1:1 from one project. Use when the ask is "make a music
   video for this song", "turn this podcast / episode / interview into a video", "animate this script",
   "narrate and animate this", "make a song from these lyrics and a video for it", "painted video",
