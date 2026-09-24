@@ -169,8 +169,9 @@ Copy nothing from memory: build `STORYBOARD.md` (template in the project) from `
 ## 7 · Chapters in parallel
 
 Fill every `{{…}}` in `ANIMATION_GUIDE.md` (direction, stage, aspects, look paragraph, timing line, kits, cast API,
-style, text rule). Add each chapter's file to `project.json` `"scripts"` in order. Then spawn **one Agent per
-remaining chapter in a single message**, each with `model: "opus"`:
+style, text rule). Add each chapter's file to `project.json` `"scripts"` in order. A piece under ~45 s is one chapter:
+the director writes it and skips this step (still fill the guide: it's the project's record). Otherwise spawn **one
+Agent per remaining chapter in a single message**, each with `model: "opus"`:
 
 > You are painting chapter {{N}} ({{NAME}}, {{start}}–{{end}} s) of "{{TITLE}}", a procedural video in
 > `{{PROJECT_DIR}}`. Read `ANIMATION_GUIDE.md` fully, then `STORYBOARD.md` (idea, rules, cast, and your chapter's
@@ -191,11 +192,14 @@ accepted when you would ship its sheets.
 ## 9 · Render and deliver
 
 ```
-node tools/bench.mjs --look paint                        # once per machine: writes the best worker count
-node tools/render.mjs --aspect all [--look paint] [--captions words] [--resume]
+node tools/bench.mjs [--preset <the project's>]           # per project + look: writes project.local.json workers
+node tools/render.mjs --aspect all [--preset …] [--captions words] [--crf 17] [--resume]
+node tools/verify.mjs                                     # ship-gate checks on every master (below)
 ```
-Outputs `out/<slug>_<aspect>_<look>.mp4` and `out/last-render.json`. Segments are resumable (`--resume` after an
-interruption). Then the ship gate, then `SendUserFile` the masters (and one sheet).
+Outputs `out/<title-slug>_<16x9|9x16|1x1>_<preset or look>[_cap].mp4` and `out/last-render.json`. Segment length is
+automatic (at least two per worker, ≤ 20 s; `--seg` overrides) and segments are resumable (`--resume`). CRF 17 is
+archival (a grainy 24 s piece is 100–180 MB); `--crf 20` roughly halves it for delivery. Then the ship gate, then
+`SendUserFile` the masters (for phones, also a 720p copy) and one sheet.
 
 ## Episode density (long recordings, when chosen at intake)
 
@@ -235,8 +239,14 @@ file (`makeShaderLook` in `engine/looks/_shader.js` does the plumbing). See [ref
 - **Frame budget**: scene p95 < 150 ms (`check --bench`). Hundreds of shapes are fine, tens of thousands aren't.
 - **Frame time is `from + i/fps` with a global i** in every render path; boil and grain are floors of `t`, so any
   other formula moves them.
-- **Captions over the subject**: captions sit at a fixed band per aspect (9:16 at 70% height). Keep faces out of it,
-  or move the band: project.json `"captionStyle": { "y": .9, "size": 70, "maxChars": 20 }`.
+- **Captions over the subject**: captions sit in a band per aspect (baseline at 16:9 .86 · 1:1 .82 · 9:16 .70 of the
+  height). Keep faces out of it, or move it per aspect: project.json
+  `"captionStyle": { "accent": "#ffb347", "9:16": { "y": .8 }, "16:9": { "size": 54 } }`.
+- **Vertical stage (`stage: "9:16"`)**: the 16:9 frame sees the stage's centre band (1080 wide × ~608 tall) and 1:1 sees
+  y 420–1500. `focus: [x, y]` slides vertically too, and `pick({ '16:9': …, default: … })` sets per-aspect zoom and
+  subject height: a push that's right in 9:16 is far too tight in 16:9.
+- **`fill(g, c)` fills the stage rectangle in the CURRENT transform**: inside a translated/rotated/scaled frame it covers
+  only part of the canvas. Fill the background before transforming, or use `screen(() => fill(s, c))`.
 - **Silhouettes need a lit backdrop.** Dark figures on dark ground vanish (both looks): put heads against a window, a
   lit wall, a fire, the sky. The smoke tests lost a crowd and a dog this way until they were moved against light.
 - **Projects vendor the engine.** After changing the repo's engine/tools/analysis, refresh a project with
@@ -249,10 +259,14 @@ file (`makeShaderLook` in `engine/looks/_shader.js` does the plumbing). See [ref
 - [ ] `data.summary.txt` read; song coverage ≥ 70% or explained; tempo/phase sane
 - [ ] STORYBOARD.md rows come from the printout; density matches mode
 - [ ] every chapter reviewed on sheets at **every aspect**: first/last frame of every shot, transitions, hits
-- [ ] no page errors or lint in `check.mjs`; scene p95 < 150 ms
-- [ ] each master: `ffprobe` size matches aspect (1920×1080 / 1080×1920 / 1080×1080), duration within one frame of
-      the audio range, an audio stream present (`out/last-render.json` records all three)
-- [ ] watched start, middle and end of each master; sync on a hard hit checked by eye
+- [ ] no page errors or lint in `check.mjs`; `check --bench` **total** p95 < 150 ms (CPU-rasterized Canvas2D defers
+      drawing, so scene cost shows up under "look": the scene column alone understates it)
+- [ ] every word you cut or hit on is checked in the `WORDS` printout (and, for the one that matters most, against
+      the waveform: `F('rms')` or an energy plot); low-confidence Whisper echo words are dropped automatically
+- [ ] `node tools/verify.mjs` → VERIFY PASS: sizes, frame counts, audio present, no stray tracks, A/V offset ≤ 10 ms by
+      cross-correlation with the source, and each sampled master frame matches a fresh render at its exact time
+      better than its neighbours (no off-by-one); look at the `*_verify.jpg` strips it writes
+- [ ] if a human can watch: start, middle, end and the hardest hit
 - [ ] captions (speech): readable at 9:16, not covering the subject's face
 - [ ] delivered with `SendUserFile`; decisions logged in the project's `docs/decisions/`
 
