@@ -139,6 +139,27 @@ eFinancialModels, 15 Excel models:
 Verified: "Showing 1 to 15 of 15", price sum $1,685 == manifest $1,685
 ```
 
+## eFinancialModels review requirements (learned 2026-09-25, first review)
+
+- **At least 5 screenshots (20 max)**, not the one featured image. Rows are `screenshots[n]`
+  hidden inputs whose value is the attachment **URL** (not the ID); click
+  `button.insert-file-row#screenshots` to add a row, then set the value.
+- **A free PDF version** alongside the paid .xlsx is expected. Click `.epv-mp-btn-add-price`
+  once: it creates `epv_mp_prices[1]` AND `epv_mp_files[1]` already tied to it (price_id 2).
+  Set price 1 to "Free PDF Preview" / 0.00. Do NOT also click `.epv-mp-btn-add-file`, which adds
+  a file under price 1.
+- **Price was the other rejection reason** for an unreviewed new vendor ("too steep"), and eFM's
+  price parity means the fix reaches your own site and Stripe too.
+- Reviewers put rejected listings back to **DRAFT**; resubmitting via Submit returns them to PENDING.
+- **The media modal hangs on image uploads** (the attachment is created, the UI never finishes).
+  Faster and reliable: host the images somewhere with `Access-Control-Allow-Origin: *`, then
+  from the vendor page `fetch()` each blob and `POST /wp-json/wp/v2/media` with
+  `X-WP-Nonce: wpApiSettings.nonce` and `Content-Disposition: attachment; filename="x.png"`.
+  WordPress may store a big PNG as `.jpg`; match `png|jpe?g` when reading ids back, and filter
+  the media listing with `author=<vendor id>` (unfiltered it returns every vendor's uploads).
+- Verify by fetching each `?task=edit-product&post_id=N` page and parsing the form, not by the
+  product list: the list's price column lagged one save behind once.
+
 ## Notes
 
 - **A media modal left open silently overlays the form.** Screenshots and DOM reads then reflect
