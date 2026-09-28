@@ -48,21 +48,22 @@ For each learning identified:
 
 ### Step 4: Cross-check gstack learnings
 
-Check gstack's project-scoped learnings for anything that should also exist as a memory file (for non-gstack sessions) or vice versa:
+Check gstack's project-scoped learnings for anything that should also exist as a memory file (for non-gstack sessions) or vice versa. Run this exact command from the project directory. It is the same from the Bash tool and the PowerShell tool, and it takes ~45s, so give it a 180s timeout:
 
 ```bash
-eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)" 2>/dev/null || true
-~/.claude/skills/gstack/bin/gstack-learnings-search --limit 50 2>/dev/null || echo "No gstack learnings."
+node "$HOME/.claude/skills/session-retro/gstack-learnings.mjs" search --limit 50
 ```
+
+**Never call the gstack bins through a bare `bash`.** From the PowerShell tool, `bash` is WSL (`C:\Windows\System32\bash.exe`), where the bins don't exist. The old `2>/dev/null || echo "No gstack learnings."` step then reported nothing while 36 learnings existed (2026-09-27). The wrapper runs Git Bash by absolute path, refuses WSL, and prints stderr, so a failure shows up as an error and a genuinely empty result is labelled as empty. The slug comes from the working directory: pass `--cwd DIR` if you're not already in the project.
 
 For each gstack learning:
 - If it's a reusable cross-session insight, ensure a corresponding feedback memory file exists
 - If a memory file exists for a pattern not in gstack learnings, consider logging it there too via `gstack-learnings-log`
 
 For each new memory file created during the session:
-- If it describes an operational pitfall or pattern that gstack skills would benefit from, log it:
+- If it describes an operational pitfall or pattern that gstack skills would benefit from, write the JSON to a file with the Write tool (`{"skill":"session-retro","type":"TYPE","key":"SHORT_KEY","insight":"DESCRIPTION","confidence":N,"source":"observed"}`), then log it. A file avoids quoting and backslash loss in both shells:
 ```bash
-~/.claude/skills/gstack/bin/gstack-learnings-log '{"skill":"session-retro","type":"TYPE","key":"SHORT_KEY","insight":"DESCRIPTION","confidence":N,"source":"observed"}'
+node "$HOME/.claude/skills/session-retro/gstack-learnings.mjs" log --from-file PATH/TO/learning.json
 ```
 
 ### Step 5: Update MEMORY.md index
