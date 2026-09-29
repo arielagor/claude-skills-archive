@@ -80,6 +80,19 @@ Process only what IS a recording inside the fiction: a cassette, a phone line, a
 the narrator dry and close. The contrast does the work, and it keeps a long piece intelligible.
 Telephone band is 300 to 3400 Hz; cassette is roughly 180 to 6200 Hz plus a slow `vibrato` wow.
 
+**The diegetic NOISE (radio static, line noise, tape hiss) must duck under the voice.** Realism
+does not excuse masking. WAX v1 mixed its radio static un-ducked at a fixed level, reasoning that
+static does not get out of a voice's way; it measured only 14.7 dB under the band-limited Keeper
+voice, and Ariel heard it bury the words. What fixed it:
+- Synthesize the noise away from the 0.8 to 3.5 kHz speech core.
+- Notch that band in the mix.
+- `sidechaincompress` it with the voice as key (an AM set's AGC does exactly this).
+- Gate both sides: speech-to-noise at least 24 dB median in speech windows, AND the noise still
+  16 to 30 dB under the voice in the pauses. Because the duck is keyed by the voice, the noise's
+  own level only moves the pauses, and an overcorrection makes the radio vanish.
+
+Tools: `~/.claude/projects/wax-radio-drama/tools/snr.py`, `static-pauses.py`.
+
 ### 4. Score levels are MEASURED, never guessed
 
 The single most damaging bug in this pipeline: a first mix had the score at -12.4 LUFS against a
