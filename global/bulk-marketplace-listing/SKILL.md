@@ -160,6 +160,31 @@ Verified: "Showing 1 to 15 of 15", price sum $1,685 == manifest $1,685
 - Verify by fetching each `?task=edit-product&post_id=N` page and parsing the form, not by the
   product list: the list's price column lagged one save behind once.
 
+## eFinancialModels: the paid file must never go through REST (learned 2026-10-01)
+
+- **`POST /wp-json/wp/v2/media` writes to the PUBLIC `/wp-content/uploads/YYYY/MM/`.** Use it for
+  images and the free PDF only. The paid .xlsx must go through the price row's
+  `.epv-mp-btn-upload-file` modal, whose plupload carries `uploading_type: files` and so lands in
+  `/uploads/edd/`. A file there 302s to the homepage when fetched without a session; check that
+  with `fetch(url, {credentials:'omit'})` and `r.redirected`. Vendors **cannot delete media**
+  (REST 403, `nonces.delete === false`), so a wrong upload is a permanent public copy until eFM
+  support removes it.
+- **A synthetic submit can silently do nothing, or half-save.** A `.click()` or a coordinate click
+  on Submit can land on TinyMCE "Add media" after a scroll. One half-save went Pending with title
+  and content only, plus a $0 single price, and a Pending listing's price section is locked
+  (`epv-mp-accordion-disabled`), so it cannot be repaired from its edit page. Reliable: focus
+  `input[type=submit][name=submit]`, then `jQuery(form).trigger('submit')`. Stub
+  `window.swal` to capture `{title, text}`, and hook XHR to confirm `success: true`.
+- Deleting a listing: GET `?task=delete-product&post_id=N`, then POST that page's form (`pid` +
+  `fes_nonce`) with `fetch`. The visible Delete button did not submit.
+
+## Flevy: submit natively
+
+"Submit for Approval" ignored a synthetic click and `form.requestSubmit(btn)` (no listener cancels
+it; it just never navigates). `HTMLFormElement.prototype.submit.call(form)` posts it, and success
+lands on `/account/documents&uploadsuccess` with "pending approval". Excel needs no preview-slide
+list. The primary-document input takes `file_upload` directly.
+
 ## Notes
 
 - **A media modal left open silently overlays the form.** Screenshots and DOM reads then reflect
