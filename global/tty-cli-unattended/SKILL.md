@@ -96,6 +96,21 @@ was unchanged.
   this login in chat, and say which account the consent page showed.
 - The same driver pattern fits other Ink/Inquirer CLIs that refuse to run without a TTY; swap
   the spawn args and the URL/secret regexes.
+- **If Chrome's claude.ai session has lapsed, stop.** The authorize link redirects to
+  `claude.ai/login?reauth=1`, and "Continue with Google" opens a popup window the extension cannot
+  see or drive (2026-09-29). Ask Ariel to sign in to claude.ai in Chrome, then rerun; never enter a
+  password.
+- **If clicking Authorize by ref does nothing twice, click by coordinates.** On 2026-10-01 two
+  ref clicks (one after `scroll_to`) left the page unchanged; a `screenshot` at scale 0.5 and a
+  left_click at the button's full-frame coordinates went straight to the callback page.
+- **Minting for WSL:** pass a `\\wsl.localhost\<distro>\home\<user>\.claude-oauth-token` path as
+  the token file, so the secret is written straight into the distro and never exists on the
+  Windows side; then `chown`/`chmod 600` it from inside WSL. Have the user's `claude` wrapper
+  export `CLAUDE_CODE_OAUTH_TOKEN` from that file when unset, so non-interactive callers
+  authenticate. `claude auth status` then reports `loggedIn: true, authMethod: oauth_token`.
+  Worked example: memory `project_wsl_claude_watchdog`.
+- **Plan for expiry.** The token lives one year. Record where it is used and warn ahead of the
+  anniversary (`\CronHealth\WslClaude` fails 30 days early, from the token file's mtime).
 - See also: memory `feedback_claude_code_oauth_logout_refresh_race` (why jobs got their own
   token), `~/.claude/scripts/lib/lean-claude.mjs` (how the token is consumed).
 
