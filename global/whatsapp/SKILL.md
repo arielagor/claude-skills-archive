@@ -34,7 +34,12 @@ If a thread needs history the registry doesn't hold, read its GBrain page at `~/
 ## 3. Each tick
 
 1. Load the Chrome tools in one ToolSearch call: tabs_context_mcp, navigate, computer, find, get_page_text, browser_batch.
-2. `tabs_context_mcp`: reuse the existing `web.whatsapp.com` tab if there is one, otherwise open one. If WhatsApp shows a QR code, the session has logged out: notify Ariel ("WhatsApp Web logged out, scan the QR on the laptop") and stop the tick.
+2. **Keep the tab alive with a self-healing check every tick.** `tabs_context_mcp`, then:
+   - **No WhatsApp tab** (closed, crashed, or the browser restarted): open one and navigate to `https://web.whatsapp.com`. The login lives in the site's stored data, so it comes back logged in without a QR code.
+   - **The page shows "WhatsApp is open in another window":** click **Use here**.
+   - **A blank, frozen, or "Trying to reach phone" page:** reload it once, and wait 10s.
+   - **It shows a QR code:** the session really is logged out. Notify Ariel ("WhatsApp Web logged out, scan the QR on the laptop") and stop the tick. Never try to get around the QR.
+   - **Healthy:** log nothing and move on.
 3. Use the **Unread** filter, then open each thread in the registry with status AWAITING REPLY. Read the new messages, with a screenshot plus `get_page_text` if it's long.
 4. For each new inbound message from a non-excluded person:
    - Check the thread's cadence rules before deciding to reply now. Personal threads follow human pacing, not instant replies.
