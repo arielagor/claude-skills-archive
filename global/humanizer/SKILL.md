@@ -156,6 +156,27 @@ the job `humanizer:<property>`. Tier `standard` (Sonnet); override with
 `HUMANIZER_TIER`. A failed or quota-skipped repair returns the original text
 unchanged, with the reason in `error`.
 
+## A pass is not the same as clean
+
+A lint PASS means no rule fired. It does not mean nobody would spot the
+prose as Claude's. On 2026-10-03 a 2,473-word essay passed clean, and a
+line-by-line read then found 21 tells. Those became 13 formulations and 10
+lexicon entries (`De-Claudish pass, 2026-10-03` in both rule files), with a
+verbatim before/after fixture for each. Swept over real prose, the new rules
+hit **0 of 9** human-written Chapin posts and **67 of 245** agor.me back-catalogue
+posts, every sampled hit a real tell. Two things changed in how to use it:
+
+- `lint` now lists every soft tell with its line, even under the ceiling. A
+  single warn never trips the density gate in long copy, so printing only the
+  count hid them.
+- For anything published under Ariel's name, run `lint` first and then read it
+  through for the shapes no regex can see: the punchy couplet, the run of
+  short closing sentences, the line that sounds good and claims more than
+  you can verify.
+
+Run the tests by file path: `node --test tests/humanizer.test.mjs`. The
+directory form (`node --test tests/`) fails on Windows.
+
 ## Known limits
 
 - The lexicon is tuned for English business and technical prose. It has not
