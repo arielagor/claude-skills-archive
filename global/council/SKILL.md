@@ -5,7 +5,7 @@ description: >-
   consensus, or to the best option after 3 rounds, on any recommended decision. Use when the user
   types /council, or asks to "run a council", "have the agents decide", "argue this out across
   perspectives", "get a multi-lens decision", "council this", or "replace my judgment with the
-  council". Runs the proven engine from the Agor AI Ads venture (headless claude -p, $0 on the Max
+  council". Runs the proven engine from the Agor AI Ads venture (lean-claude seam, standard tier, $0 on the Max
   plan, full transcript logged). The council decides WHAT to do; irreversible or outward actions
   still get a human checkpoint.
 ---
@@ -30,7 +30,7 @@ go-live architecture autonomously.
    they gave them, the options. If the decision or the options are unclear, ask once with
    AskUserQuestion: the decision statement, the candidate options (or "open" for an open-ended
    decision), and any context the advisors need (constraints, goal, what already exists).
-2. **Run the council** (claude -p, $0; the engine strips ANTHROPIC_API_KEY per call):
+2. **Run the council** (lean-claude seam on the standard tier, $0 on the Max plan):
    ```bash
    node ~/.claude/skills/council/bin/council.mjs \
      --q "<the decision as one question>" \
@@ -95,4 +95,4 @@ lenses is deliberation. Swap or extend the lenses for a project by editing `pers
 
 ## Verify
 
-`cd ~/.claude/skills/council && node --test` (8 tests, zero model spend; the LLM runner is injected).
+`cd ~/.claude/skills/council && node --test` (16 tests, zero model spend; the LLM runner is injected).

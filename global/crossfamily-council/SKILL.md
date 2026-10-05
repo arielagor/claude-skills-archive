@@ -66,7 +66,8 @@ python "$SKILL_DIR/scripts/crossfamily_council.py" "Should we ship X or hold?" -
 # Adversarially review your OWN deliverable before shipping (the key use):
 python "$SKILL_DIR/scripts/crossfamily_council.py" \
   "Adversarial sign-off: find the weakest claims, any framing bias, and the overclaims to delete before we ship. Be harsh." \
-  --context "$(cat README.md)" --json > review.json
+  --context "$(cat README.md)" --subject-family claude --json > review.json
+# --subject-family claude: you (Claude) wrote it, so a different family writes the synthesis.
 
 # Full transcript as JSON (proposals + critiques + synthesis):
 python "$SKILL_DIR/scripts/crossfamily_council.py" "QUESTION" --context "..." --json
@@ -78,6 +79,10 @@ python "$SKILL_DIR/scripts/crossfamily_council.py" --score "Evaluate this answer
 
 `--no-adversarial` skips the red-team round (faster, single proposal per family + synthesis).
 `--families claude,gemini` restricts the panel.
+`--subject-family <fam>` keeps the synthesis out of the subject's own family (pass `claude` whenever
+you are reviewing your own work). `--synthesizer <fam>` picks the synthesizer explicitly, but never
+the subject family. The Claude member runs through the lean-claude seam on the deep tier
+(`TELOS_CLAUDE_MODEL` takes a tier: deep, standard or fast).
 
 ## How to use the result well
 - **Make the gate consequential.** Don't just log the verdict — act on it. Delete the overclaims it
