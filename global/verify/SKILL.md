@@ -56,6 +56,8 @@ For the most recent task claimed complete (or the one named in arguments):
 | MCP install | `claude mcp list` shows it `✓ Connected`, plus invoke one tool successfully |
 | File edit | `grep` for new content; `git diff --stat` for line counts |
 | Cron / scheduled task | Trigger one manual run, confirm it produced output, then check next-run-time |
+| LLM-seam gate, prompt change, tier change | N≥3 runs on a fixed protocol (same inputs, same tier, same seam), matching `verify-verdict.mjs` FLOOR=3; N≥5 when the gate guards money or an outward action. Report the pass rate AND the spread, include one placebo input the gate must NOT flag, and never credit an improvement smaller than the run-to-run spread. |
+| Agent-written fix plus its test | Take the fix out (`git stash push -- <fix files>`, or revert just the fix hunk), run the test: it must FAIL. Restore the fix, run again: it must PASS. A test that passes both ways tests nothing; agents write those often (arXiv 2604.14437). |
 
 ## Anti-patterns to refuse
 
@@ -67,6 +69,8 @@ For the most recent task claimed complete (or the one named in arguments):
 - "The source says X" → that is never evidence that PROD serves X. Verify the artifact users hit.
 - "The guard/test passes" → ask what it would FAIL on. If you cannot make it fail, it is not a guard.
 - "The script exited 0" → for a wrapper script, confirm it actually WROTE something (count rows/lines before and after). `set -euo pipefail` plus command substitution can swallow an inner error into a silent no-op.
+- "It passed once" → a classifier, LLM gate or prompt change that ran green one time is a sample of one. Run N≥3 and report the rate, as in the recipe row above.
+- "The new test passes" → for a test written alongside its own fix, that proves nothing until it has been seen to FAIL with the fix taken out.
 
 ## A "ready" deploy is not YOUR deploy
 
