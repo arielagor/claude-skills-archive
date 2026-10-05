@@ -85,6 +85,12 @@ curl -s -H "Authorization: Bearer $TOK" https://api.netlify.com/api/v1/sites/<si
 Also check `build_settings.repo_branch`: the publish branch is not always `main`, and pushing to
 the wrong one builds nothing while every command still exits 0.
 
+**The inverse false alarm:** a deploy row with `state: error` and `error_message` "Canceled build
+due to no content change" is not a failure. The site's ignore-build step skipped a docs- or
+scripts-only commit (seen on agor.me for a HANDOFF.md push, 2026-10-04). Your code is live if a
+LATER published deploy has your commit as an ancestor: `git merge-base --is-ancestor <yours>
+<published_commit_ref>`.
+
 **Generalize past Netlify.** Ask what artifact the user actually touches, and verify THAT:
 a long-running daemon executes the bundle it built at spawn (a process started days ago serves
 the old code no matter what any branch says), a browser executes the served JS chunk, a phone
