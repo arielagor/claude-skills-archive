@@ -69,9 +69,18 @@ What state was the project in? What triggered this session?
 - **Because**: The actual reasoning — constraints, trade-offs, priorities
 - **Consequence**: What this commits us to or forecloses
 
-### 2. [Next decision...]
+### 2. [Decision that CREATES a cron/scheduled task, hook, agent or collector]
 
-(Repeat for each substantive decision. A session typically has 2-7.)
+- **Choice**: What was built and what it does
+- **Over**: What alternatives were considered (including "do nothing")
+- **Because**: The actual reasoning
+- **Consequence**: What this commits us to or forecloses
+- **Automation**: The exact name (task path, hook file, agent name, collector script)
+- **Expected benefit**: A metric and a number, with the baseline (not "saves time")
+- **Review date**: YYYY-MM-DD, an absolute date 2 to 6 weeks out (never "later" or "after launch")
+- **Kill if**: The observable condition under which it is retired
+
+(Repeat for each substantive decision. A session typically has 2-7. The last four fields are mandatory for any decision that creates an automation; see "Decisions That Create Automations".)
 
 ## Discoveries
 
@@ -119,6 +128,38 @@ Do NOT log these — they're implementation details, not decisions:
 - Formatting decisions
 - Which test assertion library
 
+## Decisions That Create Automations
+
+Automations get built on an expected benefit nobody writes down, so nobody notices when it never arrives (research: "To Build or Not to Build?", 2026-05-02; "Quantifying the Expectation-Realisation Gap for Agentic AI Systems", arXiv 2602.20292). So any decision record that **creates** a cron/scheduled task, hook, agent or collector MUST carry three fields, next to an `Automation` line naming it:
+
+| Field | What goes in it |
+|-------|-----------------|
+| **Expected benefit** | A metric and a number, with the baseline. "40 replies a week classified without a human, from 0", not "saves time". |
+| **Review date** | An absolute `YYYY-MM-DD`, 2 to 6 weeks out. Never "later", "after launch" or a relative date. |
+| **Kill if** | The observable condition under which it is retired, tied to the metric. "Fewer than 10 a week for 2 consecutive weeks." |
+
+Worked example (a decision made 2026-10-05):
+
+```markdown
+### 3. Nightly reply collector
+
+- **Choice**: Scheduled task `\Collector\Nightly` pulls replies from the inbox and classifies them
+- **Over**: Classifying by hand each Monday
+- **Because**: Replies sat unread for days
+- **Consequence**: One more S4U task to keep healthy
+- **Automation**: `\Collector\Nightly` (`ops/collector.mjs`)
+- **Expected benefit**: 40 replies a week classified without a human, up from 0
+- **Review date**: 2026-11-02
+- **Kill if**: Fewer than 10 replies classified per week for 2 consecutive weeks
+```
+
+Rules the CEO weekly review relies on (`agor-company/ops/lib/automation-review-core.mjs` scans `docs/decisions/*.md` in every repo under `~/.claude/projects/` and lists every `Review date:` earlier than today with its Kill-if):
+
+- Each field is its own line starting with the field name (`- **Review date**: 2026-11-02` works; so does a plain `Review date: 2026-11-02`).
+- One automation per heading section, so each gets its own Review date. A review date that is not a real `YYYY-MM-DD` is listed as unreadable.
+- When the review date passes: measure the benefit, then either write a new `Review date` (it stays) or add a `- **Retired**: YYYY-MM-DD, reason` line and disable the automation (it goes). Never leave a past date standing.
+- Decisions that create no automation do not need these fields.
+
 ## The Real-Time Rule
 
 **Log decisions AS they emerge, not at session end.**
@@ -151,4 +192,5 @@ Update the index every time a new entry is created. Statuses: `Active`, `Superse
 - [ ] Create today's entry file with the template
 - [ ] Fill in Context section before writing code
 - [ ] Begin logging decisions as work proceeds
+- [ ] Any automation created (cron, scheduled task, hook, agent, collector) has Expected benefit, Review date and Kill if
 - [ ] Close entry at session end with Next Session Context
