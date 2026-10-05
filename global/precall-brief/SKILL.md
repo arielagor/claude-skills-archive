@@ -82,6 +82,21 @@ What to cover (3 to 5 concrete angles + ONE qualifying question for the first
 5 minutes) / Sources. Tie every angle to the actual person, company, and
 sector, never generic "AI strategy".
 
+**Stack fingerprint.** Once you know the company domain (from their corporate
+email or site), run it from the agor.me repo:
+
+```powershell
+& "node_modules\.bin\tsx.cmd" scripts/stack-fingerprint.mjs <domain-or-email>
+```
+
+It reads only the company's MX/TXT DNS records and its homepage, so no people
+lookups and no scanning. If it prints signals, add a `## Their stack` section
+after "What they're working on now" with those bullets as given (each keeps its
+evidence note, which is its source), plus one sentence on where AI work would
+plug in. Tie at least one "What to cover" angle to a tool listed. A TXT signal
+is a verification token: write "has a <tool> account", never "runs on <tool>".
+If it prints nothing, or the domain is a personal email, skip the section.
+
 ### 3. Write the brief markdown
 Save to `agor.me/scripts/adhoc/<slug>-brief.md` (slug = `lastname-company`).
 H1 `# Pre-call brief: <Name> (<Company>)`, then `**Meeting:**` and `**Topic:**`
