@@ -46,6 +46,8 @@ For each learning identified:
 - **Infrastructure built** → GBrain project page + memory file + MEMORY.md entry + CLAUDE.md if cross-session
 - **Codebase knowledge** → appropriate CLAUDE.md or memory file
 
+Every NEW feedback memory (failed approach, successful approach, correction) gets `status: provisional`, a `created: YYYY-MM-DD` and a one-line `evidence:` in its frontmatter (nested under `metadata:`, same shape as `/correct`), plus **Why:** and **How to apply:** lines. `evidence:` names the artifact that grounds it (a tool call, file, commit, or Ariel's quoted words). Promotion to confirmed is a review flag raised by `scripts/memory-prune.mjs` (monthly, `\Claude\MemoryPrune`), not a gate. `scripts/session-retro.mjs` only analyses audit logs and writes no memory files, so nothing else changes.
+
 ### Step 4: Cross-check gstack learnings
 
 Check gstack's project-scoped learnings for anything that should also exist as a memory file (for non-gstack sessions) or vice versa. Run this exact command from the project directory. It is the same from the Bash tool and the PowerShell tool, and it takes ~45s, so give it a 180s timeout:
