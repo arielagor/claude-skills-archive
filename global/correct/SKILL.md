@@ -37,6 +37,9 @@ Do NOT fire for trivial typo fixes or one-off transient errors. Capture durable,
    description: <the claim, one line>
    metadata:
      type: feedback
+     status: provisional
+     created: <YYYY-MM-DD>
+     evidence: "<one line: the artifact that grounds the before-state, e.g. tool call, file path, commit, or Ariel's quoted words with the date>"
    ---
 
    <the claim, expanded to 2-3 sentences with the grounded before-state.>
@@ -48,6 +51,8 @@ Do NOT fire for trivial typo fixes or one-off transient errors. Capture durable,
    Related: [[<link to adjacent memory if one exists>]].
    ```
    First check for an existing feedback memory on the same topic (Grep the memory dir by keyword); UPDATE it rather than creating a duplicate.
+
+   **New feedback memories start `status: provisional` with an `evidence:` line** (harness P5). `evidence:` is the same grounded before-state the Hard rules demand, in one line; if you cannot fill it, ask the clarifying question instead of writing the file. Promotion to confirmed (edit `status: provisional` to `status: confirmed`, or delete the line) is a flag for review by `scripts/memory-prune.mjs`, never a gate: provisional memories load and apply exactly like any other. That script reports provisional files older than 60 days with no `evidence:` (PROVISIONAL-STALE) and provisional files that do have evidence (ready for a promotion review). When UPDATING an existing memory, leave its `status` as it is.
 
 3. **Add the MEMORY.md index line** under the most relevant section of `C:\Users\ariel\.claude\projects\C--Users-ariel\memory\MEMORY.md`:
    `- **<claim, with date> (YYYY-MM-DD).** <one-line hook.> — [feedback_<slug>.md](feedback_<slug>.md)`
