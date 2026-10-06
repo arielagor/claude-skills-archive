@@ -113,7 +113,7 @@ This is the exact template that produces the clean, professional look. Adapt the
 \newenvironment{prompt}{%
     \begin{tcolorbox}[colback=promptbg, colframe=promptborder,
         title={\textsc{Ariel}}, fonttitle=\bfseries\small,
-        coltitle=promptborder]
+        coltitle=white]   % title text sits ON the colframe bar; promptborder here made it invisible (fixed 2026-10-05)
     \itshape
 }{%
     \end{tcolorbox}
@@ -123,7 +123,7 @@ This is the exact template that produces the clean, professional look. Adapt the
 \newenvironment{insight}{%
     \begin{tcolorbox}[colback=insightbg, colframe=insightborder,
         title={\small\textbf{Key Insight}},
-        fonttitle=\color{insightborder}]
+        coltitle=white]   % was fonttitle=\color{insightborder}: gold on the gold bar, invisible (fixed 2026-10-05)
 }{%
     \end{tcolorbox}
 }
@@ -263,6 +263,8 @@ Simplify: use only the title block, body text, and closing. Skip boxes entirely.
 | Cross-references wrong | Run xelatex twice |
 | pandoc not found | `export PATH="$PATH:/c/Users/ariel/AppData/Local/Pandoc"` |
 | Compile hangs | Use `-interaction=nonstopmode` flag |
+| Long Markdown report | Don't hand-convert. `~/.claude/scripts/period-report/build.sh` runs pandoc with `cleanpdf.lua`. It maps `> **Ariel:**` to prompt, `> **KEY INSIGHT:**` to insight, a numbered list of bold-titled items to summarybox and `::: closing` to the closing rule, using this exact preamble. |
+| `No counter 'none'` / missing glyphs (→ ✓ ≈) | Pandoc tables need `\newcounter{none}`, and Georgia has no arrows or checkmarks: add `newunicodechar` mappings (see `period-report/preamble.tex`). |
 
 ## Naming Conventions
 
