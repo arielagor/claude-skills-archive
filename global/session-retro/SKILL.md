@@ -1,3 +1,12 @@
+---
+name: session-retro
+description: >-
+  Session learning capture. Run at the end of any significant session (or mid-session after a complex
+  debugging episode) to extract and persist learnings: retry storms, file churn, failed and successful
+  approaches, corrections received. Use when Ariel says "/session-retro", "retro this session" or
+  "capture what we learned".
+---
+
 # /session-retro — Session Learning Capture
 
 Run this at the end of any significant session (or mid-session after a complex debugging episode) to extract and persist learnings.

@@ -1,6 +1,7 @@
 ---
 name: web-action
-description: Execute a high-level web goal (e.g. "add Gmail alias foo@bar.com", "delete LinkedIn comment X", "publish GTM container Y", "fill out and submit this application form") by trying API → claude-in-chrome MCP → Playwright in order with 60s timeouts and automatic fallback. Logs successful paths to memory so future runs prefer the proven route. Also the canonical reference for filling any React form in the browser: read the "React control traps" section before using form_input, which silently fails on comboboxes, radios and checkboxes (renders correct, validates empty) and has caused a blocked submit and an application submitted with no resume attached.
+description: >-
+  Execute a high-level web goal (e.g. "add Gmail alias foo@bar.com", "delete LinkedIn comment X", "publish GTM container Y", "fill out and submit this application form") by trying API → claude-in-chrome MCP → Playwright in order with 60s timeouts and automatic fallback. Logs successful paths to memory so future runs prefer the proven route. Also the canonical reference for filling any React form in the browser: read the "React control traps" section before using form_input, which silently fails on comboboxes, radios and checkboxes (renders correct, validates empty) and has caused a blocked submit and an application submitted with no resume attached.
 ---
 
 # web-action
