@@ -59,7 +59,7 @@ If a thread needs history the registry doesn't hold, read its GBrain page at `~/
 Start or continue the loop with ScheduleWakeup, using the prompt `/whatsapp`.
 - **A thread is live** (a reply came in the last ~20 min within its burst window): use 300–600s.
 - **Otherwise:** use 1200–1800s.
-- **Overnight (11pm–7am PT):** use 3600s, and don't draft for personal threads.
+- **Overnight (12am–8am PT): exactly 3 wakes, at ~12am, ~4am and ~8am** (Ariel, 2026-10-06). ScheduleWakeup clamps to 3600s, so overnight runs on a recurring CronCreate instead: `3 0,4,8 * * *`, prompt `/whatsapp` with the overnight note. On startup, check with CronList that it exists and create it if it's missing (cron jobs are session-only and expire after 7 days). Any tick from 11pm to midnight schedules its wakeup only if it lands before midnight; otherwise it doesn't call ScheduleWakeup, and the cron takes over. The 12am and 4am cron ticks don't call ScheduleWakeup. The 8am tick resumes daytime ScheduleWakeup pacing. Don't draft for personal threads overnight.
 
 `/whatsapp status`: run one tick and report, with no ScheduleWakeup. `/whatsapp stop`: ScheduleWakeup `stop: true`.
 
