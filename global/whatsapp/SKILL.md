@@ -33,6 +33,7 @@ If a thread needs history the registry doesn't hold, read its GBrain page at `~/
 
 ## 3. Each tick
 
+0. **Heartbeat first, every tick (status ticks too):** write `~/.claude/personal/whatsapp-heartbeat.json` as `{"at":"<ISO now>","pid":<CLAUDE_PID>}` (read `$env:CLAUDE_PID` in PowerShell; use the Write tool or `Set-Content`). The `\Personal\WhatsAppLoop` watchdog (`~/.claude/scripts/whatsapp-tick/watchdog.ps1`, every 15 min) relaunches a minimized `/whatsapp` session whenever that pid is gone, so this file is how the loop survives a closed window or a reboot. Never run two loops: if the heartbeat pid is alive and is not this session, say so and stop without scheduling a wakeup.
 1. Load the Chrome tools in one ToolSearch call: tabs_context_mcp, navigate, computer, find, get_page_text, browser_batch.
 2. **Keep the tab alive with a self-healing check every tick.** `tabs_context_mcp`, then:
    - **No WhatsApp tab** (closed, crashed, or the browser restarted): open one and navigate to `https://web.whatsapp.com`. The login lives in the site's stored data, so it comes back logged in without a QR code.
@@ -71,4 +72,4 @@ When Ariel says "also handle <name>":
 
 ## What it cannot do
 
-It runs only while a Claude Code session is open and Chrome has WhatsApp Web logged in. Closing every session pauses it; running `/whatsapp` in a new session resumes it.
+It needs an interactive Claude Code session (headless `claude -p` is refused browser automation by design, probed 2026-10-06) and Chrome with WhatsApp Web logged in. The `\Personal\WhatsAppLoop` watchdog keeps that session alive: it relaunches a minimized `/whatsapp` session within ~15 minutes of the last one dying, and at logon. Closing the window is no longer a pause; to pause on purpose, `Disable-ScheduledTask -TaskPath '\Personal\' -TaskName WhatsAppLoop` and run `/whatsapp stop`.
