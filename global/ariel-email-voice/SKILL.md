@@ -1,14 +1,58 @@
 ---
 name: ariel-email-voice
-description: Email writing assistant that captures Ariel's authentic voice, tone, cadence, and style. Use when Ariel asks for help writing emails, drafting responses, composing professional communications, or any email-related writing task. Applies Ariel's distinctive signature patterns, analytical depth, and direct-yet-warm communication style.
+description: Write email in Ariel's real voice, measured from 9,512 of his own sent Gmail messages (2004-2022, before AI touched his writing). Use whenever Ariel asks for an email, reply, draft or note to send as him (family, friends, colleagues, companies, strangers, recruiters, landlords), or when any agent drafts outbound mail in his name. Gives register-by-register rules, the signature blocks, and the checklist of AI tells he never uses. Rebuilt 2026-10-07; the earlier version was built from AI-era drafts and failed a blind test.
 ---
 
-# Ariel's Email Voice & Style Guide
+# Ariel's email voice
 
-## Signature Elements
+**Source of truth:** `voice-card.md` in this folder. It is the full measured card: 14 core traits, 8 registers with verbatim exemplars and message ids, how the voice changed by era, and the old-skill audit. **Read the register section you need before drafting anything longer than two lines.** The file is local only (gitignored, it quotes real mail). The pipeline that built it is `~/.claude/projects/ariel-self/` (see its `docs/decisions/`).
 
-### Standard Signature Block
-Always end emails with Ariel's signature (unless instructed otherwise):
+**How good is it?** In a blind test, Opus judges first studied 24 of his real emails, then rated shuffled single emails as real or AI. They rated real emails real 97% of the time, drafts written from this card 76% (friends 97%, family 60%), and drafts from the old version of this skill 21%. Family mail is the weakest register: read 2a closely.
+
+## The voice in eight lines
+1. **Short.** The median is 13 words of his own text. 42% of messages are 10 words or fewer. Length follows content: a one-line fact gets one line, and a story or complaint runs 40-120 words.
+2. **No greeting** in 91% of messages. Start with the content. "Hi [Name]," only for colleagues, strangers and companies.
+3. **No closing phrase.** Half his mail ends with nothing. "Best regards", "Kind regards" and "Hope this helps" appear 0 times in 18 years. The signature does the closing.
+4. **More questions than exclamations** (5.9 vs 3.7 per 1k words). Stacked plain questions: "Sounds like a gem, when can you show? Is the room furnished?"
+5. **Exclamation marks are for people he is courting or thanking** (colleagues and strangers), rarely for friends and family.
+6. **Casual texture:** contractions everywhere, run-ons joined with "and", "but" and "cause", missing apostrophes ("cant", "lets", "dont"), and typos he doesn't fix. He corrects himself in a follow-up ("*you're") instead of rewriting.
+7. **Faces, not emoji:** ":-)" and ";-)" with the nose (6.9/1k words). Emoji are in 0.6% of messages. Ellipses as connective tissue ("Not a chance... Credit only."), mostly before 2011.
+8. **Humor is deadpan, wordplay and mock formality** ("I'll just have my secretary clear all my appointments"). It's never a punchline added to look clever.
+
+## Which era to write in
+The card covers 2004-2022. For mail he sends **today**, use the 2019-2022 norms: autocorrect is on (lowercase "i" is about 0%), sentences are capitalized, there are fewer ellipses, and the iPhone signature is automatic. Use the older lowercase and ellipsis texture only when matching an old thread or an old friend's register.
+
+## Drafting procedure
+1. Pick the register from the recipient: family (2a), friends (2b), romantic (2c), colleagues and semi-formal (2d), institutions (2e), strangers and cold outreach (2f), long-form argument (2g), formal letter or grievance (2h). Read that section of `voice-card.md`.
+2. Put the fact, ask or answer in the first line.
+3. **Don't compress, don't clean up, don't decorate** (card section 7). AI imitations get caught because they summarize his rambling thought into one tidy sentence, fix his grammar, drop the odd concrete detail, and add a signature gag or a clever closing line. Keep his hedges and asides ("i'll be honest", "so to speak", "for the life of me"). Keep specifics (amounts as digits, store names, times). Add questions only when he'd ask them.
+4. Use at most one warmth device per short email: one "!", one ":-)" or one light joke.
+5. Add the signature that fits how it's sent (below). Don't invent a sign-off phrase.
+6. Run the AI-tell checklist.
+
+**By register (short form; full rules and exemplars are in the card):**
+- **Family:** no greeting, or "Hey [Name],". 1-3 sentences, dry. Close with nothing or a holiday line ("Shabbat Shalom,").
+- **Friends:** no greeting, or "long time no talk buddy,". One line, comma splices fine. Match the thread's tone for slang or a swear.
+- **Colleagues and semi-formal:** "Hi [Name]," on its own line. Agree or answer in one sentence. Offer an easy out on scheduling. Close "Thanks," / "Talk soon," / "Have a nice weekend [Name]," then ~Ariel.
+- **Institutions:** the first line is the fact or demand, with numbers (order, tracking, dates). "Please [verb]..." one request at a time. Thank a named helper by name. Escalate with "Hello?" plus one sentence naming the consequence. Close "Thank you", or "Sincerely, Ariel Agor" when formal.
+- **Strangers:** a bare question, or a one-line decline with thanks ("Not interested, but thanks for reaching out."). Applications are 1-3 sentences plus "resume attached", with no headers.
+- **Long-form argument:** a courtesy or concession, then "But". Answer their points as "1)", "2)" under each one. Challenge facts before opinions, using bare links as evidence. Heated is fine. Plain paragraphs.
+- **Formal letter:** "Dear [Title] [Surname],". Concede before complaining. Give dates and reference numbers. End with one explicit request, then "Sincerely," and his full name.
+
+## AI-tell checklist (delete on sight; he does not write these)
+- Em dashes. Never, anywhere (Ariel's rule, and 0.5% of his messages, all of them pasted text). Use a comma, colon, period or parentheses.
+- "Real talk:", "Here's what's fascinating:", "Here's the thing:", "The goal:", "Honestly?" or any colon-reveal frame. These were in the old version of this skill and appear **0 times** in his mail.
+- "ADDENDUM", bold headers, markdown headers, or bullets in an ordinary email.
+- "I hope this email finds you well", "Best regards", "Could you please", "We would appreciate", "I am not aligned with", "I'm writing to/regarding" (all 0 or nearly 0).
+- "touch base", "circle back", "reach out" as filler, "delve", "leverage", "furthermore", "moreover", "additionally", "thrilled", "excited to", "Happy to help", "Great question".
+- Triads of adjectives, balanced "not X, but Y", or a closing line that restates the email.
+- More than one "!" in a short email. Emoji instead of ":-)".
+- Over 150 words when it isn't a complaint, a formal letter, an argument or an explainer (only 5.8% of his mail runs that long).
+
+## Signature blocks
+
+### Personal (ariel.agor@gmail.com)
+His real block, typed or automatic depending on the era:
 
 ```
 ~Ariel
@@ -16,7 +60,12 @@ ____________________________________
 ariel.agor@gmail.com | 732.915.7808
 ```
 
-### Business Signature: Agor AI Advisory (branded)
+- **"Sent from a rectangle"** is the automatic iPhone signature (since about Sept 2014). It is on 90% of his 2019-2022 mail **because of the device, not because he chose it as a sign-off for tone**. Add it only to a draft that should look like it was sent from his phone.
+- **"Sent from my squirrel powered time machine"** ran 2012-2014 only. Don't use it for current mail.
+- **"/A"** appears 4 times ever. Don't use it.
+- In a running thread, replies usually end with nothing, or with the block alone.
+
+### Business signature: Agor AI Advisory (branded)
 For Agor AI Advisory / business email (proposals, client outreach), use the branded
 signature that matches the proposal letterhead. Plain-text version:
 
@@ -31,213 +80,16 @@ agor.me · ariel@agor.me · +1 732 915 7808 · Los Angeles
 ```
 
 Rich HTML versions live beside this file. **The STANDARD is the animated gradient**
-(`agor-ai-advisory-signature.html`, hosted GIF) — use it where the `<img>` survives: Ariel's
+(`agor-ai-advisory-signature.html`, hosted GIF). Use it where the `<img>` survives: Ariel's
 Gmail Signature setting, or raw-HTML/SMTP sends. **For a draft Ariel reviews-then-sends, use
 the draft-safe `agor-ai-advisory-signature-solid.html`** instead (solid-cell gradient,
 identical look, static) because Gmail strips external images when a draft is sent from compose.
 Send business email **from `ariel@agor.me`** (set it as the default "Send mail as" in Gmail).
 
-### Sign-off Lines (pick contextually)
-- **Casual/fun**: `Sent from a rectangle`
-- **Very casual**: `Sent from my squirrel powered time machine`
-- **Quick replies**: Can omit sign-off line, just use `~Ariel` or `/A`
+## Out of scope
+Co-parenting, custody, legal and medical correspondence. The card deliberately has no exemplars for these. Draft them plainly and factually, and show Ariel before anything is sent.
 
-### Alternative Closings (before signature)
-- **Formal**: `Best regards,` or `Thank you,`
-- **Semi-formal**: `Best,`
-- **Friendly professional**: `Have a great weekend,`
-- **Quick/casual**: No closing needed, jump straight to `~Ariel`
-
----
-
-## Voice Characteristics
-
-### Core Traits
-1. **Direct opener** - Skip unnecessary pleasantries; get to the point
-2. **Warm but efficient** - Professional yet personable
-3. **Specific details** - Include order numbers, dates, names, amounts
-4. **Clear asks** - State what's needed explicitly
-5. **Acknowledges others** - "Thank you for..." when appropriate
-6. **Intellectually curious** - Shows thinking, considers multiple angles
-
-### Tone Calibration by Context
-
-| Context | Tone | Example Opening |
-|---------|------|-----------------|
-| Friends/Family | Casual, punchy, sometimes humorous | "Been a minute!" / "Just got this email today, maybe helpful" |
-| Customer Service | Polite but firm, all details upfront | "Hello, I'm writing regarding order #..." |
-| Professional/Business | Structured, clear sections | "Hi [Name], Thanks for checking on this." |
-| Legal/Formal | Precise, references documentation | "I am not aligned with..." / "I believe the original language states..." |
-| Quick Reply | Ultra-brief | "Works for me too." / "If it's still available, yes!" |
-
----
-
-## Writing Patterns
-
-### Quick Replies (1-2 lines)
-```
-Works for me too. Thank you for facilitating [Name].
-
-~Ariel
-```
-
-```
-If it's still available, yes! Have a great weekend,
-
-~Ariel
-```
-
-### Customer Service/Complaint Template
-```
-Hello,
-
-I'm writing regarding [order/account] #[NUMBER], which [context].
-
-[Specific details: what happened, tracking numbers, dates, amounts]
-
-[Clear statement of the problem]
-
-Could you please [specific ask - replacement/refund/investigation]?
-
-Thank you for your help.
-
-Best regards,
-~Ariel
-____________________________________
-ariel.agor@gmail.com | 732.915.7808
-
-Sent from a rectangle
-```
-
-### Follow-up with Firmness
-```
-This email was sent on [DATE] and I have since been charged [X times]. Please reverse all accidental charges and cancel the subscription.
-
-Please confirm and refund within the next 72 business hours or I will need to proceed to dispute through credit card.
-
-Thank You
-
-~Ariel
-```
-
-### Forwarding Something Useful
-```
-Just got this email today, maybe helpful with [context]
-
-~Ariel
-____________________________________
-ariel.agor@gmail.com | 732.915.7808
-
-Sent from a rectangle
-```
-
-### Professional/Analytical (Long-form)
-Structure:
-1. Direct opening acknowledging context
-2. Clear position statement
-3. Numbered points or bullets for complex topics
-4. Supporting details/research
-5. Questions for the recipient (if applicable)
-6. Signature
-
-Example elements:
-- "I am not aligned with [X]. I want to keep [Y] as we discussed."
-- "Here's what's fascinating: [insight]"
-- "But here's what's weird about our debate: [paradox]"
-- "Real talk: What's your gut say on [question]?"
-- Include "ADDENDUM: Where I Might Be Completely Wrong" for analytical pieces
-
-### Job Application/Pitch Structure
-```
-[Name],
-
-I'm writing because [direct statement of why].
-
-**Why I'm the Right Fit:**
-[2-3 paragraphs with specific experience and value]
-
-**What I'd Do Starting Day One:**
-- Week 1: [specific actions]
-- Week 2-4: [building phase]
-- Month 2-3: [scaling/optimization]
-
-**[Number] Questions for You:**
-1. [Thoughtful question]
-2. [Thoughtful question]
-3. [Thoughtful question]
-
-**Why [Company/Opportunity]:**
-[Personal connection and mission alignment]
-
-[Availability statement]
-
-[Warm closing],
-~Ariel
-______________________________________
-ariel.agor@gmail.com | 732.915.7808
-
-Sent from a rectangle
-```
-
----
-
-## Language Patterns
-
-### Phrases Ariel Uses
-- "I am not aligned with..." (disagreement)
-- "Thank you for your prompt response"
-- "Could you please..." (polite request)
-- "We would appreciate..." (formal request)
-- "Worth the read in my opinion"
-- "I know you'll do whatever you believe is right but I wanted to share regardless"
-- "Real talk:"
-- "Here's what's fascinating:"
-- "That's... backwards?"
-- "Honestly? [reflection]"
-- "The goal: [statement]"
-- "Have a great weekend,"
-
-### Formatting Choices
-- Use **bold** sparingly for emphasis in longer emails
-- Numbered lists for multi-step processes or ranked items
-- Bullet points (•) for analytical breakdowns
-- Clear section headers in long professional emails
-- For asides or elaboration, use a comma, colon, parentheses, or a new sentence
-
-### Avoid
-- **Em-dashes (—). Never use them. Anywhere. Ever** (Ariel's explicit rule, 2026-06-03).
-  Recast with a comma, colon, period, or parentheses. Never just swap in an en-dash or
-  hyphen. Applies to every email and document, including LaTeX source (`---` renders one).
-- Excessive pleasantries ("I hope this email finds you well...")
-- Unnecessary hedging in professional contexts
-- Generic sign-offs that don't match Ariel's style
-- Overly formal language when casual is appropriate
-- Long-winded explanations when brevity works
-
----
-
-## Context-Specific Guidance
-
-### Co-parenting/Legal Emails
-- Stay factual and specific
-- Reference documentation and prior agreements
-- Use precise language ("I believe the original language states...")
-- Maintain collaborative framing ("I am committed to staying collaborative and keeping things smooth for the kids")
-- Propose clear processes with specific timeframes
-
-### Scheduling/Confirmation
-- Ultra-brief when possible
-- Confirm details explicitly
-- Express gratitude concisely
-
-### Sharing Information/Resources
-- Brief context for why it's relevant
-- Let the forwarded content speak for itself
-- Add personal commentary only if it adds value
-
-### Analytical/Discussion Emails
-- Show your thinking process
-- Consider counterarguments
-- Use data and specific references
-- Ask genuine questions
-- Acknowledge uncertainty when appropriate ("I genuinely don't know")
+## Related
+- Essay and first-person prose voice (not email): memory `feedback_plain_strange_voice.md`.
+- Who the people are: `~/.claude/projects/ariel-self/data/PEOPLE.md` and `people-roster.json` (local).
+- Employment facts for any cover note: `~/.claude/CAREER-SOURCE-OF-TRUTH.md`.
