@@ -38,18 +38,22 @@ State the resolved company + role back in one line, then continue.
 
 1. **Spec capture (Iron Law, §1)** — JD verbatim into context. Then gather the
    candidate's real evidence. **For Ariel, read
-   `C:\Users\ariel\.claude\CAREER-SOURCE-OF-TRUTH.md` FIRST and treat it as the
-   authority on employment history, dates, titles and numbers** — it is the career
-   database, built from 16 dated resumes plus independent dated evidence, and it
-   carries a "claims no document supports" list that is binding. A resume file that
-   disagrees with it is wrong. Then supplement: GBrain (`mcp__gbrain__query`),
+   `C:\Users\ariel\.claude\APPLICATION-DATES.md` FIRST, ALWAYS. It is the authority
+   for every date, title, role, bullet and number that goes on an application**
+   (Ariel's ruling, 2026-10-07): years only on the resume, its "Form months" column
+   for ATS fields that want months, and its "Never on an application" list. Then read
+   `CAREER-SOURCE-OF-TRUTH.md` for extra detail and wording only. It is the private
+   truthful record, and its month-level dates, gaps and corrections NEVER go into an
+   application. Where the two disagree, APPLICATION-DATES.md wins. Then supplement: GBrain (`mcp__gbrain__query`),
    LinkedIn profile, the live portfolio page (`agor.me/portfolio`), GitHub, App
    Store links. Never draft from a summary of either text.
 2. **Map** — build the requirement→evidence matrix (STRONG / PARTIAL / GAP).
 3. **Solve → Review → Revise (§2 steps 3–5)** — fan out across subagents where it
    helps; every subagent gets the full JD + full evidence pack, never a digest.
    Reviewers: a line-by-line JD grader, an adversarial hiring-manager critic, and a
-   truthfulness auditor that flags any claim not in the evidence pack.
+   truthfulness auditor that flags any claim not in the evidence pack. The auditor
+   checks dates and titles against APPLICATION-DATES.md, NOT the truth file. A date
+   that matches APPLICATION-DATES.md is correct even where the truth file differs.
 4. **Spec-diff gate (§2 step 6)** — grep each JD requirement against the
    deliverables. Every requirement present-with-evidence or honestly-flagged-as-ramp.
    Any silent miss or over-claim is a blocker.

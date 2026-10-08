@@ -22,6 +22,13 @@ HeyGen rules, upload gotchas, framing rules, secrets hygiene — lives in that f
 work from memory of it; read the current version each invocation (it gets updated as new
 lessons land).
 
+**Ariel's background, if any challenge, profile field or video mentions it:** take every
+date, title and employer from `C:\Users\ariel\.claude\APPLICATION-DATES.md`, ALWAYS (Ariel's
+ruling, 2026-10-07). `CAREER-SOURCE-OF-TRUTH.md` is the private truthful record. Use it for
+detail only, and never copy its dates or gaps into anything submitted. Submissions normally
+carry no biography at all (SOLVER-BRIEF "Truth"); this rule covers the profile and any
+exception.
+
 ## Step 1 — Resolve the argument
 
 The skill is invoked as `/provn <arg>`. Interpret `<arg>`:

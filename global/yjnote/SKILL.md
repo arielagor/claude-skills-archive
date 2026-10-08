@@ -1,6 +1,6 @@
 ---
 name: yjnote
-description: Write a YunoJuno application cover note that fits the hard 1000-character box, from a pasted job description. Use when Ariel types "/yjnote", pastes a YunoJuno brief and asks for a cover note, or says "write the cover note for this", "yj note for this brief", "turn this JD into a cover note". Routes the brief to the right live demo artifact, checks every employment claim against CAREER-SOURCE-OF-TRUTH.md, drafts TO the cap rather than trimming down to it, measures before presenting, and hands back one paste-ready block.
+description: Write a YunoJuno application cover note that fits the hard 1000-character box, from a pasted job description. Use when Ariel types "/yjnote", pastes a YunoJuno brief and asks for a cover note, or says "write the cover note for this", "yj note for this brief", "turn this JD into a cover note". Routes the brief to the right live demo artifact, checks every employment claim against APPLICATION-DATES.md (never the truth file's dates), drafts TO the cap rather than trimming down to it, measures before presenting, and hands back one paste-ready block.
 ---
 
 # /yjnote — YunoJuno cover note, built to the box
@@ -85,26 +85,25 @@ artifact is down, fall back to the next row rather than citing it anyway.
 
 ### 3. Ground every employment claim
 
-**Read `C:\Users\ariel\.claude\CAREER-SOURCE-OF-TRUTH.md` before writing any history clause.**
-It is the authority, built from 16 pre-2022 resumes. `resume.md` has drifted and is not.
+**Read `C:\Users\ariel\.claude\APPLICATION-DATES.md` before writing any history clause, ALWAYS.**
+It is the authority for every date, title, role and number in a cover note (Ariel's ruling,
+2026-10-07). Its "Claims Ariel ruled to include" and "Never on an application" lists override
+the list below wherever they differ. `CAREER-SOURCE-OF-TRUTH.md` is the private truthful
+record, for detail only; never copy its dates or gaps into a note. `resume.md` has drifted.
 
-**Never repeat these seven. No contemporaneous document supports any of them:**
+**Never write these:**
+1. IDF "2009-2010" (applications say 2009)
+2. "Finance Roots, Deloitte / Merrill / EY, 2005-2014" as one continuous block
+3. "pioneered Hawaii's first securitization accounting team", or any team size (say
+   "founding member of Deloitte's Honolulu securitization team")
+4. $20M anything for THC Design. It was a **$15M+ revenue** business, 120 people.
 
-1. "highest Series 7 score in development class"
-2. naming JP Morgan / Goldman / BofA / Wells Fargo as Deloitte clients (say "investment
-   banking clients", or "5-7 deals per month")
-3. Litigati "cut onboarding 35%" or "lifted retention 25%"
-4. THC Design "improved gross margin by 11%"
-5. IDF "2009-2010" (it is May to Dec 2009)
-6. "Finance Roots, Deloitte / Merrill / EY, 2005-2014" as one continuous block (three
-   separate stints, two multi-year gaps)
-7. "pioneered Hawaii's first securitization accounting team" (he was one of the first twelve
-   chosen to pioneer it)
+The four self-reported claims (Series 7 top score, named bank deal teams, Litigati -35%/+25%,
+THC margin +11%) are Ariel's call. They are allowed per APPLICATION-DATES.md, but a 1000-character
+note rarely needs them.
 
-Also: THC Design was a **~$20M/year revenue** business. Do **not** claim $20mm of inventory.
-
-**Safe, verified clauses to draw on:**
-- Deloitte structured finance, June 2005 to March 2008, guiding lawyers and bankers through
+**Safe clauses to draw on (years per APPLICATION-DATES.md):**
+- Deloitte structured finance, 2005-2008, guiding lawyers and bankers through
   corrections on 5-7 securitization deals per month under deadline
 - VP Operations at THC Design under city, state and federal scrutiny; payroll for 120+,
   AP across 300+ vendors, AR for 350+ clinics and depots, 11 facilities

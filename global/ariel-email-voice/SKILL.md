@@ -92,4 +92,4 @@ Co-parenting, custody, legal and medical correspondence. The card deliberately h
 ## Related
 - Essay and first-person prose voice (not email): memory `feedback_plain_strange_voice.md`.
 - Who the people are: `~/.claude/projects/ariel-self/data/PEOPLE.md` and `people-roster.json` (local).
-- Employment facts for any cover note: `~/.claude/CAREER-SOURCE-OF-TRUTH.md`.
+- Employment facts for any cover note or application email: `~/.claude/APPLICATION-DATES.md`, ALWAYS. `CAREER-SOURCE-OF-TRUTH.md` is the private truthful record and never sets dates in outbound mail.
