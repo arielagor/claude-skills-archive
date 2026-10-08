@@ -1,6 +1,6 @@
 ---
 name: yjnote
-description: Write a YunoJuno application cover note that fits the hard 1000-character box, from a pasted job description. Use when Ariel types "/yjnote", pastes a YunoJuno brief and asks for a cover note, or says "write the cover note for this", "yj note for this brief", "turn this JD into a cover note". Routes the brief to the right live demo artifact, checks every employment claim against APPLICATION-DATES.md (never the truth file's dates), drafts TO the cap rather than trimming down to it, measures before presenting, and hands back one paste-ready block.
+description: Write a YunoJuno application cover note that fits the hard 1000-character box, from a pasted job description. Use when Ariel types "/yjnote", pastes a YunoJuno brief and asks for a cover note, or says "write the cover note for this", "yj note for this brief", "turn this JD into a cover note". Routes the brief to the right live demo artifact, checks every employment claim against APPLICATION-DATES.md (never the truth file's dates), drafts TO the cap rather than trimming down to it, always in Ariel's own email voice (the ariel-email-voice card), measures before presenting, and hands back one paste-ready block.
 ---
 
 # /yjnote — YunoJuno cover note, built to the box
@@ -11,6 +11,11 @@ sourced.
 
 The output is the note. Not a plan to write a note, not three options to choose between.
 One note, paste-ready, with the character count stated.
+
+**Every note is written in Ariel's email voice, ALWAYS** (Ariel's ruling, 2026-10-08). Load
+the `ariel-email-voice` skill and read `voice-card.md` sections 2d (semi-formal), 2f
+(strangers) and 7 (what imitations get wrong) before drafting. The note should read like an
+email he typed to someone he wants to work with, not like copy. See step 6.
 
 ## The constraint that determines everything
 
@@ -37,7 +42,9 @@ paths convert straight quotes to curly ones and a few characters shift.
    adjective. "It is a hash diff" beats "rigorous governance".
 3. **One live, clickable URL.** The only thing they can verify in a click.
 4. **One honest limit.** Buys more credibility per character than any claim, and pre-empts
-   the objection they would otherwise raise without telling you.
+   the objection they would otherwise raise without telling you. Say it the way he would
+   ("I'll be honest, I haven't administered a commercial DAM."), never as a labelled
+   "Honest limit:" line.
 5. **Real employment history compressed to a single clause.**
 
 **Cut first:** the pipeline restated back to them, second examples, methodology, anything
@@ -113,17 +120,20 @@ note rarely needs them.
 
 ### 4. Handle the location question
 
-Ariel is **US Pacific** and these are **UK/EU** briefs. For any role that directs people or
+Ariel is **US Pacific** and most of these are **UK/EU** briefs. For any role that directs people or
 runs governance across a team, the timezone is the first objection the client has. One short
-clause answering it ("I am US Pacific and hold UK hours") costs about 40 characters and is
-usually worth it.
+clause answering it ("I'm in LA and I keep UK hours") costs about 40 characters and is
+usually worth it. For **AU/NZ** briefs (AUD or NZD rate, Xero and similar), the overlap is
+natural: "I'm in LA, so my afternoons are your mornings."
 
 Skip it when the brief is asynchronous, individual-contributor, or already US-friendly. Say
 which way you went and what the note measures without it, so he can cut the clause himself.
 
 ### 5. Draft, then measure
 
-Write to the scratchpad, then measure. Never estimate a character count.
+Draft in his voice from the first word. Don't write neutral copy and convert it afterwards:
+a converted note keeps the copywriter's structure under his phrasing. Write to the
+scratchpad, then measure. Never estimate a character count.
 
 ```bash
 node ~/.claude/skills/yjnote/scripts/count.mjs <file>
@@ -139,9 +149,21 @@ dropping the weakest of the five elements produces a clean one.
 - **Never price the ask in the reader's time.** No "worth 20 minutes", no "a quick look".
 - No "I'm excited to", "I'd love to", "passionate about", "proven track record",
   "hit the ground running", "wealth of experience".
-- Short declaratives. Concrete nouns. The sentence "So I built it." is doing real work and
-  earns its place; do not decorate it.
-- Run the draft past the `humanizer` skill's tells if any sentence feels generated.
+**His email voice (from `voice-card.md`; read it, these are the points that bite here):**
+- **Write the thought the way he would say it.** Run-ons joined with "and", "so", "but"
+  and commas are his, and so are hedges and asides like "I'll be honest" or "jumped out at
+  me". Don't compress it into tidy punchy declaratives; that reads as copywriting.
+- **No colon-reveal labels** ("Honest limit:", "Live:", "Here's the thing:"). Put the URL
+  bare at the end of a sentence ("you can try it here https://...").
+- **No balanced "not X, but Y" / "X, not Y" constructions**, and no closing line that
+  restates the note. Each one is an AI tell he never writes.
+- Contractions everywhere (I'd, I'm, haven't). Normal capitals and full sentences, since
+  this is mail to strangers, so no deliberate typos or lowercase "i".
+- **At most one "!"**, and it goes on the warm line (usually the closing one). No emoji.
+- No greeting, or "Hi [Name]," if the brief names a person. No "Best regards" or other
+  closing phrase. End with `~Ariel` on its own line (8 chars, count it).
+- Keep the specifics: digits, real names, the number from the artifact.
+- Run the `ariel-email-voice` AI-tell checklist before measuring the final version.
 
 ### 7. Save it, then present it
 
@@ -149,8 +171,8 @@ The 962-char note from the Capital.com application survived only in a session te
 and was one cleanup from being lost. Do not repeat that.
 
 Save to `~/.claude/projects/yunojuno-portfolio/docs/cover-notes/<role-slug>-<YYYY-MM>.txt`
-and commit. That repo has **no git remote**, so it is disk-local; mention this once if it
-comes up, do not create a remote unasked.
+and commit. That repo's remote is `github.com/arielagor/yunojuno-portfolio` (private), and
+the auto-push hook pushes each commit there. Report the hook's push line truthfully.
 
 Then present:
 
@@ -169,8 +191,15 @@ Media. Tools: Smartsheet, JIRA, MS Project, TFS.
 
 The hook was that **Medical is listed as one discipline among six while being the gate the
 other five queue behind**. That routed to mlr-guard, and the note ran 958 characters. It is
-saved at `yunojuno-portfolio/docs/cover-notes/project-director-healthcare-pharma-2026-10.txt`
-as the reference for tone and density.
+saved at `yunojuno-portfolio/docs/cover-notes/project-director-healthcare-pharma-2026-10.txt`.
+It is the reference for **hook and density only**: it was written before the voice rule and
+uses the "Honest limit:" label and punchy declaratives that step 6 now bans.
+
+**Voice reference:** `yunojuno-portfolio/docs/cover-notes/dam-automation-manager-xero-2026-10.txt`
+(Xero DAM Automation Manager, AUD, 1 month, 975 chars). The hook was "Less single person
+dependency" in their success list. The note routes to mlr-guard as the same pattern rather
+than DAM experience, admits he hasn't run a commercial DAM, uses the THC software-selection
+work, and is written in his email voice throughout.
 
 ## Related
 
