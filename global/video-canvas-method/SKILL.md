@@ -9,7 +9,7 @@ description: >-
   storyboard. Sits under `ai-commercial` (dialogue ads), `seedance-narrated-short` (narrated film),
   and `hyperframes-*` (motion graphics) and does not replace any of them: they own CRAFT, this owns
   WHEN WORK GETS APPROVED and WHAT GETS WRITTEN DOWN. Ported from TopView AI Canvas methodology
-  (2026-07-22) and run entirely on keys we already pay for: keyframes via gemini-3.1-flash-image or
+  (2026-07-22) and run entirely on keys we already pay for: keyframes via gemini-nano-banana-2.1 or
   gpt-image-2, motion via HeyGen Seedance (1 credit, the default) or Veo 3.1 when a shot must start
   and end on exact approved frames. Also use when asked whether we can lock a first/last frame, or
   what a video build will cost.
@@ -104,7 +104,7 @@ them are free at the margin: see the routing table for which ones spend real dol
      --style canvas/assets/style.card.md --ref canvas/assets/env-diner.png \
      --out canvas/scenes/03-diner.key.png
    ```
-   Defaults to `gemini-3.1-flash-image` (about $0.067). Pass `--model gpt-image-2` when the frame
+   Defaults to `gemini-nano-banana-2.1` (about $0.067). Pass `--model gpt-image-2` when the frame
    carries text you need to read in order to approve it. Building shot N+1's keyframe with shot N's
    as a `--ref` is how the palette and set stay put; it is also how you get a matched pair for step 4.
 2. **Contact sheet before spend.** Tile the stills with labels into `SHEET-keys.png` and Read it.

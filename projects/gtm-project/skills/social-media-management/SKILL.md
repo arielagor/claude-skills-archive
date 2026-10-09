@@ -88,7 +88,7 @@ Read it whenever the task needs:
 `references/image-prompt-templates.md` (platform-specific AI image generation
 prompts) is also preserved as-is; when an image is actually needed, generate
 it with the tool named in `social-announcer`'s own doc (nanobanana /
-`gemini-3.1-flash-image-preview`, not Imagen 4) rather than a generic prompt.
+`gemini-nano-banana-2.1`, not Imagen 4) rather than a generic prompt.
 
 ## Dry-run rule
 

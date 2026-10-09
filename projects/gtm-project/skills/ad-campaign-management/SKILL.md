@@ -156,7 +156,7 @@ Vary: word choice, specificity (numbers vs. general), tone (direct/question/comm
 
 Primary path: invoke the `image-generator` subagent
 (`C:\Users\ariel\.claude\agents\image-generator.md`). It always uses the current Gemini Flash
-image model (nanobanana, currently `gemini-3.1-flash-image-preview`), never Imagen 4, and
+image model (nanobanana, currently `gemini-nano-banana-2.1`), never Imagen 4, and
 already knows the per-property style direction (cognexus connectionism for agor.me and AI
 content, clean business graphics for modelstack, playful for gifloop, and so on). Use it for ad
 hero images and static creative instead of standing up a separate image-gen integration.

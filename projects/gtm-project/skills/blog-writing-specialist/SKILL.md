@@ -28,7 +28,7 @@ before it's done.
 knows the two blogs' real mechanics: modelstack's `blog/posts/<slug>.json` +
 `blog/index.json` + `rss.xml` rebuilt via `scripts/build-rss.mjs`, and agor.me's
 Next.js MDX posts under `src/app/blog/` with a dynamic feed route. It also
-knows the image pipeline (nanobanana / `gemini-3.1-flash-image-preview`,
+knows the image pipeline (nanobanana / `gemini-nano-banana-2.1`,
 cognexus connectionism style for AI content) and hands cross-posting to
 `social-announcer` and RSS re-import to `substack-syncer`.
 
