@@ -30,7 +30,7 @@ the design and forced the project to walk back its own overclaims before shippin
 - **Gemini** needs `GEMINI_API_KEY` (REST generateContent, Gemini-3 thinkingLevel high).
 - **OpenAI** needs `OPENAI_API_KEY` (REST /v1/responses, reasoning effort high).
 - **xAI/Grok** needs `XAI_API_KEY` (REST /v1/responses at api.x.ai — OpenAI-compatible, `grok-4.5` reasoning effort high).
-- Newest SOTA per family by default (`opus`, `gemini-3.1-pro-preview`, `gpt-5.5`, `grok-4.5`);
+- Newest SOTA per family by default (`opus`, `gemini-4-argon` (one-time fallback to `gemini-3.1-pro-preview` on 404; override with `TELOS_GEMINI_MODEL`), `gpt-5.5`, `grok-4.5`);
   override with `TELOS_CLAUDE_MODEL` / `TELOS_GEMINI_MODEL` / `TELOS_OPENAI_MODEL` / `TELOS_XAI_MODEL`. It degrades
   gracefully: with one family available it is a single reasoner; with four it is a real panel.
   **Claude is the `opus` ALIAS, not a pinned id** - Claude Code resolves it to the newest Opus at

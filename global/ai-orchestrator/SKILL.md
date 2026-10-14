@@ -107,7 +107,7 @@ Based on the routing decision, execute using the appropriate method below.
 **Auth**: `x-goog-api-key` header or `?key=` query param
 **Env var**: `GOOGLE_AI_API_KEY`
 **Get key**: https://aistudio.google.com/apikey
-**Models**: `gemini-3.6-flash` (balanced text, GA default), `gemini-3.5-flash-lite` (fastest/cheapest, high-throughput), `gemini-3.1-pro-preview` (best quality). Native image generation uses an image model — `gemini-nano-banana-2.1` (see below), not a text model.
+**Models**: `gemini-3.6-flash` (balanced text, GA default), `gemini-3.5-flash-lite` (fastest/cheapest, high-throughput), `gemini-4-argon` (best quality; slow, expect 10-75s with thinking, use thinkingLevel low for latency and high only for judging; $2/$10 per 1M in/out until 2026-11-30, then $4/$20; tool calls need a thoughtSignature round-trip; `gemini-3.1-pro-preview` is the fallback). Native image generation uses an image model — `gemini-nano-banana-2.1` (see below), not a text model.
 
 #### Text Generation
 
