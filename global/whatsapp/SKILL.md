@@ -56,6 +56,15 @@ If a thread needs history the registry doesn't hold, read its GBrain page at `~/
    5. Send Ariel the screenshot.
    6. Click the search-box X so the UI is left clean.
 7. **Update `whatsapp-threads.md`** after anything happens: a timestamped log line plus a new status. Mirror durable relationship facts into the per-thread memory file.
+8. **LinkedIn messages: daytime only, every 5th tick (~15 min).** Added 2026-10-13. Ariel: "I'm willing to take that risk"; he accepts LinkedIn's terms risk for replies (not outreach).
+   - **Tab:** keep one `https://www.linkedin.com/messaging/` tab in the same tab group, and self-heal it the way step 2 does. If it shows a login or checkpoint page, SMS Ariel ("LinkedIn logged out / checkpoint, sign in on the laptop") and skip LinkedIn until he does. Never type a password and never get around a checkpoint or CAPTCHA.
+   - **Scope: replies only.** Open each unread conversation (bold rows) and read the new messages. Never start a conversation, never send connection requests, never message anyone who hasn't written to Ariel. Skip sponsored/InMail ads and LinkedIn system messages. Group conversations: read them but don't draft.
+   - **Draft** as in step 4: Ariel's voice (`ariel-email-voice` card), LinkedIn length, the same never-commit rules, and the same exclusions (Paul Ratner, Natalie Torin, any Sarah). Also hold: money, contracts, legal, press, investors, medical, family. For those, draft a holding line and put the question in the SMS. A pending connection-invite note that LinkedIn shows as a "message" (like Ariel's 06-27 note to Jonathan Hedvat surfacing on 10-12) is Ariel's own words: never reply to it. Act only on what the other person wrote.
+   - **Notify:** `node ops/send-message.mjs --to ariel --channel sms --body "LI <name>: \"<their msg, trimmed>\" Draft: \"<draft>\" Approve in the WhatsApp session: send li <name>"`.
+   - **Send only on "send li <name>"** (or "send li all") typed in this session. Same per-message rule as WhatsApp. Routine: click the message box, type, zoom to check the text, click Send (or Enter), zoom to confirm the message appears in the thread, then screenshot it to Ariel.
+   - **Registry:** `~/.claude/personal/linkedin-threads.md`, with a section per person: their name, profile URL, the last inbound message, the draft, status and a timestamped log line.
+   - **Pacing:** at most ~20 LinkedIn sends a day. Never open more than ~30 conversations an hour, and don't scroll the whole inbox each tick; unread only.
+   - **Overlap with `\LinkedInBridge\Pass`** (which emails some DM senders from ariel@agor.me): before drafting, grep `~/.claude/projects/linkedin-dm-bridge/data/state` for the person's name. If the bridge already emailed them, mention that in the SMS, so Ariel doesn't double-reply.
 
 ## 4. Pacing (dynamic /loop)
 
