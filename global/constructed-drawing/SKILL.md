@@ -8,6 +8,8 @@ description: Make any video look geometrically constructed before your eyes by a
 Built and approved on Animation vs. Euclid (repo `C:\Users\ariel\.claude\projects\animation-vs`, 2026-10-21;
 Ariel: "Close enough to perfect"). Everything below is the reusable process plus the lessons that took
 five rounds of his notes to learn. Read the code before changing it; this file says what and why.
+For the whole production run (score, record, cut into parts, publish to YouTube), use the **hand-drawn-video** skill;
+this file is the look.
 
 ## What it is
 A tool layer that watches a deterministic canvas animation and puts the right real-world drawing tool
