@@ -195,6 +195,10 @@ Follow `references/verification.md`. At minimum:
 Read `references/methodology.md` § Sector notes before Phase 3. In short:
 - **Pre-revenue or launch-stage biotech:** model each asset once, either as a revenue segment or as a pipeline rNPV programme, never both, and keep pipeline Phase 3 costs out of the `rd` driver. Financing dilution usually dominates the value.
 - **Banks, insurers, REITs:** not supported for the price target, because the engine is FCFF and the comps are EV-based. Tell the user before starting. If they proceed, value the company outside the Valuation sheet (P/TBV vs ROTCE, a dividend discount model, or P/FFO and NAV) and say so plainly in the report.
-- **20-F filers:** IFRS concepts are mapped, but check them harder.
+- **20-F / 40-F / 6-K filers and ADSs:** IFRS concepts are mapped, but check them harder. Their statements usually sit in exhibits: `fetch` pulls them and cites take the form `<acc> <file> T<n>.<r>`. A 40-F filer with no XBRL gets no draft hist; build it from the located exhibit tables. Keep the model in the reporting currency and set `reporting_currency`, `fx_rate`, `fx_date` and `listing_ratio` (ordinary shares per ADS) so per-share values convert to the listed security. Share counts and strikes stay per ordinary share.
+- **Events after the balance-sheet date** (raises, buybacks, debt changes, a signed acquisition): enter them as `post_bs` and `pending_deal` (see model-config.md), never as negative claims. Otherwise the financing engine raises cash the company already has.
+- **Preferred stock, special tax regimes (280E), changing capital intensity:** use `preferred`, per-scenario or per-year `tax_rate`, and per-year or per-scenario ratios (model-config.md).
+- **Hand corrections survive re-runs:** `hist` and `market` merge by default and keep values marked manual; `--force` regenerates. Peers with missing fundamentals come out blank and excluded from medians, never as zero; a debt-free peer needs `debt_m: 0` set by hand.
+- **De-SPACs:** if `hist` warns that the XBRL is the SPAC shell, draft the history from the located tables.
 - **Recent IPOs with only an S-1:** build `hist.json` by hand from the S-1 tables.
 - **Non-calendar fiscal years:** labels use the calendar year the fiscal year ends in.
