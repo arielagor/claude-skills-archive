@@ -76,8 +76,12 @@ Paths:
 
 ## 5. Pacing (dynamic /loop, same rotation as the WhatsApp loop)
 
-Keep the loop going with ScheduleWakeup, prompt `/imessage`.
-- **Daytime (8am–11pm PT):** 180s every tick.
+**Event-driven by day (Ariel 2026-10-28: "a hook or push notification that informs you of an incoming message" instead of constant checking).** The session does not poll. It arms a watcher and sleeps until something happens:
+- **Daytime (8am–11pm PT):** keep exactly one `Monitor` armed: command `node ~/.claude/scripts/imessage-tick/watch.mjs`, `timeout_ms` 1800000, description `iMessage autopilot events`. Check with TaskList-style awareness that one is not already running before arming another. The watcher prints `EVENT <event> <who>` for every notable autopilot event (the same set tick.mjs lists), `PROBLEM`/`CLEARED` for health changes (KILL, LIVE, task disabled/failing/stalled, bridge down, SMS forwarding silent), and `STALE-DRAFT` once per draft waiting 2 h. It is silent otherwise and never writes the heartbeat.
+  - **On each watcher event:** run a normal tick (heartbeat, tick.mjs, problems, registry). No ScheduleWakeup.
+  - **On each Monitor expiry (every 30 min):** run a normal tick (this is the fallback and keeps the heartbeat fresh), then re-arm the Monitor.
+  - The watchdog's daytime stale limit is 45 min to match. No 180s ScheduleWakeup by day anymore.
+  - From 11pm, don't re-arm the Monitor after it expires; the overnight cron takes over. The 8am cron tick re-arms it.
 - **Overnight (12am–8am PT):** exactly 3 wakes, at ~12am, ~4am and ~8am, on a recurring CronCreate: `7 0,4,8 * * *`, prompt `/imessage`.
   - On startup, and on every tick from 11pm on, check with CronList that the cron exists, and create it if it's missing. Cron jobs are session-only and expire after 7 days.
   - From 11pm to midnight, a tick schedules its wakeup only if the wakeup lands before midnight. Otherwise the cron takes over.
