@@ -58,6 +58,9 @@ Paths:
 3. **Stale drafts.** For drafts in `stalePending` that haven't been alerted yet, send one SMS listing name + first words + "reply Y in the iMessage session to send, or ignore". The autopilot already alerted when it held them, so this is the single reminder. Never repeat it for the same id.
 4. **Quiet otherwise.** Routine sends, skips and deliveries are not news. Don't SMS for them. Log one line per tick only when something notable happened.
 5. **Registry.** Update `imessage-loop.md` with a timestamped line for anything alerted, sent, released or changed, and the current open problems.
+6. **Agreed plans go on the calendar the same tick (Ariel 2026-10-30, after Lori's call was left off).** When a thread shows both sides agreeing a day + time (a call, drink, date; the autopilot's `draftForAriel` note often says "accepted"/"confirmed"/"add it to the calendar"), create the event on the Dating calendar (`648839f8...@group.calendar.google.com`, notificationLevel NONE) right away, without asking, and say so in one line. Tentative or unconfirmed plans are not added; list them as "tentative" in the registry instead.
+7. **Day-of watch (Ariel 2026-10-30, after Justin's "we still good for 5:30?" sat unanswered 2 h).** The first daytime tick lists today's Dating-calendar events in its report. For each event today, any `compose-failed`, held draft or unanswered incoming text from that person is an immediate PushNotification, and a tick within ~90 min of the start re-reads that person's last `review.jsonl` row to confirm their latest message got an answer.
+8. **Silence is not health.** `compose-failed`, `compose-gave-up` and `alert-failed` are watcher events; treat each as news, read the row, and tell Ariel the person is waiting.
 
 ## 4. What Ariel can say here (do it, then confirm in one line)
 
