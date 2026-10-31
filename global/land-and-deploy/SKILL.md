@@ -1553,7 +1553,7 @@ Record the start timestamp for timing data. Also record which merge path is take
 Try auto-merge first (respects repo merge settings and merge queues):
 
 ```bash
-gh pr merge --squash --auto --delete-branch
+gh pr merge --rebase --auto --delete-branch
 ```
 
 If `--auto` succeeds: record `MERGE_PATH=auto`. This means the repo has auto-merge enabled
@@ -1574,7 +1574,7 @@ the flow is unaffected — but do not report the second one as "auto-merge is di
    before this step runs.
 
 ```bash
-gh pr merge --squash --delete-branch
+gh pr merge --rebase --delete-branch
 ```
 
 If direct merge succeeds: record `MERGE_PATH=direct`. Tell the user: "PR merged successfully. The branch has been cleaned up."

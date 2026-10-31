@@ -1069,11 +1069,17 @@ service with existing deployment — verify that a distribution pipeline exists.
 
 ## Step 3: Merge the base branch (BEFORE tests)
 
-Fetch and merge the base branch into the feature branch so tests run against the merged state:
+Fetch the base branch and REBASE the feature branch onto it so tests run against the combined state
+(Ariel's git-hygiene rule, 2026-10-31: no merge commits on branches; PRs land by rebase-merge.
+Local override of the gstack default `git merge`; re-apply after a gstack upgrade):
 
 ```bash
-git fetch origin <base> && git merge origin/<base> --no-edit
+git fetch origin <base> && git -c sequence.editor=true rebase -i --autosquash --autostash origin/<base>
 ```
+
+A rebase rewrites the branch: push it with `git push --force-with-lease` (never `--force`), or run
+`node ~/.claude/scripts/git-hygiene.mjs tidy`. Review fixes go INTO the commit they fix:
+`node ~/.claude/scripts/git-hygiene.mjs fixup <sha> -- <paths>`, never a "fix review" commit.
 
 **If there are merge conflicts:** Try to auto-resolve if they are simple (VERSION, schema.rb, CHANGELOG ordering). If conflicts are complex or ambiguous, **STOP** and show them.
 
