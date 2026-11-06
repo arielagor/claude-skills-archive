@@ -22,7 +22,7 @@ Inbox, person, offer, words. Wording comes last. Our volume cannot prove a wordi
 - Guilt, or debt attached to a gift.
 - Pressure on anyone in distress. A paid offer inside a dispute, or alongside a score below 7.
 - Promising rankings or dofollow value. Selling a link without its required `rel` disclosure.
-- Implying a human wrote what an agent wrote. AI-voice or auto-dialled calls to prospects.
+- Denying being an AI when someone sincerely asks. AI-voice or auto-dialled calls to prospects. (Agents are treated as employees: no disclosure line, seat persona or Ariel's name is fine.)
 - Commercial mail without a postal address and a working opt-out.
 - Tracking pixels on cold touches.
 
