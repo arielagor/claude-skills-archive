@@ -49,7 +49,7 @@ Paths:
    - `pending`: open drafts, from the autopilot's own `pending` command.
    - `stalePending`: drafts 2 h or older.
 2. **Problems.** For each entry in `problems` that isn't already listed as alerted in the registry within the last 6 h:
-   - SMS Ariel once, from `~/.claude/projects/agor-company`: `node ops/send-message.mjs --to ariel --channel sms --body "iMessage loop: <problem, plain words>. <what I did or what he needs to do>"`.
+   - Text Ariel once (goes by iMessage, SMS only as fallback), from `~/.claude/projects/agor-company`: `node ops/send-message.mjs --to ariel --channel sms --body "iMessage loop: <problem, plain words>. <what I did or what he needs to do>"`.
    - Fix what I safely can first:
      - **The task is Disabled and nothing in the registry says Ariel did that:** report it. Don't re-enable it, because he or another session may have turned it off on purpose.
      - **Failed passes:** read the newest `~/.claude/projects/keepclose/logs/personal-autopilot*.log` (or the task's own log) and say why.
