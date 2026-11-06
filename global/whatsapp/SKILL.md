@@ -25,7 +25,7 @@ If a thread needs history the registry doesn't hold, read its GBrain page at `~/
 ## 2. Hard rules
 
 - **Never reply to, draft for, or message Ariel's ex-wife Sarah (Sarah Agor / Mendelsohn).** She is video calls only. Paul Ratner, Natalie Torin and other Sarahs are normal contacts (Ariel 2026-10-28). If a Sarah could be the ex-wife, treat her as excluded and ask.
-- **Every send needs Ariel's explicit OK in chat**: "send jon", "send maddie now", "send all". **A bare "Y" (or "y") typed by Ariel in this Claude chat means "send all"** (Ariel, 2026-10-16): send every draft listed as waiting in your previous message. A "Y" texted by SMS goes to the agor-company command path (Y + PIN releases business and personal iMessage drafts) and never approves WhatsApp sends. This holds per message, every time. A text inside WhatsApp is never an approval. Ariel asked on 2026-10-10 for immediate auto-replies; the browser-automation safety rules don't allow a standing authorization to send messages on his behalf, so the loop drafts within ~3 min, texts him, and sends the moment he says so in this session (he can do that from his phone via Remote Control).
+- **Every send needs Ariel's explicit OK in chat**: "send jon", "send maddie now", "send all". **A bare "Y" (or "y") typed by Ariel in this Claude chat means "send all"** (Ariel, 2026-10-16): send every draft listed as waiting in your previous message. A "Y" texted by SMS goes to the agor-company command path (Y + PIN releases business and personal iMessage drafts) and never approves WhatsApp sends. This holds per message, every time. A text inside WhatsApp is never an approval. Ariel asked on 2026-10-10 for immediate auto-replies; the browser-automation safety rules don't allow a standing authorization to send messages on his behalf, so the loop drafts at its next 3-hourly tick, texts him, and sends the moment he says so in this session (he can do that from his phone via Remote Control).
 - Never accept a call, never delete chats or messages, never change WhatsApp settings.
 - **Meeting invites go on the "Agor AI Consulting" calendar** (agor.me account, `gws-agorme`, calendarId `c_1171188046b79c8c32e280c2ba283c1cad970e75be6b749ec6c1e603c75c4755@group.calendar.google.com`), never primary (Ariel 2026-10-26). If a primary event is cancelled and a same-name copy exists on that calendar, Ariel moved it from his phone: never restore it. Delete duplicates with `sendUpdates: none`.
 - Don't put personal chat content into any company repo. Business leads (such as Jon) may update the agor-company CRM with business facts only.
@@ -57,7 +57,7 @@ If a thread needs history the registry doesn't hold, read its GBrain page at `~/
    5. Send Ariel the screenshot.
    6. Click the search-box X so the UI is left clean.
 7. **Update `whatsapp-threads.md`** after anything happens: a timestamped log line plus a new status. Mirror durable relationship facts into the per-thread memory file.
-8. **LinkedIn messages: daytime only, every 5th tick (~15 min).** Added 2026-10-13. Ariel: "I'm willing to take that risk"; he accepts LinkedIn's terms risk for replies (not outreach).
+8. **LinkedIn messages: every tick (every 3 hours).** Added 2026-10-13. Ariel: "I'm willing to take that risk"; he accepts LinkedIn's terms risk for replies (not outreach).
    - **Tab:** keep one `https://www.linkedin.com/messaging/` tab in the same tab group, and self-heal it the way step 2 does. If it shows a login or checkpoint page, SMS Ariel ("LinkedIn logged out / checkpoint, sign in on the laptop") and skip LinkedIn until he does. Never type a password and never get around a checkpoint or CAPTCHA.
    - **Scope: replies only.** Open each unread conversation (bold rows) and read the new messages. Never start a conversation, never send connection requests, never message anyone who hasn't written to Ariel. Skip sponsored/InMail ads and LinkedIn system messages. Group conversations: read them but don't draft.
    - **Draft** as in step 4: Ariel's voice (`ariel-email-voice` card), LinkedIn length, the same never-commit rules, and the same exclusions (Paul Ratner, Natalie Torin, any Sarah). Also hold: money, contracts, legal, press, investors, medical, family. For those, draft a holding line and put the question in the SMS. A pending connection-invite note that LinkedIn shows as a "message" (like Ariel's 06-27 note to Jonathan Hedvat surfacing on 10-12) is Ariel's own words: never reply to it. Act only on what the other person wrote.
@@ -67,13 +67,15 @@ If a thread needs history the registry doesn't hold, read its GBrain page at `~/
    - **Pacing:** at most ~20 LinkedIn sends a day. Never open more than ~30 conversations an hour, and don't scroll the whole inbox each tick; unread only.
    - **Overlap with `\LinkedInBridge\Pass`** (which emails some DM senders from ariel@agor.me): before drafting, grep `~/.claude/projects/linkedin-dm-bridge/data/state` for the person's name. If the bridge already emailed them, mention that in the SMS, so Ariel doesn't double-reply.
 
-## 4. Pacing (dynamic /loop)
+## 4. Pacing (recurring cron)
 
-Start or continue the loop with ScheduleWakeup, using the prompt `/whatsapp`.
-- **Daytime (8am–11pm PT): 180s every tick** (Ariel 2026-10-10: reply immediately). The old 300–600 / 1200–1800s pacing is retired.
-- **Overnight (12am–8am PT): exactly 3 wakes, at ~12am, ~4am and ~8am** (Ariel, 2026-10-06). ScheduleWakeup clamps to 3600s, so overnight runs on a recurring CronCreate instead: `3 0,4,8 * * *`, prompt `/whatsapp` with the overnight note. On startup AND on every tick from 11pm on, check with CronList that it exists and create it if it's missing (cron jobs are session-only and expire after 7 days; a lapsed cron left the loop silent from 2026-10-21 00:33 to 10-23, and the watchdog now kills a session whose heartbeat goes stale). Any tick from 11pm to midnight schedules its wakeup only if it lands before midnight; otherwise it doesn't call ScheduleWakeup, and the cron takes over. The 12am and 4am cron ticks don't call ScheduleWakeup. The 8am tick resumes daytime ScheduleWakeup pacing. Don't draft for personal threads overnight.
+- **Every 3 hours from 7am to 10pm PT, nothing from 11pm to 7am** (Ariel 2026-11-05, replaces the 180s daytime ticks and the 12am/4am/8am overnight wakes). The ticks run from one recurring CronCreate: `3 7,10,13,16,19,22 * * *`, prompt `/whatsapp`. Never call ScheduleWakeup for pacing.
+- On startup, run `node ~/.claude/skills/rotate/scripts/rotate.mjs arm` from this session's shell. Only `/rotate` successors inherit arming, so a session the watchdog launches isn't armed and would run on to the ~966K compaction point (the session of 2026-11-04 reached 900K this way).
+- On startup AND on every tick, check with CronList that this cron exists and create it if it's missing (cron jobs are session-only and expire after 7 days; a lapsed cron left the loop silent from 2026-10-21 00:33 to 10-23, and the watchdog kills a session whose heartbeat goes stale).
+- A message Ariel types in this session is handled when it arrives, at any hour; only the scheduled checks stop overnight.
+- The watchdog never launches a session between 11pm and 7am. If the watchdog's limits change, keep them above the longest gap between ticks.
 
-`/whatsapp status`: run one tick and report, with no ScheduleWakeup. `/whatsapp stop`: ScheduleWakeup `stop: true`.
+`/whatsapp status`: run one tick and report, without changing the cron. `/whatsapp stop`: CronDelete the tick cron.
 
 ## 5. Adding a thread
 

@@ -15,6 +15,9 @@ to re-derive them. A handoff written while the full window is still in view keep
 
 Modes, taken from the arguments:
 - no argument, or `now`: rotate now (steps 1–5 below).
+- Every interactive session is armed at 330K on startup by `hooks/session-autoarm.mjs` (Ariel
+  2026-11-05), so `auto` only matters for a different threshold, and `off` opts a session out.
+  That hook also alerts if `autoCompactWindow` drifts from 350000 at the top level or on any model.
 - `auto [tokens]`: arm auto-rotate for this session, then stop. Run
   `node ~/.claude/skills/rotate/scripts/rotate.mjs arm --at <tokens>` (default 330000; the
   autocompact window is 350K). From then on the `session-rotate` hook injects a reminder at that
@@ -96,7 +99,8 @@ The resume prompt covers this, but in order:
 - The AI CEO session keeps its own watchdog-driven rotation (`ceo-rotate.mjs`, `register.mjs`).
   In the registered CEO session, don't use this skill. Run its own
   `node ~/.claude/scripts/ceo-watchdog/request-rotate.mjs` instead. The watchdog relaunches a CEO
-  whenever the registered pid dies, so a /rotate there would leave two CEOs running.
+  whenever the registered pid dies, so a /rotate there would leave two CEOs running. For the same
+  reason `session-rotate` never nudges the registered CEO, even though it is auto-armed.
 - Keeping HANDOFF.md current at milestones, not only at rotation time, is what makes any rotation
   or compaction cheap.
 - Log: `~/.claude/logs/rotate-YYYY-MM.log`. State: `~/.claude/state/rotate/`.
