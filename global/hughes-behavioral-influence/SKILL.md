@@ -6,6 +6,8 @@ description: >
 
 # Behavioral Influence Operating System
 
+> **Banned for outward sales and marketing:** the covert techniques in section III (Linguistic Weapons System), including embedded commands, "scarcity whispers" and "installation". They are built to bypass judgment and have no peer-reviewed support. For any sales email, offer, page, pitch or ad, the `sales-persuasion` skill and its playbook govern. Section III stays here for spotting manipulation aimed at us.
+
 Synthesized from Chase Hughes' complete published frameworks, NCI lecture vault, and long-form interviews. This is not a summary. It is a compressed operational manual: every model, every technique, every chain, organized for immediate deployment in writing, conversation design, self-mastery, and behavioral analysis.
 
 ## FOUNDATIONAL PRINCIPLE

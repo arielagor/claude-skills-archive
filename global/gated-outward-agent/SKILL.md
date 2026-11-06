@@ -165,6 +165,7 @@ tests, armed to LIVE 2026-06-16 with a verified self-send + idempotency proof. I
 
 ## See also
 
+- `sales-persuasion` skill: the rules for any agent that sells or markets.
 - `sierra-way` skill — delivering a customer-experience agent to a CLIENT (broader
   engagement playbook; this skill is the build+arm mechanics for a self-acting one).
 - `claude-code-binding-governance-hook` skill — when the gate must be a hook that

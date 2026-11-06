@@ -39,6 +39,7 @@ The five property briefs are `modelstack`, `agor-consulting`, `ios-apps`, `score
 
 ## Rules carried everywhere
 
+- **Sales and marketing copy** follows the `sales-persuasion` skill and its playbook.
 - **Dry-run by default.** Every vault skill produces drafts. Nothing is published, sent, spent, or deployed without Ariel's explicit, in-the-moment go. This router does not relax that.
 - **Voice and style.** Match `about\me.md` / the `ariel-email-voice` skill. Never write the phrase meaning structurally-critical (the "load" + hyphen + "bearing" contiguous phrase). No em-dashes in authored text.
 - **Payment-rail truth.** Apple handles iOS IAP refunds; Stripe/Ariel handles Stripe-rail refunds (MVAT Focus has both; never conflate them). A polite "I double-paid, please advise" is a real-customer pattern, routed to Ariel, never auto-answered.
