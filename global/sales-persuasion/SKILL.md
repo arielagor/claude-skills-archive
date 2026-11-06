@@ -19,7 +19,7 @@ Inbox, person, offer, words. Wording comes last. Our volume cannot prove a wordi
 - Invented testimonials, logos, "trusted by", or inflated value and "was" prices.
 - Fake personalisation, such as praise for something not read.
 - "Re:" or "Fwd:" on a message that is not a real reply.
-- Covert techniques built to bypass judgment, including everything in section III of `hughes-behavioral-influence`. Guilt, or debt attached to a gift.
+- Guilt, or debt attached to a gift.
 - Pressure on anyone in distress. A paid offer inside a dispute, or alongside a score below 7.
 - Promising rankings or dofollow value. Selling a link without its required `rel` disclosure.
 - Implying a human wrote what an agent wrote. AI-voice or auto-dialled calls to prospects.
