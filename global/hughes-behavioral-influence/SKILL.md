@@ -6,7 +6,7 @@ description: >
 
 # Behavioral Influence Operating System
 
-> **Section III (Linguistic Weapons System) is allowed in sales and marketing** (Ariel, 2026-11-06). We found no peer-reviewed support for it, so treat it as untested. For any sales email, offer, page, pitch or ad, the `sales-persuasion` skill and its playbook also apply.
+> **Ariel wants these techniques used, Section III (Linguistic Weapons System) included, and nothing blocks them in sales and marketing** (Ariel, 2026-11-06). Facts inside a technique must be true. For any sales email, offer, page, pitch or ad, the `sales-persuasion` skill and its playbook also apply.
 
 Synthesized from Chase Hughes' complete published frameworks, NCI lecture vault, and long-form interviews. This is not a summary. It is a compressed operational manual: every model, every technique, every chain, organized for immediate deployment in writing, conversation design, self-mastery, and behavioral analysis.
 

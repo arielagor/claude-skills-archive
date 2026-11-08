@@ -38,6 +38,17 @@ Paths:
 - **Don't touch the parked cloud autoresponder** (`cloud/deploy.sh`) unless Ariel asks.
 - **Report outcomes, not plumbing.** Answer what he asked, in a sentence or two.
 
+### Prospects (website pitch campaign, Ariel 2026-11-06)
+
+A handle in `~/.claude/personal/prospects.json` (written by the campaign sender, call.agor.me; never edit it by hand except `opted_out`) is a **prospect**: a local business Ariel texted first about a concept website. The autopilot's prospect lane answers them (keepclose `packages/autopilot/prospect-rules.md`, the one rules file; code in `prospect.ts`). The same rules bind anything I draft or send to them:
+1. **Business, never personal.** Origin always known: a local business Ariel contacted first about a website concept, with their business name and sample link. No dating, family, jokes at their expense, pushback voice, nicknames. Plain, short, courteous, one text.
+2. **Opt-out sticks.** STOP, unsubscribe, not interested, wrong number, leave me alone, or anything like them: at most "Understood, I won't text again.", `opted_out` true in the registry, a row in `~/.claude/personal/prospect-optouts.jsonl`, never messaged again (the runner vetoes every send to them, `send` included), Ariel alerted. Never resend to an opted-out prospect, even if Ariel says "send", without telling him they opted out.
+3. **Only three auto-answers:** who is this, what is this, resend the link (fixed texts). Everything else (price, scope, timing, interest, booking, complaints, legal, anything uncertain) is a held draft plus an alert. `PROSPECT INTEREST:` alerts are news: tell Ariel at once, with the business name and the draft.
+4. **Allowed facts only:** Ariel Agor, Agor AI, local, Sherman Oaks; the concept site is real and theirs to look at; they'd own the domain and site outright; a 15 minute walkthrough. Never prices, results, rankings, client names or deadlines. No invented facts, no pressure, at most one follow-up and never an automatic one.
+5. **AI identity:** never volunteer it; on a sincere question the truthful fixed text goes out ("Yes, an AI assistant helps me with these texts. Ariel can call you himself if you prefer.") and Ariel is alerted. Never the "one can never tell" line, never claim to be human.
+6. Hgfdd, KILL, LIVE and the never-message blocklist apply. A prospect who is also a friend or family person is answered as that person (`prospect-known-person-wins` in the log).
+Events to read in `decisions.log`: `prospect-auto`, `prospect-truth`, `prospect-held`, `prospect-opted-out`, `prospect-send-vetoed`, `prospects-unreadable` (unknown numbers wait until the registry parses). Dry run: `npx tsx scripts/personal-autopilot.ts prospect-dry-run "<text>" [--phone +1...]`. Contact card + "Business Prospects" group: `node ~/.claude/scripts/prospect-contact.mjs --phone +1... --name "Business" --campaign website-pitch`.
+
 ## 3. Each tick
 
 0. **Heartbeat first, every tick (status ticks too).** Write `~/.claude/personal/imessage-heartbeat.json` as `{"at":"<ISO now>","pid":<CLAUDE_PID>}`. Read `$env:CLAUDE_PID` in PowerShell and write the file with `Set-Content`.

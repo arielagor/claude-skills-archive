@@ -20,7 +20,8 @@ Inbox, person, offer, words. Wording comes last. Our volume cannot prove a wordi
 - Fake personalisation, such as praise for something not read.
 - "Re:" or "Fwd:" on a message that is not a real reply.
 - Guilt, or debt attached to a gift.
-- Pressure on anyone in distress. A paid offer inside a dispute, or alongside a score below 7.
+- Pressure on anyone in distress. A paid offer inside a dispute.
+- Saying or implying that paying changes a score. Paid offers go to every tool whatever its score (Ariel, 2026-11-06).
 - Promising rankings or dofollow value. Selling a link without its required `rel` disclosure.
 - Denying being an AI when someone sincerely asks. AI-voice or auto-dialled calls to prospects. (Agents are treated as employees: no disclosure line, seat persona or Ariel's name is fine.)
 - Commercial mail without a postal address and a working opt-out.
