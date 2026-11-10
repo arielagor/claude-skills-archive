@@ -42,7 +42,7 @@ Answer these questions (don't skip any):
 1. **What was tried that didn't work?** Document the failed approach and why it failed. If the failure mode could recur, save as a feedback memory.
 2. **What non-obvious approach succeeded?** If you chose an unusual path and it worked (especially without correction from Ariel), save as a feedback memory with the reasoning.
 3. **What corrections were received?** Check if they're already saved as feedback memories. If not, save them.
-4. **What infrastructure was built?** Verify every pipeline, scheduled task, hook, or integration has a GBrain project page and a MEMORY.md entry.
+4. **What infrastructure was built?** Verify it has a GBrain project page. Add a memory note only for what its code, config and task list won't tell a future session.
 5. **What codebase knowledge was hard-won?** If you spent significant time finding how something works, consider whether the answer should be in a CLAUDE.md or memory file for next time.
 
 ### Step 3: File the learnings
@@ -52,7 +52,7 @@ For each learning identified:
 - **Failed approach** → feedback memory: what was tried, why it failed, what to do instead
 - **Successful approach** → feedback memory: what was done, why it worked, when to reuse
 - **Correction received** → feedback memory: the rule, the reason, how to apply
-- **Infrastructure built** → GBrain project page + memory file + MEMORY.md entry + CLAUDE.md if cross-session
+- **Infrastructure built** → GBrain project page; a memory note only for what the environment won't show; CLAUDE.md if cross-session
 - **Codebase knowledge** → appropriate CLAUDE.md or memory file
 
 Every NEW feedback memory (failed approach, successful approach, correction) gets `status: provisional`, a `created: YYYY-MM-DD` and a one-line `evidence:` in its frontmatter (nested under `metadata:`, same shape as `/correct`), plus **Why:** and **How to apply:** lines. `evidence:` names the artifact that grounds it (a tool call, file, commit, or Ariel's quoted words). Promotion to confirmed is a review flag raised by `scripts/memory-prune.mjs` (monthly, `\Claude\MemoryPrune`), not a gate. `scripts/session-retro.mjs` only analyses audit logs and writes no memory files, so nothing else changes.
