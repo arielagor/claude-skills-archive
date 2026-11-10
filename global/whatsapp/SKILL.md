@@ -35,6 +35,7 @@ If a thread needs history the registry doesn't hold, read its GBrain page at `~/
 ## 3. Each tick
 
 0. **Heartbeat first, every tick (status ticks too):** write `~/.claude/personal/whatsapp-heartbeat.json` as `{"at":"<ISO now>","pid":<CLAUDE_PID>}` (read `$env:CLAUDE_PID` in PowerShell; use the Write tool or `Set-Content`). The `\Personal\WhatsAppLoop` watchdog (`~/.claude/scripts/whatsapp-tick/watchdog.ps1`, every 15 min) relaunches a minimized `/whatsapp` session whenever that pid is gone, so this file is how the loop survives a closed window or a reboot. Never run two loops: if the heartbeat pid is alive and is not this session, say so and stop without scheduling a wakeup.
+0b. **WhatsApp pause check:** if `~/.claude/personal/whatsapp-paused.json` exists, WhatsApp is paused (Ariel 2026-11-10: "just keep this as linkedin loop for the meanwhile"). Skip steps 2-7 entirely: no WhatsApp tab check, no unread scan, no WA drafts or texts. Run only the heartbeat, the cron check and step 8 (LinkedIn), and log the tick in `linkedin-threads.md`. Resume WhatsApp only when Ariel says so, by deleting that file.
 1. Load the Chrome tools in one ToolSearch call: tabs_context_mcp, navigate, computer, find, get_page_text, browser_batch.
 2. **Keep the tab alive with a self-healing check every tick.** `tabs_context_mcp`, then:
    - **No WhatsApp tab** (closed, crashed, or the browser restarted): open one and navigate to `https://web.whatsapp.com`. The login lives in the site's stored data, so it comes back logged in without a QR code.
