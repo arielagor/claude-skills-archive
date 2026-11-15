@@ -29,8 +29,10 @@ Start from the newest report. Re-run `node ~/.claude/scripts/instruction-audit.m
 11. Prove nothing was lost. Diff the backup `inventory.json` link set against the new files: every missing link or rule must be in the archive or on an explicit deliberate-delete list. Re-measure.
 12. Build approved hooks. Test each one blocks a real violation (`hooks/tests/`), then shrink the prompt rule to one line. Hook changes go through governance-gate.
 13. Retire what is unused: `node ~/.claude/scripts/usage-audit/feature-usage.mjs` for skills, plugins and connectors unused 90 days; hooks that never fired. Back up settings.json before switching anything off.
+    Also count hooks that fire and fail: for each hook in settings.json, tally runs and non-zero exits or error output over the last 30 days of session transcripts under `~/.claude/projects/` (hook result lines) and any log the hook writes itself. A hook failing more than half its runs is a high finding: fix it or switch it off, never leave it. A deliberate deny (the hook blocking a real violation) is a success, not a failure; separate the two by reading a sample of the output.
 14. Second opinion: `/crossfamily-council` on the diff before committing.
 15. Smoke-test the pointers: in a fresh lean `claude -p` with the new CLAUDE.md, ask five questions whose answers now sit behind pointers. All five must come back right.
+    Then replay routing: take 10 real requests from the last 30 days of session transcripts where a skill was invoked, spread across different skills and including any whose description this pass changed. Give each request, verbatim, to a fresh lean session (`standard` tier, one batched call where possible) and ask only which skill it would invoke. All 10 must name the skill the original session used; a miss means a description lost its trigger, so restore or reword it and replay again. Record the 10 requests and results in the commit body.
 16. Record: commit in `~/.claude` with before/after numbers, update `project_instruction_audit` memory, report to Ariel what changed and what needs his call.
 
 ## Off-schedule triggers
