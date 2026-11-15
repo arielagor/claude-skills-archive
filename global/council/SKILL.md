@@ -93,6 +93,11 @@ lenses is deliberation. Swap or extend the lenses for a project by editing `pers
 - Every run writes a full transcript + verdict to `--logdir` so each autonomous decision is
   auditable after the fact.
 
+## One-agent baseline (is the council earning its calls?)
+
+`node bin/council.mjs --baseline --q "..." --opt ...` runs the same brief through one advisor (one call, no peers, no rounds; `lib/baseline.mjs`, exported as `single`).
+`node ~/.claude/scripts/decide-bench/council-vs-single.mjs --site tier-evals-fast --limit 3` runs both over decide-bench cases and reports accuracy against the labels, council-vs-single agreement, which cases only one got right, and a keep/drop line (council must beat single by 5 points). Limit is capped at 3 (smoke) unless `--confirm-paid`; a smoke run is not evidence. Keep the council only where it wins.
+
 ## Verify
 
-`cd ~/.claude/skills/council && node --test` (16 tests, zero model spend; the LLM runner is injected).
+`cd ~/.claude/skills/council && node --test` (23 tests, zero model spend; the LLM runner is injected).

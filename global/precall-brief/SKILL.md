@@ -102,6 +102,27 @@ Save to `agor.me/scripts/adhoc/<slug>-brief.md` (slug = `lastname-company`).
 H1 `# Pre-call brief: <Name> (<Company>)`, then `**Meeting:**` and `**Topic:**`
 lines, then the sections. Obey the renderer limits and no-em-dash rule above.
 
+### 3b. Claim check (annotation only, never blocks)
+Save the PUBLIC page texts you actually fetched in step 2 (one `.txt` per page)
+into a folder. Do NOT save SMS or iMessage text there (personal texts never go
+to Google, OpenAI or xAI; ruling 2026-11-12). If you must include one, name the
+file `sms-*.txt` or pass `--personal`: the check then runs with no third-party
+judge and reports "unavailable". Then run:
+
+```powershell
+node C:\Users\ariel\.claude\scripts\lib\claim-check.mjs --brief "scripts\adhoc\<slug>-brief.md" --sources "<folder>"
+```
+
+It splits the brief into atomic claims (fast tier), judges each against those
+texts with a non-Claude model (Gemini, then OpenAI, then xAI), and appends a
+`## Claims not found in sources` section to the brief. It always exits 0 and
+leaves the brief intact if anything fails; log: `logs/claim-check.jsonl`.
+Read the flagged lines: fix or cut a real fabrication, keep a claim that is
+true but came from a source you did not save. Send the brief either way. Add
+`--dry-run` to preview the section without writing. Re-running replaces the
+previous section (idempotent). The whole check has a 100s deadline; on
+timeout the brief gets an "unavailable" note and goes out as is.
+
 ### 4. Send the immediate brief
 From the agor.me repo. `npx tsx` can fail with "could not determine executable
 to run", so call the local binary directly:

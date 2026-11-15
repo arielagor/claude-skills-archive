@@ -25,7 +25,7 @@ Work lands in `~/.claude/state/post-infographic/<slug>/`, finished files in its 
 | extract | `scripts/extract.mjs <post> --out <dir>` | post, `spec.json` | shape and word budgets; every number, name and quote must be in the post; one repair round, then `spec.rejected.json` and exit 1. Exit 2: the post does not decompose, nothing is forced |
 | layout | `scripts/layout.mjs <spec.json> --out <proj> --layout hub` | spec, HyperFrames project + `layout.json` | deterministic; anything that does not fit is cut and named in `layout.json`, type is never shrunk |
 | render | `scripts/render.mjs <proj>` | project, `master.mp4` | `hyperframes check` has no errors; duration matches |
-| export | `scripts/export.mjs <proj> --name <n> --out <dir>` | master, PNG + GIF + MP4 | first and last frame match (the loop closes); GIF within LinkedIn's 500 frames and under 8 MB |
+| export | `scripts/export.mjs <proj> --name <n> --out <dir>` | master, PNG + GIF + MP4 | first and last frame match (the loop closes); GIF within LinkedIn's 500 frames (LinkedIn help a564109) and under 8 MB (our own budget for feed load time, not a LinkedIn limit) |
 
 Tests: `node --test ~/.claude/skills/post-infographic/tests/pipeline.test.mjs`. `scripts/show-spec.mjs <spec.json>` prints the words as an outline; `scripts/check-summary.mjs <proj>` reads the last check report.
 
@@ -42,7 +42,7 @@ The extract stage makes one model call through `lean-claude.mjs` on the `deep` t
 
 ## Choosing a layout
 
-- `hub`: the reference arrangement. Hub at left, numbered nodes fanned round it, first and last branch full width above and below, a result panel closing every row. Holds 3 to 5 branches; first and last rows up to 4 steps, middle rows 2. Reads as "one idea, several ways in".
+- `hub`: the reference arrangement. A hub ring at left made of one coloured segment per branch, numbered nodes on an orbit beside it, first and last branch full width above and below (their connectors sweep out to the left edge and round into the row), middle connectors turn on large radii, a result panel closing every row. Holds 3 to 5 branches; first and last rows up to 4 steps, middle rows 2. Reads as "one idea, several ways in".
 - `rail`: a vertical rail from the hub, one band per branch, steps in a two-column grid, result at the right. Holds 6 branches at 2 steps each, fewer branches at 4. The most legible at feed size.
 - `lanes`: hub on top, a bus, one column per branch, result tile closing each lane. Best at 3 to 5 branches with 3 to 4 steps each; at 6 the lanes are narrow.
 
@@ -50,8 +50,10 @@ The extract stage makes one model call through `lean-claude.mjs` on the `deep` t
 
 - Facts only from the post. A failed grounding check is fixed in the spec, never waved through.
 - Colours, type and radii come from `scripts/lib/tokens.mjs`, which is copied from the property's `REFERENCE.md` with section references. A new property means reading its `REFERENCE.md` in full and adding a block there. Never type a hex from memory. A test fails the build if a non-token colour reaches the page.
-- Agor: dark ground only, violet `#8B5CF6` as the single accent, the gradient once, on the glyphs of the headline's accent phrase.
-- `--palette series` colour-codes the branches with the five gradient stops. REFERENCE.md §1.1 allows those stops for chart data marks only, so this is NOT approved for posting: it exists so Ariel can see it and rule.
+- Agor: dark ground only, the gradient once, on the glyphs of the headline's accent phrase.
+- Branches are colour-coded by default (`--palette series`, Ariel 2026-11-15: "More colors"): each branch takes one of the five gradient stops from REFERENCE.md §1.1 as a flat colour on its badge, step dots, connector, card borders and figure, ordered so neighbouring branches never take neighbouring stops. `--palette single` puts every branch on violet. No hue outside the five stops without Ariel's ruling and a REFERENCE.md entry.
+- Motion (in `layout.mjs`, shared by all layouts): complete picture, ghost, then per branch in reading order: its hub segment fills and pulses, its node pops, its connector draws with a comet on the tip, each step lights as the comet passes its dot, the result lands when the comet arrives (whole-number figures count up). One heartbeat comet pass in the hold, finished before the still at t = 10 s. Every entrance starts from the identity pose (scale 1), so nothing jumps where the ghost sat.
+- Every connector is one continuous subpath; a branch with two runs uses two paths.
 - Result panels show real material: a sourced figure, a verbatim quote, or a plain line from the post. No drawn fake screenshots, no stock imagery, no emoji, no icons that were not drawn for it.
 - No type under 12 px; nothing shrunk to fit. Cut a step or a branch and say which.
 - The loop must close and the PNG is taken from the hold (t = 10 s).
