@@ -37,7 +37,10 @@ starts now gets split across two windows.
 ### 2. Write the handoff
 Location:
 - Inside a project git repo: `<repo root>/HANDOFF.md`. Update the existing file and don't
-  clobber it. Keep its useful history and put a fresh "Start here" at the top.
+  clobber it. Keep its useful history and put a fresh "Start here" at the top. If the file is
+  an index (it carries the `handoff-index` marker, about 60 lines, detail in `progress/<slug>.md`),
+  refresh the index and write your detail to `progress/<slug>.md`; never append a long dated
+  UPDATE section to the index. See the two layouts in `references/handoff-template.md`.
 - Otherwise (cwd is `C:\Users\ariel`, `~/.claude`, or not a repo):
   `~/.claude/handoffs/<YYYY-MM-DD>-<first 8 of session id>-rotate.md`.
 
@@ -57,7 +60,7 @@ Write it for a reader with zero context. Test: could a fresh session take the co
 from "Start here" alone?
 
 ### 3. Commit it (repo case)
-`git add HANDOFF.md && git commit -m "handoff: rotate <topic>"`. The commit gate and auto-push
+`git add HANDOFF.md && git commit -m "handoff: rotate <topic>"` (index layout: `git add HANDOFF.md progress`). The commit gate and auto-push
 hooks apply as usual, so report the push line truthfully. Commit only the handoff (plus work that
 is already finished). Don't sweep half-done edits into the commit. Name them in the handoff
 instead. `rotate.mjs` refuses to run on a handoff that has uncommitted changes, is stale (over

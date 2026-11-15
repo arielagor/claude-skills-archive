@@ -60,14 +60,15 @@ Events to read in `decisions.log`: `prospect-auto`, `prospect-truth`, `prospect-
    - `notable`: sends, escalations, blocks, failures.
    - `pending`: open drafts, from the autopilot's own `pending` command.
    - `stalePending`: drafts 2 h or older.
-2. **Problems.** For each entry in `problems` that isn't already listed as alerted in the registry within the last 6 h:
-   - Text Ariel once (goes by iMessage, SMS only as fallback), from `~/.claude/projects/agor-company`: `node ops/send-message.mjs --to ariel --channel sms --body "iMessage loop: <problem, plain words>. <what I did or what he needs to do>"`.
+   - `problemKeys` / `staleKeys`: each problem's (and stale draft's) `key` for the reported ledger, and `reported6h` / `reported`: whether the shared ledger (`agor-company/ops/state/reported.jsonl`, `~/.claude/scripts/lib/reported.mjs`) already shows Ariel was told (problems: last 6 h; drafts: ever).
+2. **Problems.** For each entry in `problems` that isn't already listed as alerted in the registry within the last 6 h, and whose `problemKeys` entry has `reported6h` false (either record saying he was told is enough to skip it):
+   - Text Ariel once (goes by iMessage, SMS only as fallback), from `~/.claude/projects/agor-company`: `node ops/send-message.mjs --to ariel --channel sms --system claude:imessage-loop --topic problem --keys <key from problemKeys> --body "iMessage loop: <problem, plain words>. <what I did or what he needs to do>"`. The flags only name the reported.jsonl row send-message writes; the text is unchanged. A "cleared" SMS uses `--topic cleared --keys <key>:cleared` (its own key, never the problem's, so a cleared row cannot silence the problem if it comes back).
    - Fix what I safely can first:
      - **The task is Disabled and nothing in the registry says Ariel did that:** report it. Don't re-enable it, because he or another session may have turned it off on purpose.
      - **Failed passes:** read the newest `~/.claude/projects/keepclose/logs/personal-autopilot*.log` (or the task's own log) and say why.
      - **Bridge down:** check `ssh mac` reachability and say which side is down.
    - Write each alerted problem into the registry with its time. When a problem clears, log that too. If he was alerted, send one "cleared" SMS.
-3. **Stale drafts.** For drafts in `stalePending` that haven't been alerted yet, send one SMS listing name + first words + "reply Y in the iMessage session to send, or ignore". The autopilot already alerted when it held them, so this is the single reminder. Never repeat it for the same id.
+3. **Stale drafts.** For drafts in `stalePending` that haven't been alerted yet (registry, or `staleKeys` `reported` true), send one SMS listing name + first words + "reply Y in the iMessage session to send, or ignore", with `--system claude:imessage-loop --topic stale-draft --keys <every key from staleKeys in it>`. The autopilot already alerted when it held them, so this is the single reminder. Never repeat it for the same id.
    - **Drafts expire (2026-11-05).** Every pass closes drafts older than 24 h, unsent, and logs `draft-expired`. On that event, read the thread: if the person's message is still unanswered, tell Ariel who and what they asked. A holding line is the draft with the commitment cut out, not a stall, so read it before describing it. To drain early: `npx tsx scripts/personal-autopilot.ts drain [--hours N] [--dry-run]`.
 4. **Quiet otherwise.** Routine sends, skips and deliveries are not news. Don't SMS for them. Log one line per tick only when something notable happened.
 5. **Registry.** Update `imessage-loop.md` with a timestamped line for anything alerted, sent, released or changed, and the current open problems.
