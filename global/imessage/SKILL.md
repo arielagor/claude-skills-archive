@@ -88,7 +88,7 @@ Events to read in `decisions.log`: `prospect-auto`, `prospect-truth`, `prospect-
 | "draft something for <name>" | Write it in his voice (`~/.claude/skills/ariel-email-voice/voice-card.md`), following the never-commit rule. Show it, and wait for "send it". |
 | "Y" / "send all" | `npx tsx scripts/personal-autopilot.ts release`. Report the sent, skipped and failed counts exactly as printed. |
 | "pending / what's waiting" | `npx tsx scripts/personal-autopilot.ts pending`. List name, kind and text. |
-| "pause <name>" / "unpause <name>" | Add or remove their handle(s) in `overrides.json` `paused`. Tell him that texting Hgfdd in the thread does the same from his phone. |
+| "pause <name>" / "unpause <name>" | NEVER hand-edit `overrides.json` `paused`. Run `npx tsx scripts/personal-autopilot.ts pause <handle> --reason "<who, what happened, why, what would justify undoing it>"` (or `unpause <handle> --reason "..."`) from the keepclose live tree; it writes the row to `mute-reasons.jsonl` first. `mutes` lists who is muted and why. A hand edit gets a NO REASON GIVEN row and alerts Ariel. Tell him that texting Hgfdd in the thread does the same from his phone. |
 | "ap off" / "ap on" | Create or delete `personal-autopilot/KILL`. Confirm the next pass logged `killed`, or resumed. |
 | "note for <name>: <rule>" | Append it to `autoresponder_notes:` in their GBrain page frontmatter and file it the normal GBrain way. Then delete their entry in `relationships-cache.json` so it applies on the next pass. |
 | "replay <name>" | `npx tsx scripts/personal-autopilot.ts replay "<handle>" --count 3`. This is a dry run that sends nothing. Show what it would have said next to what he actually sent. |
