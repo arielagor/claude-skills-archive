@@ -51,9 +51,10 @@ Events to read in `decisions.log`: `prospect-auto`, `prospect-truth`, `prospect-
 
 ## 3. Each tick
 
-0. **Heartbeat first, every tick (status ticks too).** Write `~/.claude/personal/imessage-heartbeat.json` as `{"at":"<ISO now>","pid":<CLAUDE_PID>}`. Read `$env:CLAUDE_PID` in PowerShell and write the file with `Set-Content`.
+0. **Heartbeat first, every tick (status ticks too), guard before write.**
+   - **Check first: never run two loops.** Read `~/.claude/personal/imessage-heartbeat.json` before writing it. If its pid is alive, belongs to a claude process and is not this session's `$env:CLAUDE_PID`, say so and stop without writing the file or scheduling a wakeup (overwriting it would hide the other loop from the watchdog).
+   - **Then write** it as `{"at":"<ISO now>","pid":<CLAUDE_PID>}`: read `$env:CLAUDE_PID` in PowerShell and write the file with `Set-Content`. Write when the file is missing, its pid is dead or not claude, or the pid is this session.
    - The `\Personal\iMessageLoop` watchdog (`~/.claude/scripts/imessage-tick/watchdog.ps1`, at logon and every 15 min) relaunches a minimized `/imessage` session when that pid is gone or the heartbeat goes stale (20 min by day, 5 h overnight).
-   - **Never run two loops.** If the heartbeat pid is alive, belongs to a claude process and is not this session, say so and stop without scheduling a wakeup.
 1. **Read.** Run `node ~/.claude/scripts/imessage-tick/tick.mjs`. It reads the log since the last tick, advances the cursor, and prints JSON with these fields:
    - `health`: LIVE, KILL, task state, bridge failure streak, last event, last SMS.
    - `problems`: only what the autopilot can't alert on itself.
