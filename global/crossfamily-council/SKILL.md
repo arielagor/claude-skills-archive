@@ -1,6 +1,7 @@
 ---
 name: crossfamily-council
-description: Run a cross-family adversarial council (Claude + Gemini + OpenAI + xAI/Grok) on a decision, a claim, or a near-final deliverable. Each model FAMILY reasons independently, then red-teams the others, then a synthesis keeps only what survives the cross-examination. Use for high-stakes or debatable decisions, for adversarially verifying your OWN work and claims before you ship (it will make you walk back overclaims), and for LLM-judge scoring with the subject's own family excluded from its jury. Distinct from /council, which is three Claude-only agents — this one spans model PROVIDERS to cancel the single-family blind spots a same-family panel shares. Triggers: "crossfamily council", "multifamily council", "adversarial council across families/models", "red-team this across models", "have the families decide", "council this across providers", or before shipping anything where an overclaim or a framing bias would be costly.
+description: >-
+  Run a cross-family adversarial council (Claude, Gemini, OpenAI, Grok) on a decision, claim or near-final deliverable: independent reasoning, cross red-teaming, then a synthesis of what survives. Use for high-stakes or debatable decisions, adversarially checking your own work before shipping, and LLM-judge scoring with the subject's family excluded. Triggers: 'crossfamily council', 'multifamily council', 'red-team this across models', 'council this across providers'. Distinct from /council (Claude-only).
 ---
 
 # /crossfamily-council — multifamily adversarial council

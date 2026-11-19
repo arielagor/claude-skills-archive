@@ -1,18 +1,7 @@
 ---
 name: video-canvas-method
 description: >-
-  The production-management layer under every video build: a canvas-as-repo structure (asset cards,
-  scene cards, non-destructive versions) and six approval gates, the important one being a KEYFRAME
-  gate that puts an approved still in front of every shot BEFORE any motion is generated. Use at the
-  start of any video project, when a build is about to generate clips, when a piece is drifting
-  (faces changing, style wandering, scenes being regenerated repeatedly), or when someone asks for a
-  storyboard. Sits under `ai-commercial` (dialogue ads), `seedance-narrated-short` (narrated film),
-  and `hyperframes-*` (motion graphics) and does not replace any of them: they own CRAFT, this owns
-  WHEN WORK GETS APPROVED and WHAT GETS WRITTEN DOWN. Ported from TopView AI Canvas methodology
-  (2026-07-22) and run entirely on keys we already pay for: keyframes via gemini-nano-banana-2.1 or
-  gpt-image-2, motion via HeyGen Seedance (1 credit, the default) or Veo 3.1 when a shot must start
-  and end on exact approved frames. Also use when asked whether we can lock a first/last frame, or
-  what a video build will cost.
+  Production-management layer for any video build: asset and scene cards, versioning and six approval gates, chiefly an approved keyframe before any motion is generated. Use at the start of a video project, before generating clips, when a piece drifts (faces changing, style wandering, repeated regenerations), when asked for a storyboard, whether a first or last frame can be locked, or what a video build will cost. Sits under ai-commercial, seedance-narrated-short and hyperframes and does not replace them.
 ---
 
 # The Canvas Method

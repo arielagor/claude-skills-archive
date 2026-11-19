@@ -1,6 +1,7 @@
 ---
 name: musescore
-description: "Render, convert and score music notation headlessly with the MuseScore 4 CLI. Use when: (1) converting between notation/audio formats — MusicXML, MIDI, MSCZ, PDF, PNG, SVG, MP3, WAV, OGG, FLAC; (2) turning a MIDI file into readable sheet music; (3) engraving a score to PDF or to a transparent PNG/SVG for a slide, video or print piece; (4) generating an audio stem (MP3/WAV) from notation to feed a mix; (5) composing a short piece by authoring MusicXML directly and rendering it; (6) batch-converting a folder of scores. Triggers: 'convert this MIDI to sheet music', 'render this score', 'make a PDF of this music', 'turn this MusicXML into an mp3', 'notate this', 'export the score', 'engrave this'. NOT for sourcing or generating music from a prompt (use /media-use — Lyria 3), NOT for mixing or mastering a multi-track piece (use /hyperframes-audio or /audio-drama), NOT for TTS or narration (use /audio-drama, /timed-guided-audio)."
+description: >-
+  Render, convert and engrave music notation headlessly with the MuseScore 4 CLI: MusicXML, MIDI or MSCZ to PDF, PNG, SVG, MP3, WAV, OGG or FLAC; MIDI to sheet music; audio stems from notation; authoring MusicXML; batch conversion. Triggers: 'convert this MIDI to sheet music', 'render this score', 'make a PDF of this music', 'turn this MusicXML into an mp3', 'notate this', 'engrave this'. NOT for generating music from a prompt (media-use), mixing or narration (audio-drama, timed-guided-audio).
 ---
 
 # MuseScore 4 — headless notation rendering and conversion

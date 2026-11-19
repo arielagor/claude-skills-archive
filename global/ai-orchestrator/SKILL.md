@@ -212,41 +212,37 @@ print('Saved: imagen_output.png')
 
 ---
 
-### 3. Google Veo 3.1 (Video Generation)
+### 3. Gemini Omni 1.2 Flash (Video Generation)
 
 **Auth**: Same `GOOGLE_AI_API_KEY`
-**Model**: `veo-3.1-generate-preview`
+**Model**: `gemini-omni-1.2-flash` (Veo 3.1 preview ids on the Gemini API shut down 2026-10-22; GA Veo lives on Vertex only, see `motion-engine/integrations/veo-loop.mjs`)
 
-Video generation is async — you submit a request and poll for completion.
+Submit in the background, then poll the interaction (a synchronous call can hold the connection for minutes).
 
 #### Submit Video Generation
 
 ```bash
-curl -s -X POST \
-  "https://generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning?key=$GOOGLE_AI_API_KEY" \
-  -H "Content-Type: application/json" \
+curl -s -X POST "https://generativelanguage.googleapis.com/v1beta/interactions" \
+  -H "x-goog-api-key: $GOOGLE_AI_API_KEY" -H "Content-Type: application/json" \
   -d '{
-    "instances": [{"prompt": "YOUR_VIDEO_PROMPT"}],
-    "parameters": {
-      "aspectRatio": "16:9",
-      "durationSeconds": 8,
-      "numberOfVideos": 1
-    }
+    "model": "gemini-omni-1.2-flash",
+    "background": true,
+    "input": [{"type": "text", "text": "YOUR_VIDEO_PROMPT"}],
+    "response_format": {"type": "video", "duration": "8s", "resolution": "720p", "aspect_ratio": "16:9"}
   }'
 ```
 
-Parse response: Save the `name` field (operation ID) for polling.
+Save the `id`. For image-to-video put `{"type":"image","data":"<b64>","mime_type":"image/png"}` items before the text (a second image = last frame, 3-10 s). Durations 3-15 s; resolution 360p/720p/1080p/4k; aspect 16:9 or 9:16. Output has native audio.
 
 #### Poll for Completion
 
 ```bash
-OPERATION_ID="operations/your-operation-id"
-curl -s "https://generativelanguage.googleapis.com/v1beta/$OPERATION_ID?key=$GOOGLE_AI_API_KEY"
+curl -s "https://generativelanguage.googleapis.com/v1beta/interactions/$ID" -H "x-goog-api-key: $GOOGLE_AI_API_KEY"
 ```
 
-When `.done` is `true`, the video URL is in `.response.generateVideoResponse.generatedSamples[0].video.uri`.
+When `status` is `completed`, the MP4 is base64 in the `steps[].content[]` item with `type: "video"` (`data`).
 
-**Cost**: $0.10–0.75/second of video
+**Cost**: $1.50/1M input tokens, $12/1M video output tokens (per-second price unpublished)
 **IMPORTANT**: Always confirm with user before generating — videos are expensive.
 **Max duration**: 8 seconds per clip
 

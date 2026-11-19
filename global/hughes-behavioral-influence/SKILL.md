@@ -1,7 +1,7 @@
 ---
 name: hughes-behavioral-influence
-description: >
-  Comprehensive behavioral influence, persuasion, and self-mastery skill synthesized from Chase Hughes' complete body of work (NCI training, lectures, interviews, published frameworks). Use this skill whenever Ariel needs to: craft persuasive language, write influence-optimized copy or scripts, analyze a social interaction or negotiation, prepare for a meeting or presentation, understand or counter manipulative behavior, design communication strategy for consulting engagements, coach someone on authority and confidence, apply behavioral profiling to team dynamics, write content about human behavior or psychology of influence, or build frameworks for Cognexus/OpOntology that intersect with influence mechanics. Also trigger when Ariel references Chase Hughes, NCI, behavioral influence, micro-compliance, the PCP model, FATE, six-axis model, linguistic weapons, behavioral magnetics, or any related concept. This skill operates as both a reference library and an active reasoning framework for real-time application.
+description: >-
+  Chase Hughes behavioral influence and persuasion frameworks as a reference and reasoning aid. Use when Ariel needs persuasive language, influence-optimized copy or scripts, analysis of a negotiation or social interaction, meeting or presentation prep, countering manipulation, authority and confidence coaching, behavioral profiling, or influence content for Cognexus/OpOntology. Also trigger on Chase Hughes, NCI, micro-compliance, the PCP model, FATE, the six-axis model, linguistic weapons or behavioral magnetics.
 ---
 
 # Behavioral Influence Operating System

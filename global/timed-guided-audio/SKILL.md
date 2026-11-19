@@ -1,21 +1,7 @@
 ---
 name: timed-guided-audio
-description: |
-  Produce audio where the TIMING IS THE PRODUCT: a guided workout with counted reps, an interval
-  or HIIT timer, a meditation or breathwork track with held phases, a hypnosis session with timed
-  suggestion and pause, a physio or rehab protocol, a language drill with response gaps. Use when
-  the ask is "turn this program/routine into guided audio", "count my reps", "a coach that paces
-  me", "timed audio guide", or any piece where a rest interval must be exactly N seconds because
-  the PROTOCOL says so, not because that is how long the narration ran. Covers the prescriptive
-  timeline, exact-BPM tempo locking (Lyria 3 refuses numeric BPM, so the grid is synthesized), the
-  slot-fit gate that forces copy to fit its window, per-clip levelling, and a rep-lock assertion
-  that proves cues land on the beat in the rendered audio. Also the contemplative variant (hypnosis,
-  meditation, self-inquiry in a cloned voice): named gap tiers as the only pacing lever, a runtime
-  scaler over the contemplative tiers, bed ranking by hypnotic score before generating anything,
-  a local STT omission check with homophone folding, and publishing the master as an agor.me
-  podcast episode. NOT for a script-driven piece whose timing follows the performance (use
-  `audio-drama`), NOT for video (`hyperframes`, `seedance-narrated-short`), NOT for authoring
-  ElevenLabs markup (`elevenlabs-tts-scripting`).
+description: >-
+  Produce audio where timing is the product: guided workouts with counted reps, interval or HIIT timers, meditation, breathwork or hypnosis with held phases, rehab protocols, language drills with response gaps. Use for 'turn this routine into guided audio', 'count my reps', 'a coach that paces me', 'timed audio guide', or any piece where a gap must last exactly N seconds. NOT for script-paced audio (audio-drama), video (hyperframes, seedance-narrated-short) or ElevenLabs markup (elevenlabs-tts-scripting).
 author: Claude Code
 version: 1.1.0
 date: 2026-09-01

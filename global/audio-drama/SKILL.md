@@ -1,19 +1,7 @@
 ---
 name: audio-drama
 description: >-
-  Produce a finished AUDIO-ONLY multi-voice piece from a script: a radio drama, an audio play,
-  a narrated essay, a multi-character audiobook, or a scripted podcast episode. Use when the ask
-  is "turn this script into a radio drama", "make this into an audio piece / audio play",
-  "narrate this with different voices for each character", "produce this as an mp3", or any
-  script that needs casting, a score, ambience, a mix, and a delivered audio master. Covers the
-  whole pipeline: structured script model, casting by MEASURED pitch, xAI Grok TTS, a Google
-  Lyria 3 score, synthesized foley, stem assembly, ducked mixdown, and a ship gate. NOT for video
-  (use `seedance-narrated-short` for narrated film, `hyperframes` for motion graphics,
-  `ai-commercial` for dialogue ads), NOT for writing the script text itself, and NOT for
-  ElevenLabs markup authoring (use `elevenlabs-tts-scripting`), and NOT for audio whose timing is
-  PRESCRIBED rather than emergent, such as a counted workout, an interval timer, a meditation or a
-  hypnosis track (use `timed-guided-audio`, which inverts this pipeline). Reference
-  implementation: `~/.claude/projects/the-unfurling`.
+  Produce a finished audio-only multi-voice piece from a script: radio drama, audio play, narrated essay, multi-character audiobook or scripted podcast episode. Use for 'turn this script into a radio drama', 'make this an audio play', 'different voices for each character', 'produce this as an mp3'. NOT for video (seedance-narrated-short, hyperframes, ai-commercial), writing the script, ElevenLabs markup (elevenlabs-tts-scripting) or prescribed-timing audio such as workouts and meditations (timed-guided-audio).
 author: Claude Code
 version: 1.1.0
 date: 2026-08-22

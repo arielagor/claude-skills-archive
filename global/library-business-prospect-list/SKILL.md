@@ -1,16 +1,7 @@
 ---
 name: library-business-prospect-list
-description: |
-  Build a geographic B2B prospect / lead list of local businesses and their owner/decision-maker
-  contacts for FREE, then geocode and distance-sort it into a clean spreadsheet + readable PDF.
-  Use when asked to: "build a prospect/lead list of businesses near <place>", "find local business
-  owners/partners to contact", "list companies in <area> with phone numbers / decision-makers",
-  "make a spreadsheet of businesses sorted by distance", or any local-sales / cold-outreach
-  territory list. Covers: the FREE Data Axle Reference Solutions access (via any public library
-  card, remote), why "all C corps / all businesses in <state>" is the wrong ask, the Census batch
-  geocoder + Haversine pipeline, owner/partner title filtering + institutional-NAICS exclusion, the
-  hard-won Data Axle browser-automation gotchas (coordinate-clicks tag, ref-clicks don't; 250/search
-  cap; hand tag+download to the human), and TCPA/CAN-SPAM compliance for regulated outreach.
+description: >-
+  Build a free geographic B2B prospect list of local businesses and their owner or decision-maker contacts, geocoded and distance-sorted into a spreadsheet and PDF. Use for 'build a prospect/lead list of businesses near <place>', 'find local business owners to contact', 'list companies in <area> with phone numbers / decision-makers', 'spreadsheet of businesses sorted by distance', or any local-sales territory list.
 author: Claude Code
 version: 1.0.0
 date: 2026-06-27

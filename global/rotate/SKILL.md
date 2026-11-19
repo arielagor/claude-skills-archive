@@ -1,6 +1,7 @@
 ---
 name: rotate
-description: Rotate this Claude Code session into a fresh context window, the way the AI CEO session does. It writes and commits a structured HANDOFF.md, opens a new `claude` window that resumes from it (re-creating crons and loops first), and closes this window once the new one checks in. `/rotate auto [N]` arms the session so a hook triggers the rotation automatically at N tokens (default 330K). Use whenever the user types /rotate or /Rotate, or says "rotate", "rotate the session", "fresh context window", "hand off to a new session", "the context is getting bloated/too long", "restart yourself with a handoff", or "auto-rotate this session". Also use when a [session-rotate] hook message says the rotation point has been reached. Prefer this to letting auto-compaction happen whenever the work has to continue: a rotation keeps exact ids and constraints, and compaction drops them.
+description: >-
+  Rotate this Claude Code session into a fresh context window, or save and restore working state. /rotate writes and commits HANDOFF.md, opens a successor claude window that resumes from it and closes this one; /rotate auto [N] arms auto-rotation at N tokens. /rotate save [title] writes a checkpoint, /rotate restore [name] loads one, /rotate list [--all] lists them, /rotate resume-all opens one window per open checkpoint. Use for /rotate, /checkpoint, /context-save, /context-restore, /resume-checkpoints, 'rotate', 'fresh context window', 'hand off to a new session', 'context is getting long', 'save my progress', 'checkpoint this', 'where was I', 'resume where I left off', or a [session-rotate] hook message. Prefer rotation to auto-compaction when the work must continue.
 ---
 
 # /rotate
@@ -24,6 +25,7 @@ Modes, taken from the arguments:
   size, and when it does, run this skill in "now" mode. Arming carries over to the successor
   session automatically. `off` disarms it (`rotate.mjs disarm`), and `status` shows armed sessions
   and recent rotations.
+- save [title], restore [name or number], list [--all], resume-all [--dry-run|--project <slug>|--limit N|--include-old]: lightweight checkpoints with no new window. Read references/save-restore.md and follow it.
 
 Every `rotate.mjs` call has to run from this session's own tool shell. It reads `CLAUDE_PID` and
 `CLAUDE_CODE_SESSION_ID` from there, so it can't run from a subagent.
@@ -111,3 +113,4 @@ The resume prompt covers this, but in order:
 ## Folded procedures (formerly subagents)
 
 - **handoff-writer**: a long multi-step session to write a `HANDOFF.md` in the repo root so the next session can pick up without re-onboarding. Also use at milestone commits to capture the current state before context may compress. Read `references/handoff-writer.md`.
+- checkpoint, context-save, context-restore, resume-checkpoints (folded 2026-11-18): now the save/restore/list/resume-all modes above.

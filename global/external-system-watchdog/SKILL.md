@@ -1,19 +1,7 @@
 ---
 name: external-system-watchdog
-description: |
-  Author a standing watchdog over an EXTERNAL system you do not control (Merchant Center,
-  App Store Connect, a payment processor, an ad platform, any third-party API) so it neither
-  cries wolf nor misses a silent failure. Use when: (1) building a cron/scheduled monitor that
-  polls someone else's API and alerts, (2) a monitor reported a problem that turned out to be
-  normal propagation delay or a legitimate difference between their data and yours, (3) a
-  monitor stayed green while the thing it watched was broken, (4) deciding what a monitor
-  should email about versus merely log, (5) picking exit codes for a scheduled task so
-  fleet-health reads them honestly. Covers the snapshot-and-diff shape, the four false-positive
-  traps (wrong comparison, absence-during-latency, ignoring their own status endpoint,
-  inferring config from data), throttle-never-suppress alert policy, and proving the monitor by
-  making it fire on a real defect. NOT for scanning your own repo (see heuristic-detector-hygiene),
-  one-off verification of a claimed completion (see verify), post-deploy canaries (see canary), or
-  publishing an external system's data to a page of your own (see self-refreshing-data-page).
+description: >-
+  Build a scheduled monitor over an external system you do not control (Merchant Center, App Store Connect, payment processors, ad platforms, third-party APIs) that neither cries wolf nor misses silent failures. Use when writing such a cron, when a monitor raised a false alarm from propagation delay or data differences, when a monitor stayed green while broken, or when choosing what to email vs log and which exit codes to return. NOT for scanning your own repo (heuristic-detector-hygiene), one-off checks (verify) or publishing external data (self-refreshing-data-page).
 author: Claude Code
 version: 1.0.0
 date: 2026-09-01

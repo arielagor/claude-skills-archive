@@ -1,6 +1,7 @@
 ---
 name: equity-analysis
-description: Full institutional equity-research initiation on a US SEC-filing company from one command. "/equity-analysis TICKER" fetches the filings from EDGAR, builds a cited, formula-driven Excel model (three statements, three parallel scenario DCFs with financing dilution, comps, precedents, sensitivities, cap table), recalculates and ties it out headless, draws 16-20 charts, writes a 40-50 page report and renders it to PDF, DOCX and TXT in the clean-pdf institutional-research look, verifies it and delivers it. Use when the user types /equity-analysis, or asks to "initiate coverage on X", "write an equity research report on X", "build a valuation model and initiation report for X", or "run the TNXP/SCTX process on X". "/equity-analysis setup" installs every dependency (Python packages, LaTeX, pandoc, LibreOffice); "/equity-analysis doctor" checks them; "/equity-analysis resume TICKER" continues an unfinished run from its HANDOFF.md.
+description: >-
+  Full institutional equity-research initiation on a US SEC-filing company: EDGAR filings, a cited Excel model with DCFs and comps, charts, and a 40-50 page report in PDF, DOCX and TXT. Use when the user types /equity-analysis [TICKER|setup|doctor|resume TICKER], or asks to 'initiate coverage on X', 'write an equity research report on X', 'build a valuation model and initiation report for X', or 'run the TNXP/SCTX process on X'.
 argument-hint: "<TICKER> | setup | doctor | resume <TICKER>"
 ---
 

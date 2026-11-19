@@ -1,6 +1,7 @@
 ---
 name: practical_woo
-description: Write in the practical-woo voice, the register that takes mystical or hard-to-report claims seriously and makes them pay rent in method, or audit an existing draft against it. Use when Ariel types "/practical_woo", or asks to "write this in the practical woo voice", "make this sound like Sasha Chapin", "audit this essay for woo tells", "does this promise results without a method", "check this for guru voice", or wants contemplative, philosophical or first-person-transformation prose that is neither credulous nor sneering. Transferable past meditation: the same eight moves carry writing about AI, consulting and building. NOT for producing meditation, hypnosis or breathwork AUDIO (use timed-guided-audio), and NOT a general prose cleaner (that is humanizer, which this layers on). Built from a close reading of nine Woo Papers posts, 12,375 words, with every rule measured against that corpus rather than guessed.
+description: >-
+  Write in, or audit a draft against, the practical-woo voice, which takes mystical or hard-to-report claims seriously and makes them pay rent in method. Use for '/practical_woo', 'write this in the practical woo voice', 'make this sound like Sasha Chapin', 'audit this for woo tells / guru voice', 'does this promise results without a method', or contemplative and first-person-transformation prose that is neither credulous nor sneering. NOT for meditation audio (timed-guided-audio) or general prose cleanup (humanizer).
 ---
 
 # practical_woo

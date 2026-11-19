@@ -1,15 +1,7 @@
 ---
 name: claude-code-binding-governance-hook
-description: |
-  Build a Claude Code PreToolUse governance hook that ACTUALLY enforces (blocks/asks), not one that
-  silently allows everything. Use when: (1) building a hook to protect files, gate dangerous actions,
-  or bound agent autonomy; (2) a hook is "installed" but never seems to fire / shows zero block events;
-  (3) you wrote a kill-switch or never-class and need to prove it binds. Covers the hard-won pattern:
-  identity from trusted hook input only (never tool_input.agent_name), fail-CLOSED on match + fail-OPEN
-  on error, hardcoded never-class with additive config overlay, path normalization (MSYS /c/, $HOME,
-  bare basenames), GATE_ADMIN bypass, session-start self-test, and the rule that decides everything:
-  prove it with a REAL fired block event in a log, because synthetic tests pass while real events catch
-  the bypasses. The broader, non-git variant of git-guardrails.
+description: >-
+  Build a Claude Code PreToolUse governance hook that actually blocks or asks instead of silently allowing. Use when building a hook to protect files, gate dangerous actions or bound agent autonomy; when an installed hook never seems to fire or logs zero blocks; or when a kill switch or never-class must be proven to bind with a real fired block event.
 author: Claude Code
 version: 1.0.0
 date: 2026-06-12

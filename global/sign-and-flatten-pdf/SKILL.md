@@ -1,18 +1,7 @@
 ---
 name: sign-and-flatten-pdf
-description: |
-  Sign, date, flatten and PROVE a filled PDF form before returning it to whoever
-  asked for it. Use when: (1) a filled form needs a handwritten-signature image and
-  a date stamped into cells that are NOT form fields (IRS W-9/W-4/W-8BEN-E, vendor
-  onboarding packets, NDAs, insurance ACORDs, USPTO forms); (2) a form must be
-  flattened so the recipient cannot edit it; (3) a verification says a field is
-  EMPTY or WRONG on a form that is visibly correct, especially a TIN/SSN/EIN or any
-  boxed one-character-per-cell field; (4) a signature image renders as a black or
-  white BOX over the document; (5) you need to prove a form is correct rather than
-  assert it. Covers the comb-field false-red, the no-alpha-channel signature trap
-  that a mean-alpha check passes, PyMuPDF doc.bake(), and metadata that survives.
-  Does NOT cover mapping or filling the fields themselves: the `pdf` skill and its
-  FORMS.md own that, run it first and come here for the last mile.
+description: >-
+  Sign, date, flatten and prove a filled PDF form before returning it (W-9, W-4, W-8BEN-E, vendor packets, NDAs, ACORDs, USPTO forms). Use when a signature image and date must go into cells that are not form fields, a form must be made uneditable, a check says a visibly correct field (often a boxed TIN/SSN/EIN) is empty or wrong, a signature renders as a black or white box, or you must prove a form is correct. Filling the fields themselves is a separate first step.
 author: Claude Code
 version: 1.0.0
 date: 2026-09-09

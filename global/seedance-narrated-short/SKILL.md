@@ -1,17 +1,7 @@
 ---
 name: seedance-narrated-short
 description: >-
-  Produce a long-form NARRATED cinematic short or feature-ette (art film, video essay, or a
-  novel/story/script adapted to film) using HeyGen Seedance for the picture and a continuous
-  NARRATOR spoken OVER the footage — no lip-synced dialogue. Use when the ask is "adapt this
-  novel/story/essay into a film", "make a narrated short film / video essay", "turn this script
-  into a cinematic Seedance short", "recut / fix / rescue my AI film", or any beat-driven narrated
-  piece longer than a couple of minutes. NOT for lip-synced SPEAKING characters or ads (use
-  `ai-commercial`), NOT for a single talking-head (use `heygen`), NOT for HTML/motion-graphic
-  explainers (use `hyperframes`). Encodes the full craft doctrine (references/FILM-CRAFT.md) and a
-  proven, gotcha-hardened pipeline; the fully worked reference implementation is the repo
-  `~/.claude/projects/the-safety-of-strangers` ("The Safety of Strangers", a 20-chapter novel cut
-  to an ~11-min film).
+  Produce a long-form narrated cinematic short (art film, video essay, or a novel, story or script adapted to film) with HeyGen Seedance picture and a narrator over the footage, no lip-synced dialogue. Use for 'adapt this novel/story into a film', 'make a narrated short film / video essay', 'turn this script into a Seedance short', 'recut / fix my AI film', or any narrated piece longer than a couple of minutes. NOT for speaking characters or ads (ai-commercial), a single talking head (heygen) or motion-graphic explainers (hyperframes).
 ---
 
 # Seedance narrated short — the proven pipeline

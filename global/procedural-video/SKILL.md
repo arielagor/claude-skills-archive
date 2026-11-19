@@ -1,22 +1,7 @@
 ---
 name: procedural-video
 description: >-
-  Turn a song, a podcast or interview recording, or a script into a finished video where every frame is
-  drawn by code Claude writes, in a look chosen from a gallery of 17 presets (moving oil painting, clean
-  illustration, ink wash, woodcut, halftone comic, watercolor, and variants), cut to the audio's own
-  words and beats, delivered in 16:9, 9:16 and 1:1 from one project. Use when the ask is "make a music
-  video for this song", "turn this podcast / episode / interview into a video", "animate this script",
-  "narrate and animate this", "make a song from these lyrics and a video for it", "painted video",
-  "visual podcast", "video for this audio", or any piece that needs original animation (not stock, not AI
-  footage) landing on the audio. Covers intake, audio prep (xAI TTS narration in Ariel's cloned voice,
-  Lyria 3 songs, clipping long recordings), local timing analysis (faster-whisper word timestamps,
-  Needleman-Wunsch alignment to known text, numpy beat tracking), storyboard, the director + parallel
-  chapter-subagent build, contact-sheet QA at every aspect, and a resumable parallel render. The picture
-  costs nothing in media APIs. NOT for HTML motion graphics, kinetic typography or lyric-card videos (use
-  `hyperframes`), NOT for AI-generated footage films (use `seedance-narrated-short`), NOT for lip-synced
-  dialogue ads (use `ai-commercial`), NOT for audio-only pieces (use `audio-drama` or `timed-guided-audio`,
-  whose masters make good inputs here). Reference implementation: `~/.claude/projects/procedural-video`,
-  an engine port of ledbetterljoshua/functional-emotions-video proven bit-exact against the original.
+  Make a video whose every frame is drawn by code, in one of 17 painted or illustrated presets, cut to a song, podcast, interview or script and delivered in 16:9, 9:16 and 1:1. Use for 'music video for this song', 'turn this podcast/interview into a video', 'animate this script', 'painted video', 'visual podcast', 'video for this audio'. NOT for motion graphics or lyric cards (hyperframes), AI footage (seedance-narrated-short), lip-synced ads (ai-commercial) or audio-only work (audio-drama, timed-guided-audio).
 author: Claude Code
 version: 1.0.0
 date: 2026-09-23
