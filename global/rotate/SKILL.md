@@ -107,3 +107,7 @@ The resume prompt covers this, but in order:
 - Keeping HANDOFF.md current at milestones, not only at rotation time, is what makes any rotation
   or compaction cheap.
 - Log: `~/.claude/logs/rotate-YYYY-MM.log`. State: `~/.claude/state/rotate/`.
+
+## Folded procedures (formerly subagents)
+
+- **handoff-writer**: a long multi-step session to write a `HANDOFF.md` in the repo root so the next session can pick up without re-onboarding. Also use at milestone commits to capture the current state before context may compress. Read `references/handoff-writer.md`.

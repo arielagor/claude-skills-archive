@@ -171,3 +171,11 @@ When invoked, you have:
 - **Repo has both `main` and `master`:** use whichever HEAD currently points to
 - **`direct-push` authority and a protected branch:** the pilot's autofix push will fail; warn the user before triggering
 - **Workflow run fails to start (e.g. invalid input):** surface the gh error and abort, do not retry blindly
+
+## Folded procedures (formerly subagents)
+
+- **asc-promoter**: promote a processed TestFlight build to App Store review — attaches the build to an editable appStoreVersion (creating one if needed) and creates the appStoreVersionSubmissions resource. Wraps `scripts/promote_to_app_store.py`. Read `references/asc-promoter.md`.
+- **asc-listing-manager**: App Store listing metadata (description, keywords, subtitle, promotional text, categories, URLs) needs to change. Edits `docs/app-listing.json` in the target repo and pushes to ASC via `scripts/fill_listing.py` / `push_listing.py`. Never edit ASC directly in the web UI — the manifest is the source of truth. Read `references/asc-listing-manager.md`.
+- **testflight-note-composer**: a TestFlight build finishes processing to generate and push the "What to Test" release notes from conventional commits since the previous TestFlight tag. Wraps `scripts/push_beta_notes.py` + `_release_notes.py`. Read `references/testflight-note-composer.md`.
+- **xcode-signing-diagnostician**: an iOS build fails with code-signing, provisioning, capability, or entitlement errors — in EAS, GitHub Actions, or local Xcode. Diagnoses the root cause and applies the targeted fix from the known catalog. Never attempts a blanket "clear all credentials" without evidence. Read `references/xcode-signing-diagnostician.md`.
+- **ios-release-pilot**: shipping an iOS build to TestFlight or App Store review — orchestrates archive, upload, ASC poll, TestFlight assignment, and invokes the known-failure-mode autofix catalog. Do NOT trust `eas submit` / `xcrun altool` exit codes alone; this agent polls ASC until the build is actually listed. Read `references/ios-release-pilot-agent.md`.

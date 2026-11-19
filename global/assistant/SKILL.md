@@ -130,7 +130,7 @@ For each candidate step, capture:
 
 **Heuristics:**
 
-- **Specialist beats generalist.** If a wrapped skill exists (`/ios-ship`, `/asc-promoter`, `/marketing-site-updater`), use it instead of asking a subagent to redo what the skill already encodes.
+- **Specialist beats generalist.** If a wrapped skill exists (`/ios-ship`, `/ios-ship` (asc-promoter reference), `/marketing-site-updater`), use it instead of asking a subagent to redo what the skill already encodes.
 - **Match the canonical chain.** Read `references/chain-heuristics.md` for 12+ pre-baked chain patterns. If the session synth matches one, use that chain as the spine and tweak.
 - **Order by dependency.** If skill B reads state that skill A produces, A goes first. Most chains follow: verify → test → ship → marketing → social → document.
 - **Mark risk=high** for any skill in `references/risky-skills.md` (anything that ships code, deploys, sends external messages, or costs real money). The risk badge changes execution behavior in Step 6.

@@ -1,6 +1,6 @@
 ---
 name: deploy-all
-description: Deploy changes across multiple sites/repos in parallel. Use when the user wants to push updates to multiple websites or repos at once.
+description: Deploy changes across multiple sites/repos in parallel. Use when the user wants to push updates to multiple websites or repos at once. Also holds the single-platform deploy procedures (Netlify site deploy and env vars, Firebase Cloud Functions, Google Play AAB releases) that used to be subagents.
 user_invocable: true
 ---
 
@@ -38,3 +38,9 @@ Deploy changes across multiple repos/sites in parallel using Task sub-agents.
 - Never commit `.env` files or credentials
 - Always use conventional commit messages (feat:, fix:, chore:, docs:)
 - If a repo has merge conflicts, skip it and report the conflict
+
+## Folded procedures (formerly subagents)
+
+- **netlify-deployer**: deploy a Netlify site and verify the live URL. Also the right agent when someone asks "why can't I set a Netlify env var from Claude" — the answer is you can't locally, use the dashboard or `netlify env:set`. Read `references/netlify-deployer.md`.
+- **cloud-functions-deployer**: deploying Firebase Cloud Functions (TypeScript). Always compiles TS before deploy, because `firebase deploy` ships compiled `lib/`, not `src/`. Read `references/cloud-functions-deployer.md`.
+- **google-play-release-pilot**: shipping an Android AAB to Google Play internal testing, closed testing, or production. Handles build → upload → poll Play Console until the release is live. Never trusts `eas submit -p android` exit code alone. Read `references/google-play-release-pilot.md`.
