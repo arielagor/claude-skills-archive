@@ -1,6 +1,7 @@
 ---
 name: publish-post
-description: Write and distribute a blog post for modelstack.digital or agor.me, end to end in the main loop: writing the post in the established voice, cross-posting it to X, Facebook and Instagram, and re-importing the RSS feed into Substack. Use when asked to write a blog post, announce or cross-post a post or launch on social, or sync Substack after a new post.
+description: >-
+  Write and distribute a blog post for modelstack.digital or agor.me, end to end in the main loop: writing the post in the established voice, cross-posting it to X, Facebook and Instagram, and re-importing the RSS feed into Substack. Use when asked to write a blog post, announce or cross-post a post or launch on social, or sync Substack after a new post.
 ---
 
 # publish-post

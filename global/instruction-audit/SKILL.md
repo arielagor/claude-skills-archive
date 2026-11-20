@@ -1,6 +1,7 @@
 ---
 name: instruction-audit
-description: Audit and slim everything that loads on every request (~/.claude/CLAUDE.md, memory/MEMORY.md, project CLAUDE.md files, skill and agent descriptions, settings.json, hooks). Use when Ariel types /instruction-audit, says "audit my instructions/prompt", "slim CLAUDE.md", "run the quarterly audit", or when the monthly report at ~/.claude/cron-health/instruction-audit/ says "Full pass flagged: YES". The monthly half runs unattended (\Claude\InstructionAudit, report only); this skill is the interactive half that applies findings.
+description: >-
+  Audit and slim everything that loads on every request (~/.claude/CLAUDE.md, memory/MEMORY.md, project CLAUDE.md files, skill and agent descriptions, settings.json, hooks). Use when Ariel types /instruction-audit, says "audit my instructions/prompt", "slim CLAUDE.md", "run the quarterly audit", or when the monthly report at ~/.claude/cron-health/instruction-audit/ says "Full pass flagged: YES". The monthly half runs unattended (\Claude\InstructionAudit, report only); this skill is the interactive half that applies findings.
 ---
 
 # Instruction audit
@@ -20,6 +21,8 @@ Built 2026-10-20 from three past passes (memory index split 2026-06, prompt audi
 7. Find hook candidates: rules broken twice (recent feedback memories) or that must hold every time. A rule a hook already enforces shrinks to one line naming the hook.
 8. Delete instead of prohibiting: a "never X" about something retired keeps X in context.
 9. Grade and report: high, medium, low with evidence; the model must quote verbatim and unmatched quotes are marked UNVERIFIED.
+
+The monthly run also adds three deterministic flags from `scripts/lib/instruction-audit-checks.mjs`. ZERO-USE: a live skill never invoked, or last used over 90 days ago, per `feature-usage-<date>.json` (written by `scripts/usage-audit/feature-usage.mjs`; skip with `--no-usage`). EVAL-STALE: a system in `scripts/evals/REGISTRY.md` whose last run is over 30 days old or says never (EVIDENCE), or whose cell is not a date (GUESS). PROMPT-SIZE: the always-loaded total over `INSTRUCTION_AUDIT_PROMPT_BUDGET` (default 16448, the 2026-11-01 figure), which also flags the full pass, and any skill description over 900 chars.
 
 ## Quarterly (interactive, Jan/Apr/Jul/Oct, or when a report flags it)
 
@@ -43,3 +46,4 @@ Start from the newest report. Re-run `node ~/.claude/scripts/instruction-audit.m
 - The unattended run never edits instruction files. Edits happen only in an interactive session.
 - Backups holding settings.json stay in gitignored `cron-health/`; never commit them.
 - Never trust a finding whose quote is UNVERIFIED without reading the file.
+- The monthly /instruction-audit is the single owner of the always-loaded prompt: new always-on lines go through it.

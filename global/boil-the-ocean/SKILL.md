@@ -26,7 +26,7 @@ hooks:
     - matcher: "Write|Edit|MultiEdit"
       hooks:
         - type: command
-          command: "bash ${CLAUDE_SKILL_DIR}/bin/check-boil.sh"
+          command: "node \"${CLAUDE_SKILL_DIR}/bin/check-boil.mjs\""
           statusMessage: "Scanning for half-solve markers..."
 sensitive: false
 ---

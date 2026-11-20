@@ -1,6 +1,7 @@
 ---
 name: gemini-decisions-api
-description: Use before any code that classifies, routes, gates, answers yes/no or scores with an LLM, and before moving such a call to the Gemini Decisions API (gemini-decision-1). Covers the only allowed entry point (~/.claude/scripts/lib/lean-decide.mjs), the bench-first rule, the data-scope limits (mail yes, texts and dating and job-search no), shadow wiring, and the per-site verdict registry. Triggers: "use the Decisions API", "make this classifier cheaper", "swap this to Gemini decide", "lean-decide", "decide-bench", "shadow this classifier".
+description: >-
+  Use before any code that classifies, routes, gates, answers yes/no or scores with an LLM, and before moving such a call to the Gemini Decisions API (gemini-decision-1). Covers the only allowed entry point (~/.claude/scripts/lib/lean-decide.mjs), the bench-first rule, the data-scope limits (mail yes, texts and dating and job-search no), shadow wiring, and the per-site verdict registry. Triggers: "use the Decisions API", "make this classifier cheaper", "swap this to Gemini decide", "lean-decide", "decide-bench", "shadow this classifier".
 ---
 
 # Gemini Decisions API
