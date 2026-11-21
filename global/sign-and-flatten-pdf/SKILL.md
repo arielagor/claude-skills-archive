@@ -120,8 +120,8 @@ and it is only meaningful because the failure paths were proven to fire. On Form
 | Control | Result |
 |---|---|
 | Correct form, correct expectations | exit 0, 8 checks passed |
-| Wrong expected EIN | exit 1, `expected '999999999', read '461586449'` |
-| Claim a value in the empty SSN row | exit 1, `expected '123456789', read ''` |
+| Wrong expected EIN | exit 1, `expected '999999999', read '123456789'` |
+| Claim a value in the empty SSN row | exit 1, `expected '987654321', read ''` |
 | Expect text that is not on the form | exit 1, `expected text missing` |
 | Signature PNG with no alpha channel | exit 1, refused before writing |
 | Signature PNG opaque with a channel | exit 1, refused before writing |
@@ -151,9 +151,9 @@ Signing a W-9 whose fields are already filled:
   "flatten": true,
   "metadata": {"title": "Form W-9 (Rev. March 2024)", "author": "Ariel Agor"},
   "verify": {
-    "text_present": ["Ariel Agor", "SANSPNASH"],
+    "text_present": ["Ariel Agor", "EXAMPLE LLC"],
     "comb": [
-      {"name": "EIN", "page": 1, "y": [420, 445], "x_min": 415, "expect": "461586449"},
+      {"name": "EIN", "page": 1, "y": [420, 445], "x_min": 415, "expect": "123456789"},
       {"name": "SSN", "page": 1, "y": [372, 397], "x_min": 415, "expect": ""}
     ]
   }
