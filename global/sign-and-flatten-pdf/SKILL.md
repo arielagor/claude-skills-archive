@@ -52,7 +52,7 @@ TIN, SSN, EIN, date and account-number boxes are **comb fields** (`Ff` bit 25,
 writes **each character as a separately positioned glyph**. So:
 
 ```python
-"1586449" in page.get_text()   # False, on a perfectly filled form
+"3456789" in page.get_text()   # False, on a perfectly filled form
 ```
 
 A substring assertion against a comb field is a **false red**, and it will send you
@@ -60,7 +60,7 @@ debugging a bug that does not exist. Read it back by x-position instead, which t
 helper's `comb` verifier does.
 
 **The second half of that trap:** the band you select also contains the form's own
-printed furniture. Reading every glyph in the EIN band returned `46>1586449` for a
+printed furniture. Reading every glyph in the EIN band returned `12>3456789` for a
 correct EIN, and `or>>` for an SSN row that was **empty**. Filter to the charset the
 field can hold (`"chars": "digits"` is the default, `"alnum"` and `"any"` also work,
 or pass your own regex).
